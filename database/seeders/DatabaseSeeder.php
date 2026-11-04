@@ -79,6 +79,7 @@ class DatabaseSeeder extends Seeder
         $qris = PaymentAccount::create([
             'type' => PaymentAccountType::Qris,
             'account_holder' => 'Afiliasi Produk Digital',
+            'qris_image' => $this->fakeQris(),
         ]);
         $bca = PaymentAccount::create([
             'type' => PaymentAccountType::Bank,
@@ -161,6 +162,45 @@ class DatabaseSeeder extends Seeder
             'amount' => 20000,
             'status' => WithdrawalStatus::Pending,
         ]);
+    }
+
+    /**
+     * Gambar mirip kode QR (bukan QRIS asli), hanya untuk tampilan contoh.
+     */
+    private function fakeQris(): ?string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $cells = 29;
+        $size = 10;
+        $image = imagecreatetruecolor($cells * $size, $cells * $size);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $black = imagecolorallocate($image, 11, 28, 48);
+        imagefill($image, 0, 0, $white);
+
+        mt_srand(2026);
+        for ($y = 0; $y < $cells; $y++) {
+            for ($x = 0; $x < $cells; $x++) {
+                if (mt_rand(0, 1)) {
+                    imagefilledrectangle($image, $x * $size, $y * $size, ($x + 1) * $size - 1, ($y + 1) * $size - 1, $black);
+                }
+            }
+        }
+        // Tiga penanda sudut khas kode QR
+        foreach ([[0, 0], [$cells - 7, 0], [0, $cells - 7]] as [$cx, $cy]) {
+            imagefilledrectangle($image, $cx * $size, $cy * $size, ($cx + 7) * $size - 1, ($cy + 7) * $size - 1, $black);
+            imagefilledrectangle($image, ($cx + 1) * $size, ($cy + 1) * $size, ($cx + 6) * $size - 1, ($cy + 6) * $size - 1, $white);
+            imagefilledrectangle($image, ($cx + 2) * $size, ($cy + 2) * $size, ($cx + 5) * $size - 1, ($cy + 5) * $size - 1, $black);
+        }
+
+        ob_start();
+        imagepng($image);
+        Storage::disk('public')->put('qris/contoh-qris.png', ob_get_clean());
+        imagedestroy($image);
+
+        return 'qris/contoh-qris.png';
     }
 
     /**
