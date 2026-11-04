@@ -147,10 +147,12 @@ class ProductManagementTest extends TestCase
     {
         $this->seed();
 
-        $this->actingAs(User::firstWhere('email', 'admin@afiliasi.test'))
+        $this->actingAs(User::firstWhere('email', 'hanif@afiliasi.test'))
             ->get(route('admin.dashboard'))
             ->assertOk()
+            ->assertSee('Selamat Datang, Hanif')
             ->assertSee('Pembayaran Menunggu Verifikasi')
-            ->assertSee('Budi Santoso');
+            ->assertSee('Gibran')
+            ->assertSee('Bagus');
     }
 }

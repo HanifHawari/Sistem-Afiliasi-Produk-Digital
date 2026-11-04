@@ -51,9 +51,10 @@ Buka http://localhost:8000
 ### Akun contoh (password: `password`)
 | Email | Role |
 |---|---|
-| admin@afiliasi.test | Admin |
-| afiliator@afiliasi.test | Afiliator |
-| customer@afiliasi.test | Customer |
+| hanif@afiliasi.test | Admin |
+| gibran@afiliasi.test | Afiliator |
+| fadhil@afiliasi.test | Afiliator |
+| bagus@afiliasi.test | Customer |
 
 Reset database ke data contoh: `php artisan migrate:fresh --seed`
 

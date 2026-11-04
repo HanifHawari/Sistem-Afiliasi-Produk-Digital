@@ -21,9 +21,10 @@ use Illuminate\Support\Str;
 /**
  * Data contoh untuk development. Semua akun memakai password: password
  *
- *   admin@afiliasi.test      -> Admin
- *   afiliator@afiliasi.test  -> Afiliator (Budi Santoso)
- *   customer@afiliasi.test   -> Customer
+ *   hanif@afiliasi.test   -> Admin
+ *   gibran@afiliasi.test  -> Afiliator utama
+ *   fadhil@afiliasi.test  -> Afiliator kedua
+ *   bagus@afiliasi.test   -> Customer
  */
 class DatabaseSeeder extends Seeder
 {
@@ -35,25 +36,26 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $admin = User::factory()->admin()->create([
-            'name' => 'Admin Afiliasi',
-            'email' => 'admin@afiliasi.test',
+            'name' => 'Hanif',
+            'email' => 'hanif@afiliasi.test',
+            'phone' => '085264019832',
         ]);
 
         $affiliate = User::factory()->affiliate()->create([
-            'name' => 'Budi Santoso',
-            'email' => 'afiliator@afiliasi.test',
-            'phone' => '081234567890',
+            'name' => 'Gibran',
+            'email' => 'gibran@afiliasi.test',
+            'phone' => '081371904526',
         ]);
         $affiliate->affiliateProfile()->create([
             'bank_name' => 'BCA',
-            'account_number' => '1234567890',
-            'account_holder' => 'Budi Santoso',
+            'account_number' => '7712045318',
+            'account_holder' => 'Gibran',
         ]);
 
         $customer = User::factory()->customer()->create([
-            'name' => 'Rian Firmansyah',
-            'email' => 'customer@afiliasi.test',
-            'phone' => '081288231194',
+            'name' => 'Bagus',
+            'email' => 'bagus@afiliasi.test',
+            'phone' => '082169785312',
         ]);
 
         // Produk contoh, diambil dari desain Stitch
@@ -89,15 +91,15 @@ class DatabaseSeeder extends Seeder
             'account_holder' => 'PT Afiliasi Produk Digital',
         ]);
 
-        // Link referral Budi untuk semua produk
+        // Link referral Gibran untuk semua produk
         $links = $products->mapWithKeys(fn (Product $product) => [
             $product->id => $affiliate->referralLinks()->create([
                 'product_id' => $product->id,
-                'code' => 'BUDI'.$product->id,
+                'code' => 'GIBRAN'.$product->id,
             ]),
         ]);
 
-        // Klik contoh di link Budi (supaya angka konversi terlihat)
+        // Klik contoh di link Gibran (supaya angka konversi terlihat)
         $channels = ['tiktok', 'instagram', 'wa', 'facebook', null];
         foreach ($links->values() as $i => $link) {
             foreach (range(1, [40, 25, 12, 8][$i] ?? 5) as $n) {
@@ -109,21 +111,15 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // Afiliator lain: satu aktif tanpa penjualan, satu nonaktif
-        $dina = User::factory()->affiliate()->create([
-            'name' => 'Dina Putri',
-            'email' => 'dina@afiliasi.test',
-            'phone' => '081377889900',
+        // Afiliator kedua: satu link produk
+        $fadhil = User::factory()->affiliate()->create([
+            'name' => 'Fadhil',
+            'email' => 'fadhil@afiliasi.test',
+            'phone' => '085261337840',
         ]);
-        $dina->affiliateProfile()->create(['bank_name' => 'MANDIRI', 'account_number' => '1370019283', 'account_holder' => 'Dina Putri']);
-        $dina->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'DINA2'])
+        $fadhil->affiliateProfile()->create(['bank_name' => 'MANDIRI', 'account_number' => '1370045812', 'account_holder' => 'Fadhil']);
+        $fadhil->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'FADHIL2'])
             ->clicks()->create(['channel' => 'instagram', 'clicked_at' => now()->subDay()]);
-
-        User::factory()->affiliate()->create([
-            'name' => 'Reza Hardiansyah',
-            'email' => 'reza@afiliasi.test',
-            'is_active' => false,
-        ]);
 
         // Order contoh dengan berbagai status, supaya halaman admin bisa langsung diuji
         $orders = [
@@ -164,10 +160,10 @@ class DatabaseSeeder extends Seeder
         }
 
         // Riwayat penjualan 45 hari terakhir, supaya laporan & grafik punya data
-        $this->seedSalesHistory($products, [$links, $dina->referralLinks()->get()->keyBy('product_id')], $qris, $bca);
+        $this->seedSalesHistory($products, [$links, $fadhil->referralLinks()->get()->keyBy('product_id')], $customer, $qris, $bca);
 
-        // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Budi 49.500)
-        $bank = ['bank_name' => 'BCA', 'account_number' => '1234567890', 'account_holder' => 'Budi Santoso'];
+        // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Gibran)
+        $bank = $affiliate->affiliateProfile->only(['bank_name', 'account_number', 'account_holder']);
 
         $paid = $affiliate->withdrawals()->create($bank + [
             'amount' => 15000,
@@ -177,8 +173,8 @@ class DatabaseSeeder extends Seeder
             'note' => 'Ref. transfer 889120',
         ]);
         $paid->update(['transfer_proof' => $this->fakeReceipt("withdrawal-proofs/WD-{$paid->id}.png", [
-            'Ke      : BCA 1234567890',
-            'a.n     : Budi Santoso',
+            'Ke      : BCA 7712045318',
+            'a.n     : Gibran',
             'Nominal : Rp 15.000',
             'Berita  : Pencairan komisi',
         ])]);
@@ -201,10 +197,9 @@ class DatabaseSeeder extends Seeder
      *
      * @param  array<int, Collection>  $linkSets  link referral per afiliator, key = product_id
      */
-    private function seedSalesHistory($products, array $linkSets, PaymentAccount $qris, PaymentAccount $bca): void
+    private function seedSalesHistory($products, array $linkSets, User $customer, PaymentAccount $qris, PaymentAccount $bca): void
     {
         mt_srand(45);
-        $customers = User::factory()->customer()->count(8)->create();
         $commissions = app(CommissionService::class);
 
         foreach (range(1, 30) as $n) {
@@ -216,7 +211,7 @@ class DatabaseSeeder extends Seeder
 
             $order = Order::create([
                 'invoice_number' => 'INV-'.$paidAt->format('Ymd').'-H'.str_pad($n, 3, '0', STR_PAD_LEFT),
-                'customer_id' => $customers[mt_rand(0, $customers->count() - 1)]->id,
+                'customer_id' => $customer->id,
                 'product_id' => $product->id,
                 'referral_link_id' => $link?->id,
                 'amount' => $product->price,
