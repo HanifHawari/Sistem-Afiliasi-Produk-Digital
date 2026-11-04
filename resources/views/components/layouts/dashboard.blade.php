@@ -18,17 +18,12 @@
     <header class="fixed inset-x-0 top-0 z-40 h-16 border-b border-slate-200/80 bg-white lg:h-20">
         <div class="flex h-full items-center justify-between px-4 lg:px-10">
             <div class="flex min-w-0 items-center gap-2 sm:gap-3">
-                <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden" @click="sidebarOpen = !sidebarOpen" aria-label="Buka menu">
+                <button type="button" class="-ml-2 rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden" @click="sidebarOpen = true" aria-label="Buka menu">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
-                <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
-                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/30 lg:h-12 lg:w-12">
-                        <span class="material-symbols-outlined text-[24px] lg:text-[26px]">bolt</span>
-                    </span>
-                    <span class="flex min-w-0 flex-col leading-tight">
-                        <span class="truncate text-base font-bold tracking-tight text-slate-900 lg:text-xl">{{ config('app.name') }}</span>
-                        <span class="text-[11px] font-semibold uppercase tracking-wide text-blue-600 lg:text-sm">{{ $area }}</span>
-                    </span>
+                {{-- Logo & nama aplikasi: di header hanya untuk layar lebar; di HP pindah ke menu samping --}}
+                <a href="{{ route('dashboard') }}" class="hidden min-w-0 items-center gap-3 lg:flex">
+                    @include('partials.brand', ['area' => $area])
                 </a>
             </div>
 
@@ -66,13 +61,23 @@
     </header>
 
     {{-- Overlay sidebar (mobile) --}}
-    <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-sm lg:hidden"></div>
+    <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-[45] bg-slate-900/40 backdrop-blur-sm lg:hidden"></div>
 
     {{-- Sidebar --}}
     <aside
-        class="fixed bottom-0 left-0 top-16 z-30 flex w-72 -translate-x-full flex-col border-r border-slate-200/80 bg-white px-4 py-6 transition-transform lg:top-20 lg:translate-x-0 2xl:w-80 2xl:px-5"
+        class="fixed bottom-0 left-0 top-0 z-50 flex w-72 -translate-x-full flex-col border-r border-slate-200/80 bg-white px-4 py-5 transition-transform lg:top-20 lg:z-30 lg:translate-x-0 lg:py-6 2xl:w-80 2xl:px-5"
         :class="sidebarOpen && '!translate-x-0'"
     >
+        {{-- Logo & nama aplikasi di menu samping (HP & tablet) --}}
+        <div class="mb-6 flex items-center justify-between gap-2 border-b border-slate-100 pb-5 lg:hidden">
+            <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
+                @include('partials.brand', ['area' => $area])
+            </a>
+            <button type="button" class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700" @click="sidebarOpen = false" aria-label="Tutup menu">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+
         <nav class="flex flex-1 flex-col gap-1 overflow-y-auto">
             {{ $nav }}
         </nav>

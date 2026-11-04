@@ -39,11 +39,11 @@
         @endif
 
         {{-- Statistik --}}
-        <div class="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-6 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
+        <x-stat-grid cols="3">
             <x-stat-card label="QRIS Aktif" :value="$stats['active_qris'].' QRIS'" :caption="$qrisAccounts->count().' QRIS terdaftar'" />
             <x-stat-card label="Rekening Aktif" :value="$stats['active_bank'].' rekening'" :caption="$bankAccounts->count().' rekening terdaftar'" />
             <x-stat-card label="Dana Masuk Bulan Ini" :value="rupiah($stats['paid_month'])" caption="Dari pembayaran yang sudah diverifikasi" />
-        </div>
+        </x-stat-grid>
 
         <div class="grid grid-cols-1 items-start gap-6 2xl:grid-cols-12">
             <div class="flex flex-col gap-6 2xl:col-span-8">

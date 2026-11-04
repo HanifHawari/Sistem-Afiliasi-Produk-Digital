@@ -7,7 +7,7 @@
         description="Pantau performa setiap afiliator: link, klik, penjualan, komisi, dan saldo." />
 
     {{-- Statistik --}}
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+    <x-stat-grid>
         <x-stat-card label="Total Afiliator" :value="$stats['total'].' orang'" caption="Terdaftar di platform">
             <span>+{{ $stats['new_month'] }} bulan ini</span>
         </x-stat-card>
@@ -15,7 +15,7 @@
         <x-stat-card label="Sudah Menjual" :value="$stats['with_sales'].' orang'"
             :caption="$stats['total'] ? round($stats['with_sales'] / $stats['total'] * 100).'% dari semua afiliator' : 'Belum ada afiliator'" />
         <x-stat-card label="Total Komisi Afiliator" :value="rupiah($stats['commission_total'])" caption="Dari pembayaran yang disetujui" />
-    </div>
+    </x-stat-grid>
 
     {{-- Filter --}}
     <form method="GET" action="{{ route('admin.affiliates.index') }}" class="toolbar">

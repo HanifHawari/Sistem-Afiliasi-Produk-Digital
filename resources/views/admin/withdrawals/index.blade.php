@@ -15,7 +15,7 @@
         description="Periksa saldo afiliator, setujui pengajuan, lalu tandai lunas setelah dana ditransfer." />
 
     {{-- Statistik --}}
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+    <x-stat-grid>
         <x-stat-card label="Pengajuan Baru" :value="rupiah($stats['pending_sum'])" :caption="$stats['pending_count'].' pengajuan menunggu persetujuan'">
             @if ($stats['pending_oldest'])
                 <span class="pill-on-blue text-amber-600">Tertua {{ $stats['pending_oldest']->diffForHumans() }}</span>
@@ -29,7 +29,7 @@
         </x-stat-card>
         <x-stat-card label="Dicairkan Bulan Ini" :value="rupiah($stats['paid_month'])" :caption="now()->translatedFormat('F Y')" />
         <x-stat-card label="Total Komisi Dicairkan" :value="rupiah($stats['paid_total'])" caption="Sejak awal platform berjalan" />
-    </div>
+    </x-stat-grid>
 
     {{-- Tab status + pencarian --}}
     <div class="toolbar">

@@ -13,6 +13,11 @@
     </div>
 
     @isset($actions)
-        <div class="flex w-full flex-wrap items-center gap-3 sm:w-auto lg:shrink-0 [&>*]:flex-1 sm:[&>*]:flex-none [&>form>button]:w-full">{{ $actions }}</div>
+        {{-- HP: tombol berdampingan, lebih ringkas & tanpa ikon. Tablet ke atas: ukuran normal. --}}
+        <div class="flex w-full items-center gap-2 sm:w-auto sm:gap-3 lg:shrink-0
+                    [&>*]:min-w-0 [&>*]:flex-1 sm:[&>*]:flex-none
+                    [&>a]:px-3 [&>a]:py-2.5 [&>a]:text-sm [&>button]:px-3 [&>button]:py-2.5 [&>button]:text-sm [&>form>button]:w-full [&>form>button]:px-3 [&>form>button]:py-2.5 [&>form>button]:text-sm
+                    sm:[&>a]:px-5 sm:[&>a]:py-3 sm:[&>a]:text-[15px] sm:[&>button]:px-5 sm:[&>button]:py-3 sm:[&>button]:text-[15px] sm:[&>form>button]:px-5 sm:[&>form>button]:py-3 sm:[&>form>button]:text-[15px]
+                    [&_.material-symbols-outlined]:hidden sm:[&_.material-symbols-outlined]:inline">{{ $actions }}</div>
     @endisset
 </div>

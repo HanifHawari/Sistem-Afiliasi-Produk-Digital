@@ -63,7 +63,7 @@
     </form>
 
     {{-- KPI --}}
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+    <x-stat-grid>
         @foreach ([
             ['Omzet', rupiah($summary['revenue']), 'Rata-rata '.rupiah($summary['average']).' per order', $revenueDelta],
             ['Order Terverifikasi', $summary['orders'].' order', 'Pembayaran yang disetujui admin', $ordersDelta],
@@ -83,7 +83,7 @@
                 @endif
             </x-stat-card>
         @endforeach
-    </div>
+    </x-stat-grid>
 
     <div class="mb-6 grid grid-cols-1 items-start gap-6 2xl:grid-cols-12">
         {{-- Grafik tren --}}

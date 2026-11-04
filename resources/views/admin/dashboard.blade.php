@@ -21,7 +21,7 @@
     </x-page-header>
 
     {{-- Statistik --}}
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+    <x-stat-grid>
         <x-stat-card label="Penjualan Bulan Ini" :value="rupiah($stats['revenue_month'])" :caption="$stats['orders_month'].' pesanan berhasil'">
             <span>{{ now()->translatedFormat('F Y') }}</span>
             @if ($revenueChange !== null)
@@ -50,7 +50,7 @@
             <span class="text-white/80">{{ $stats['withdrawal_pending_count'] ? 'Segera proses' : 'Tidak ada antrean' }}</span>
             <a href="{{ route('admin.withdrawals.index') }}" class="font-bold text-white hover:underline">Tinjau</a>
         </x-stat-card>
-    </div>
+    </x-stat-grid>
 
     <div class="grid grid-cols-1 items-start gap-6 2xl:grid-cols-12">
         {{-- Pembayaran menunggu verifikasi --}}

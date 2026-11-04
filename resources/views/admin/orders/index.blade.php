@@ -19,7 +19,7 @@
     </x-page-header>
 
     {{-- Statistik --}}
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+    <x-stat-grid>
         <x-stat-card label="Terverifikasi Hari Ini" :value="rupiah($stats['volume_today'])" caption="Total pembayaran disetujui hari ini" />
         <x-stat-card label="Menunggu Verifikasi" :value="$stats['waiting_count'].' pesanan'" caption="Bukti bayar sudah diunggah customer">
             @if ($stats['waiting_oldest'])
@@ -30,7 +30,7 @@
         </x-stat-card>
         <x-stat-card label="Komisi Terkredit Bulan Ini" :value="rupiah($stats['commission_month'])" caption="Otomatis saat pembayaran disetujui" />
         <x-stat-card label="Transaksi Berhasil" :value="$stats['paid_count'].' pesanan'" caption="Akses produk sudah terbuka" />
-    </div>
+    </x-stat-grid>
 
     {{-- Tab status + pencarian --}}
     <div class="toolbar">

@@ -25,14 +25,14 @@
     @endunless
 
     {{-- Statistik --}}
-    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+    <x-stat-grid>
         <x-stat-card label="Total Klik Link" :value="number_format($affiliate->referral_clicks_count, 0, ',', '.')" :caption="$affiliate->referral_links_count.' link produk dibuat'" />
         <x-stat-card label="Penjualan" :value="$affiliate->sales_count.' order'" :caption="'Omzet '.rupiah($affiliate->revenue)">
             <span>Konversi {{ number_format($conversion, 1, ',', '.') }}%</span>
         </x-stat-card>
         <x-stat-card label="Total Komisi" :value="rupiah($affiliate->earned)" :caption="'Sudah ditransfer '.rupiah($affiliate->paid_out)" />
         <x-stat-card label="Saldo Belum Dicairkan" :value="rupiah($balance)" caption="Komisi dikurangi pengajuan pencairan" />
-    </div>
+    </x-stat-grid>
 
     <div class="grid grid-cols-1 items-start gap-6 2xl:grid-cols-12">
         <div class="flex flex-col gap-6 2xl:col-span-8">
