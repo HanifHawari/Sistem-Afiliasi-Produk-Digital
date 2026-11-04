@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PaymentAccountController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PromoMaterialController;
 use App\Http\Controllers\Admin\WithdrawalController;
@@ -41,7 +42,13 @@ Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalController::class, '
 Route::post('/withdrawals/{withdrawal}/pay', [WithdrawalController::class, 'pay'])->name('withdrawals.pay');
 Route::post('/withdrawals/{withdrawal}/reject', [WithdrawalController::class, 'reject'])->name('withdrawals.reject');
 
+// QRIS & rekening tujuan pembayaran customer
+Route::get('/payment-accounts', [PaymentAccountController::class, 'index'])->name('payment-accounts.index');
+Route::post('/payment-accounts', [PaymentAccountController::class, 'store'])->name('payment-accounts.store');
+Route::put('/payment-accounts/{paymentAccount}', [PaymentAccountController::class, 'update'])->name('payment-accounts.update');
+Route::patch('/payment-accounts/{paymentAccount}/toggle', [PaymentAccountController::class, 'toggle'])->name('payment-accounts.toggle');
+Route::delete('/payment-accounts/{paymentAccount}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');
+
 // Belum dikerjakan (placeholder)
 Route::view('/affiliates', 'admin.affiliates.index')->name('affiliates.index');
-Route::view('/payment-accounts', 'admin.payment-accounts.index')->name('payment-accounts.index');
 Route::view('/reports', 'admin.reports.index')->name('reports.index');
