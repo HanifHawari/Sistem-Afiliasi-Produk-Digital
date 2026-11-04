@@ -10,23 +10,23 @@ Setelah selesai, branch ini di-merge ke `develop`, lalu semua anggota menjalanka
 | Framework | Laravel (versi stabil terbaru) + Blade |
 | Tampilan | Tailwind CSS (via Vite), mengikuti design system di `design/stitch/semua_design-system/DESIGN.md` |
 | Font & ikon | Plus Jakarta Sans, Material Symbols Outlined |
-| Database | PostgreSQL |
+| Database | MySQL (bawaan Laragon) |
 | Auth | Laravel Breeze (Blade) + kolom `role` di tabel `users` |
 | Akun customer | Wajib register/login untuk membeli |
 | Pengiriman produk | Tombol download aman (signed URL) di halaman pesanan customer |
 
 ## 2. Persiapan Laptop (semua anggota)
 
-1. **Laragon** (PHP 8.3, Composer, Node.js sudah termasuk).
-2. **PostgreSQL**: install dari https://www.postgresql.org/download/windows/ atau `winget install PostgreSQL.PostgreSQL.17`. Catat password user `postgres`.
-3. **Aktifkan ekstensi PHP PostgreSQL**: Laragon > Menu > PHP > Extensions > centang `pdo_pgsql` dan `pgsql`, lalu restart Laragon.
-4. Buat database: `createdb -U postgres afiliasi_db` (atau lewat pgAdmin).
+1. **Laragon** (PHP 8.3, Composer, Node.js, dan MySQL sudah termasuk).
+2. Klik **Start All** di Laragon supaya MySQL berjalan.
+3. Buat database `afiliasi_db`: Laragon > tombol **Database** (HeidiSQL) > klik kanan koneksi > Create new > Database, atau jalankan `mysql -u root -e "CREATE DATABASE afiliasi_db"`.
+4. Koneksi default Laragon: host `127.0.0.1`, port `3306`, user `root`, password kosong.
 
 ## 3. Langkah Pembuatan Kerangka
 
 1. Install Laravel di root repo (file README, CONTRIBUTING, design/, docs/ tetap dipertahankan).
 2. Install Breeze (stack Blade) untuk login, register, lupa password, profil.
-3. Konfigurasi `.env` ke PostgreSQL, buat `.env.example` tanpa data rahasia.
+3. Konfigurasi `.env` ke MySQL Laragon, buat `.env.example` tanpa data rahasia.
 4. Pindahkan token desain Stitch (warna, font, radius, spacing) ke konfigurasi Tailwind.
 5. Buat migration, model, dan relasi untuk semua tabel (bagian 4).
 6. Buat middleware `role` dan pemisahan route per area (bagian 5).
