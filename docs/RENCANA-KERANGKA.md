@@ -4,12 +4,14 @@ Branch: `feature/setup-project` (PIC: Muhammad Hanif Hawari)
 Status: **kerangka selesai dibuat** (Laravel 13, Breeze, migration, model, role, layout, seeder). Cara instalasi ada di README.
 Setelah di-merge ke `develop`, semua anggota menjalankan `git merge origin/develop` di branch fitur masing-masing, lalu langkah instalasi di README.
 
+> **Pembaruan November 2026:** tema tampilan, komponen bersama, logo, dan akun contoh sudah berubah. Lihat [bagian 8](#8-pembaruan-tampilan--data-contoh-november-2026).
+
 ## 1. Tech Stack
 
 | Bagian | Pilihan |
 |---|---|
 | Framework | Laravel 13 + Blade |
-| Tampilan | Tailwind CSS (via Vite), mengikuti design system di `design/stitch/semua_design-system/DESIGN.md` |
+| Tampilan | Tailwind CSS (via Vite), tema biru/slate (lihat bagian 8). Struktur token tetap dari `design/stitch/semua_design-system/DESIGN.md` |
 | Font & ikon | Plus Jakarta Sans, Material Symbols Outlined |
 | Database | MySQL (bawaan Laragon) |
 | Auth | Laravel Breeze (Blade) + kolom `role` di tabel `users` |
@@ -33,7 +35,7 @@ Setelah di-merge ke `develop`, semua anggota menjalankan `git merge origin/devel
 6. Buat middleware `role` dan pemisahan route per area (bagian 5).
 7. Buat 3 layout dasar: `admin`, `affiliate`, `shop` (sidebar/navbar mengikuti Stitch).
 8. Buat halaman kosong (placeholder) untuk setiap menu, supaya tiap anggota tinggal mengisi.
-9. Buat seeder: akun admin, afiliator, customer contoh, produk contoh, rekening & QRIS contoh.
+9. Buat seeder: akun admin, afiliator, customer contoh, produk contoh, rekening & QRIS contoh (akun terbaru di bagian 8).
 10. Siapkan penyimpanan file: disk `public` untuk thumbnail & materi promosi, disk `local` (privat) untuk file produk & bukti bayar.
 11. Perbarui README dengan cara instalasi project untuk anggota tim.
 12. Commit, push, buat Pull Request ke `develop`.
@@ -79,7 +81,7 @@ routes/shop.php       halaman publik + /orders (middleware role:customer)
 routes/web.php        landing, redirect /r/{code} (referral)
 ```
 
-File bersama (model, migration, layout, komponen Blade) dibuat di kerangka ini. Jika perlu mengubahnya, kabari tim dulu supaya tidak conflict.
+File bersama (model, migration, layout, komponen Blade, `resources/css/app.css`, `tailwind.config.js`) dibuat di kerangka ini. Jika perlu mengubahnya, kabari tim dulu supaya tidak conflict.
 
 ## 6. Alur Antar Fitur (kontrak antar anggota)
 
@@ -101,3 +103,67 @@ File bersama (model, migration, layout, komponen Blade) dibuat di kerangka ini. 
 | `design/stitch/semua_design-system/DESIGN.md` | Semua: warna, font, badge status, tabel, tombol |
 
 Layar yang belum ada di Stitch (login, laporan, pencairan, katalog customer, dll.) dibuat mengikuti `DESIGN.md`.
+
+Catatan: layout & susunan halaman tetap mengacu ke Stitch, tetapi **warna mengikuti tema biru di bagian 8**.
+Panel admin (`resources/views/admin/`) bisa dijadikan contoh jadi pemakaian komponen & class di bawah.
+
+## 8. Pembaruan Tampilan & Data Contoh (November 2026)
+
+### Tema warna
+Nama token Tailwind **tidak berubah** (`primary`, `surface`, `on-surface`, dst.), hanya nilainya diganti ke palet biru/slate.
+Jadi kode lama tetap jalan, tapi warnanya ikut berubah.
+
+| Token | Warna | Dipakai untuk |
+|---|---|---|
+| `primary` | `#2563eb` (biru) | tombol utama, link, kartu statistik |
+| `secondary` | `#059669` (hijau) | nominal komisi, status berhasil |
+| `tertiary` | `#d97706` (amber) | status menunggu |
+| `error` | `#dc2626` (merah) | status ditolak, tombol hapus |
+| `surface` / `on-surface` | `#f8fafc` / `#0f172a` | latar halaman / teks utama |
+
+Selain token, boleh langsung memakai warna bawaan Tailwind seperti `bg-blue-600`, `text-slate-500`.
+
+### Komponen Blade bersama
+| Komponen | Fungsi |
+|---|---|
+| `<x-page-header title="..." description="...">` | Judul halaman. Tombol di kanan lewat `<x-slot name="actions">`; di HP tombol otomatis berdampingan & ringkas |
+| `<x-stat-grid>` + `<x-stat-card label value caption>` | Kartu statistik biru. Di HP jadi carousel geser. `cols="3"` untuk 3 kartu |
+| `<x-filter-menu :items="$items">` | Tab filter status. Di HP jadi satu tombol menu. Item: `label`, `href`, `active`, `count` |
+| `<x-pager :paginator="$data" noun="transaksi">` | Kaki tabel "1-5 dari 34 transaksi" + tombol Sebelumnya/Berikutnya |
+| `<x-badge tone="success">` | Label status. `tone`: success / warning / danger / info / neutral (cocok dengan `->tone()` di enum) |
+| `<x-application-logo class="h-10 w-10">` | Logo aplikasi (ikon kotak produk). Ganti logo cukup di file ini |
+
+### Class CSS siap pakai (`resources/css/app.css`)
+| Class | Fungsi |
+|---|---|
+| `.card`, `.card-header`, `.card-title`, `.card-subtitle`, `.card-body`, `.card-link` | Kartu konten putih |
+| `.btn-primary`, `.btn-outline`, `.btn-success`, `.btn-danger`, `.btn-soft`, `.btn-sm` | Tombol |
+| `.input` | Input, select, textarea |
+| `.data-table` + `.ledger` | Tabel data: kepala biru; di HP seluruh tabel bisa digeser ke samping (bungkus dengan `div.relative.overflow-x-auto`) |
+| `.pill-blue`, `.pill-green`, `.pill-amber`, `.pill-red`, `.pill-gray` | Label kecil berwarna |
+| `.toolbar`, `.search` | Baris filter + kolom cari |
+| `.panel` | Kotak abu-abu untuk ringkasan angka |
+
+### Logo & favicon
+Logo aplikasi sekarang ikon kotak produk (Material Symbols `package_2`) di kotak biru, dipakai di header dashboard,
+halaman login/daftar, dan navbar toko. Favicon: `public/favicon.svg`.
+
+### Akun contoh (password: `password`)
+| Nama | Peran | Email |
+|---|---|---|
+| Hanif | Admin | hanif@afiliasi.test |
+| Gibran | Afiliator utama (punya penjualan, komisi, pencairan) | gibran@afiliasi.test |
+| Fadhil | Afiliator kedua | fadhil@afiliasi.test |
+| Bagus | Customer (pemilik semua pesanan contoh) | bagus@afiliasi.test |
+
+Akun lama (`admin@`, `afiliator@`, `customer@afiliasi.test`) **sudah tidak ada**.
+
+### Yang perlu dijalankan setiap anggota setelah pembaruan ini di-merge
+```
+git checkout develop
+git pull
+git checkout <branch-fitur-kamu>
+git merge develop
+php artisan migrate:fresh --seed
+npm run build
+```
