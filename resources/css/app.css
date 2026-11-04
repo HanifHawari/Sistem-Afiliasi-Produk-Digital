@@ -180,7 +180,7 @@
 }
 
 /* =====================================================================
-   Halaman login / daftar & transisi "pintu"
+   Halaman login / daftar & transisi masuk ke dashboard
    ===================================================================== */
 
 /* Pola ikon samar di latar biru: kotak produk, grafik, koin, tautan */
@@ -216,242 +216,121 @@
     }
 }
 
-/* ---------- Pintu transisi ---------- */
-.page-door {
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    pointer-events: none;
-    visibility: hidden;
-}
-
-.door-closing .page-door,
-.door-opening .page-door {
-    visibility: visible;
-}
-
-/* Saat menutup, klik ditahan supaya form tidak terkirim dua kali */
-.door-closing .page-door {
-    pointer-events: auto;
-}
-
-/* HP: pintu atas & bawah */
-.page-door-half {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 50%;
-    overflow: hidden;
-    transform: var(--door-out);
-    will-change: transform;
-}
-
-.page-door-a {
-    top: 0;
-    --door-out: translate3d(0, -100%, 0);
-}
-
-.page-door-b {
-    bottom: 0;
-    --door-out: translate3d(0, 100%, 0);
-}
-
-/* Isi pintu = 2x ukuran pintu (seukuran layar) & menempel ke tepi luar, supaya pola menyambung di garis tengah */
-.page-door-canvas {
-    position: absolute;
-    left: 0;
-    width: 100%;
-    height: 200%;
-}
-
-.page-door-a .page-door-canvas {
-    top: 0;
-}
-
-.page-door-b .page-door-canvas {
-    bottom: 0;
-}
-
-/* Garis cahaya di tengah sebelum pintu membelah */
-.page-door-seam {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 50%;
-    height: 2px;
-    margin-top: -1px;
-    opacity: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
-    box-shadow: 0 0 18px 2px rgba(191, 219, 254, 0.7);
-    --seam-from: scaleX(0);
-}
-
-.page-door-brand {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-}
-
-/* Desktop: pintu kiri & kanan */
+/* ---------- Transisi login -> halaman tujuan (View Transitions API) ----------
+   Desktop: halaman login terbelah tepat di garis biru|putih, panel kiri bergeser ke kiri,
+   panel kanan ke kanan, memperlihatkan dashboard di baliknya.
+   HP: cukup memudar (bawaan browser). Browser yang belum mendukung: langsung pindah halaman. */
 @media (min-width: 1024px) {
-    .page-door-half {
-        top: 0;
-        bottom: 0;
-        width: 50%;
-        height: auto;
+    .auth-left {
+        view-transition-name: auth-left;
     }
 
-    .page-door-a {
-        left: 0;
-        right: auto;
-        --door-out: translate3d(-100%, 0, 0);
+    .auth-right {
+        view-transition-name: auth-right;
     }
 
-    .page-door-b {
-        left: auto;
-        right: 0;
-        --door-out: translate3d(100%, 0, 0);
-    }
-
-    .page-door-canvas,
-    .page-door-b .page-door-canvas {
-        top: 0;
-        bottom: auto;
-        width: 200%;
-        height: 100%;
-    }
-
-    .page-door-b .page-door-canvas {
-        left: auto;
-        right: 0;
-    }
-
-    .page-door-seam {
-        top: 0;
-        bottom: 0;
-        left: 50%;
-        right: auto;
-        width: 2px;
-        height: auto;
-        margin-top: 0;
-        margin-left: -1px;
-        background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.95), transparent);
-        --seam-from: scaleY(0);
-    }
-}
-
-/* Menutup (setelah tombol Masuk/Daftar ditekan) */
-.door-closing .page-door-half {
-    animation: door-close 0.6s cubic-bezier(0.7, 0, 0.3, 1) forwards;
-}
-
-.door-closing .page-door-brand {
-    animation: door-brand-in 0.3s ease-out 0.3s both;
-}
-
-/* Membuka (halaman tujuan baru tampil) */
-.door-opening .page-door-brand {
-    animation: door-brand-out 0.3s ease-in 0.1s both;
-}
-
-.door-opening .page-door-seam {
-    animation: door-seam-draw 0.35s ease-out 0.3s both, door-seam-fade 0.35s ease-out 0.7s forwards;
-}
-
-.door-opening .page-door-half {
-    animation: door-open 0.85s cubic-bezier(0.76, 0, 0.24, 1) 0.6s both;
-}
-
-.door-opening [data-door-content] {
-    animation: door-content-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
-}
-
-@keyframes door-close {
-    from {
-        transform: var(--door-out);
-    }
-
-    to {
-        transform: none;
-    }
-}
-
-@keyframes door-open {
-    from {
-        transform: none;
-    }
-
-    to {
-        transform: var(--door-out);
-    }
-}
-
-@keyframes door-brand-in {
-    from {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-@keyframes door-brand-out {
-    from {
-        opacity: 1;
-        transform: none;
-    }
-
-    to {
-        opacity: 0;
-        transform: scale(0.92);
-    }
-}
-
-@keyframes door-seam-draw {
-    from {
-        opacity: 1;
-        transform: var(--seam-from);
-    }
-
-    to {
-        opacity: 1;
-        transform: none;
-    }
-}
-
-@keyframes door-seam-fade {
-    from {
-        opacity: 1;
-    }
-
-    to {
+    /* Halaman baru langsung tampil di belakang, yang bergerak hanya dua belahan halaman login */
+    ::view-transition-old(root) {
+        animation: none;
         opacity: 0;
     }
-}
 
-@keyframes door-content-in {
-    from {
-        opacity: 0;
-        transform: scale(0.985);
-    }
-}
-
-/* Pengguna yang mematikan animasi di perangkatnya: tanpa transisi */
-@media (prefers-reduced-motion: reduce) {
-    .anim-rise,
-    .anim-fade,
-    .door-opening [data-door-content] {
+    ::view-transition-new(root) {
         animation: none;
     }
 
-    .page-door {
-        display: none;
+    ::view-transition-old(auth-left):only-child {
+        animation: auth-split-left 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.1s both;
+        box-shadow: 24px 0 48px rgba(15, 23, 42, 0.18);
+    }
+
+    ::view-transition-old(auth-right):only-child {
+        animation: auth-split-right 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.1s both;
+        box-shadow: -24px 0 48px rgba(15, 23, 42, 0.12);
+    }
+}
+
+@keyframes auth-split-left {
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes auth-split-right {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* ---------- Halaman pertama setelah login ----------
+   Kelas .intro dipasang oleh partials/head, urutan (--i) & .intro-run oleh resources/js/app.js */
+@keyframes intro-left {
+    from {
+        opacity: 0;
+        transform: translateX(-28px);
+    }
+}
+
+@keyframes intro-up {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+}
+
+@keyframes intro-fade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+}
+
+/* Desktop: menu samping muncul dari kiri satu per satu, kartu muncul dari bawah satu per satu */
+@media (min-width: 1024px) {
+    .intro:not(.intro-run) :is([data-intro-group="left"] > *, [data-intro="left"], [data-intro="up"], main .card) {
+        opacity: 0;
+    }
+
+    .intro-run :is([data-intro-group="left"] > *, [data-intro="left"]) {
+        animation: intro-left 0.55s cubic-bezier(0.22, 1, 0.36, 1) calc(0.35s + var(--i, 0) * 60ms) both;
+    }
+
+    .intro-run :is([data-intro="up"], main .card) {
+        animation: intro-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(0.5s + var(--i, 0) * 90ms) both;
+    }
+}
+
+/* HP: sederhana. Halaman login memudar dulu, lalu konten tujuan memudar naik sekali (tanpa saling menimpa) */
+@media (max-width: 1023px) {
+    ::view-transition-old(root) {
+        animation: intro-fade-out 0.18s ease-out both;
+    }
+
+    ::view-transition-new(root) {
+        animation: intro-fade-in 0.3s ease-out 0.12s both;
+    }
+
+    .intro main {
+        animation: intro-fade 0.5s ease-out 0.15s both;
+    }
+}
+
+@keyframes intro-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes intro-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+/* Pengguna yang mematikan animasi di perangkatnya: tanpa animasi */
+@media (prefers-reduced-motion: reduce) {
+    .anim-rise,
+    .anim-fade {
+        animation: none;
     }
 }

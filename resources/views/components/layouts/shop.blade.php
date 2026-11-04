@@ -33,9 +33,8 @@
         </div>
     </header>
 
-    <main data-door-content class="mx-auto max-w-[1440px] px-space-md py-space-lg lg:px-margin">
+    <main class="mx-auto max-w-[1440px] px-space-md py-space-lg lg:px-margin">
         {{ $slot }}
     </main>
-    @include('partials.page-door')
 </body>
 </html>

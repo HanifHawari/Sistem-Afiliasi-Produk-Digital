@@ -78,21 +78,20 @@
             </button>
         </div>
 
-        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto">
+        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto" data-intro-group="left">
             {{ $nav }}
         </nav>
 
         @isset($sidebarFooter)
-            <div class="mt-4">{{ $sidebarFooter }}</div>
+            <div class="mt-4" data-intro="left">{{ $sidebarFooter }}</div>
         @endisset
     </aside>
 
     {{-- Konten --}}
-    <main data-door-content class="min-h-screen px-4 pb-12 pt-[calc(4rem+1.5rem)] sm:px-6 lg:ml-72 lg:px-10 lg:pt-[calc(5rem+2.5rem)] 2xl:ml-80">
+    <main class="min-h-screen px-4 pb-12 pt-[calc(4rem+1.5rem)] sm:px-6 lg:ml-72 lg:px-10 lg:pt-[calc(5rem+2.5rem)] 2xl:ml-80">
         {{ $slot }}
     </main>
 
     <x-toast />
-    @include('partials.page-door')
 </body>
 </html>

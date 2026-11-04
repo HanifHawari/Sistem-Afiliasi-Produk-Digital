@@ -11,13 +11,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
-{{-- Transisi pintu setelah login/daftar: ditandai sebelum halaman tampil supaya tidak berkedip (lihat resources/js/app.js) --}}
+{{--
+    Halaman pertama setelah login/daftar: ditandai sebelum tampil supaya tidak berkedip,
+    sekaligus mengizinkan transisi terbelah dari halaman login (lihat resources/js/app.js).
+--}}
 <script>
     try {
-        if (sessionStorage.getItem('afp-door')) {
-            sessionStorage.removeItem('afp-door');
+        if (sessionStorage.getItem('afp-intro')) {
+            sessionStorage.removeItem('afp-intro');
             if (! matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                document.documentElement.classList.add('door-opening');
+                document.documentElement.classList.add('intro');
+                const style = document.createElement('style');
+                style.textContent = '@view-transition { navigation: auto; }';
+                document.head.appendChild(style);
             }
         }
     } catch (e) {}

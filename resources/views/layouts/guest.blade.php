@@ -7,11 +7,17 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head', ['title' => $title])
+        {{-- Izinkan transisi terbelah saat pindah ke halaman berikutnya (lihat resources/css/app.css) --}}
+        <style>
+            @media (prefers-reduced-motion: no-preference) {
+                @view-transition { navigation: auto; }
+            }
+        </style>
     </head>
     <body class="bg-blue-600 font-sans text-slate-900 antialiased lg:bg-slate-50">
         <div class="lg:grid lg:min-h-screen lg:grid-cols-2">
             {{-- Kiri (desktop): identitas sistem di atas latar biru bergambar samar --}}
-            <aside class="relative hidden overflow-hidden lg:block">
+            <aside class="auth-left relative hidden overflow-hidden lg:block">
                 @include('partials.auth-backdrop')
 
                 <div class="relative flex h-full min-h-screen flex-col justify-between p-12 text-white xl:p-16">
@@ -32,7 +38,7 @@
             </aside>
 
             {{-- Kanan (desktop) / seluruh layar (HP): form --}}
-            <main class="relative flex min-h-screen flex-col items-center justify-center px-5 py-10 sm:px-8">
+            <main class="auth-right relative flex min-h-screen flex-col items-center justify-center px-5 py-10 sm:px-8 lg:bg-slate-50">
                 {{-- HP: latar biru bergambar samar --}}
                 <div class="lg:hidden">@include('partials.auth-backdrop')</div>
 
@@ -41,7 +47,7 @@
                     <span class="mt-3 text-xl font-bold tracking-tight text-white">{{ config('app.name') }}</span>
                 </a>
 
-                <div class="anim-rise relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl shadow-blue-950/30 sm:p-8 lg:rounded-2xl lg:border lg:border-slate-200/80 lg:p-10 lg:shadow-xl lg:shadow-slate-900/5" data-door-content>
+                <div class="anim-rise relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl shadow-blue-950/30 sm:p-8 lg:rounded-2xl lg:border lg:border-slate-200/80 lg:p-10 lg:shadow-xl lg:shadow-slate-900/5">
                     @if ($title)
                         <h2 class="text-2xl font-bold tracking-tight text-slate-900">{{ $title }}</h2>
                     @endif
@@ -57,7 +63,5 @@
                 <p class="relative mt-7 text-center text-xs text-blue-100/80 lg:hidden">&copy; {{ now()->year }} {{ config('app.name') }}</p>
             </main>
         </div>
-
-        @include('partials.page-door')
     </body>
 </html>

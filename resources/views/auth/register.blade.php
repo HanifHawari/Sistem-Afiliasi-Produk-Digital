@@ -1,5 +1,5 @@
 <x-guest-layout title="Buat Akun" subtitle="Daftar untuk mulai membeli produk digital.">
-    <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-5" data-door>
+    <form method="POST" action="{{ route('register') }}" class="flex flex-col gap-5" data-intro>
         @csrf
 
         <!-- Name -->
