@@ -1,5 +1,11 @@
 @php
     $tabs = ['all' => 'Semua', 'active' => 'Aktif', 'inactive' => 'Nonaktif'];
+
+    $filterItems = collect($tabs)->map(fn ($label, $key) => [
+        'label' => $label,
+        'href' => route('admin.affiliates.index', array_filter(['status' => $key, 'sort' => $sort, 'q' => $search])),
+        'active' => $status === $key,
+    ])->values()->all();
 @endphp
 
 <x-layouts.admin title="Afiliator">
@@ -19,23 +25,17 @@
 
     {{-- Filter --}}
     <form method="GET" action="{{ route('admin.affiliates.index') }}" class="toolbar">
-        <div class="tabs">
-            @foreach ($tabs as $key => $label)
-                <x-tab-link :href="route('admin.affiliates.index', array_filter(['status' => $key, 'sort' => $sort, 'q' => $search]))" :active="$status === $key">{{ $label }}</x-tab-link>
+        <x-filter-menu :items="$filterItems" />
+        <input type="hidden" name="status" value="{{ $status }}">
+        <div class="search lg:ml-auto">
+            <span class="material-symbols-outlined">search</span>
+            <input name="q" value="{{ $search }}" type="text" placeholder="Cari nama, email, no. HP...">
+        </div>
+        <select name="sort" onchange="this.form.submit()" class="input w-full sm:w-56">
+            @foreach ($sorts as $key => $label)
+                <option value="{{ $key }}" @selected($sort === $key)>Urutkan: {{ $label }}</option>
             @endforeach
-        </div>
-        <div class="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-            <input type="hidden" name="status" value="{{ $status }}">
-            <select name="sort" onchange="this.form.submit()" class="input sm:w-56">
-                @foreach ($sorts as $key => $label)
-                    <option value="{{ $key }}" @selected($sort === $key)>Urutkan: {{ $label }}</option>
-                @endforeach
-            </select>
-            <div class="search">
-                <span class="material-symbols-outlined">search</span>
-                <input name="q" value="{{ $search }}" type="text" placeholder="Cari nama, email, no. HP...">
-            </div>
-        </div>
+        </select>
     </form>
 
     {{-- Tabel afiliator --}}

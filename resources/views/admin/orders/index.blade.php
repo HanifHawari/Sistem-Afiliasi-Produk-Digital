@@ -8,6 +8,13 @@
         OrderStatus::Paid->value => ['Berhasil', $counts[OrderStatus::Paid->value] ?? 0],
         OrderStatus::Rejected->value => ['Ditolak', $counts[OrderStatus::Rejected->value] ?? 0],
     ];
+
+    $filterItems = collect($tabs)->map(fn ($tab, $key) => [
+        'label' => $tab[0],
+        'count' => $tab[1],
+        'href' => route('admin.orders.index', array_filter(['status' => $key, 'q' => $search])),
+        'active' => $status === $key,
+    ])->values()->all();
 @endphp
 
 <x-layouts.admin title="Verifikasi Pembayaran">
@@ -34,11 +41,7 @@
 
     {{-- Tab status + pencarian --}}
     <div class="toolbar">
-        <div class="tabs">
-            @foreach ($tabs as $key => [$label, $total])
-                <x-tab-link :href="route('admin.orders.index', array_filter(['status' => $key, 'q' => $search]))" :active="$status === $key" :count="$total">{{ $label }}</x-tab-link>
-            @endforeach
-        </div>
+        <x-filter-menu :items="$filterItems" />
         <form method="GET" action="{{ route('admin.orders.index') }}" class="search">
             <input type="hidden" name="status" value="{{ $status }}">
             <span class="material-symbols-outlined">search</span>

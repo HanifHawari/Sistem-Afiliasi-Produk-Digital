@@ -8,6 +8,13 @@
         WithdrawalStatus::Rejected->value => ['Ditolak', $counts[WithdrawalStatus::Rejected->value] ?? 0],
         'all' => ['Semua', $counts->sum()],
     ];
+
+    $filterItems = collect($tabs)->map(fn ($tab, $key) => [
+        'label' => $tab[0],
+        'count' => $tab[1],
+        'href' => route('admin.withdrawals.index', array_filter(['status' => $key, 'q' => $search])),
+        'active' => $status === $key,
+    ])->values()->all();
 @endphp
 
 <x-layouts.admin title="Pencairan Komisi">
@@ -33,11 +40,7 @@
 
     {{-- Tab status + pencarian --}}
     <div class="toolbar">
-        <div class="tabs">
-            @foreach ($tabs as $key => [$label, $total])
-                <x-tab-link :href="route('admin.withdrawals.index', array_filter(['status' => $key, 'q' => $search]))" :active="$status === $key" :count="$total">{{ $label }}</x-tab-link>
-            @endforeach
-        </div>
+        <x-filter-menu :items="$filterItems" />
         <form method="GET" action="{{ route('admin.withdrawals.index') }}" class="search">
             <input type="hidden" name="status" value="{{ $status }}">
             <span class="material-symbols-outlined">search</span>

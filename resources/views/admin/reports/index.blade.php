@@ -38,6 +38,15 @@
     $affiliateShare = $summary['revenue'] ? $summary['affiliate_revenue'] / $summary['revenue'] * 100 : 0;
     $rangeLabel = $start->translatedFormat('d M Y').' – '.$end->translatedFormat('d M Y');
     $query = $preset === 'custom' ? ['start' => $start->toDateString(), 'end' => $end->toDateString()] : ['preset' => $preset];
+
+    $filterItems = collect($presets)->map(fn ($label, $key) => [
+        'label' => $label,
+        'href' => route('admin.reports.index', ['preset' => $key]),
+        'active' => $preset === $key,
+    ])->values()->all();
+    if ($preset === 'custom') {
+        array_unshift($filterItems, ['label' => 'Tanggal bebas', 'href' => route('admin.reports.index', $query), 'active' => true]);
+    }
 @endphp
 
 <x-layouts.admin title="Laporan Penjualan">
@@ -49,12 +58,8 @@
 
     {{-- Filter periode --}}
     <form method="GET" action="{{ route('admin.reports.index') }}" class="toolbar">
-        <div class="tabs">
-            @foreach ($presets as $key => $label)
-                <x-tab-link :href="route('admin.reports.index', ['preset' => $key])" :active="$preset === $key">{{ $label }}</x-tab-link>
-            @endforeach
-        </div>
-        <div class="flex w-full items-center gap-2 lg:w-auto">
+        <x-filter-menu :items="$filterItems" />
+        <div class="flex w-full items-center gap-2 sm:w-auto lg:ml-auto">
             <input type="date" name="start" value="{{ $start->toDateString() }}" aria-label="Tanggal mulai" class="input min-w-0 flex-1 lg:w-40">
             <span class="text-slate-400">–</span>
             <input type="date" name="end" value="{{ $end->toDateString() }}" aria-label="Tanggal akhir" class="input min-w-0 flex-1 lg:w-40">

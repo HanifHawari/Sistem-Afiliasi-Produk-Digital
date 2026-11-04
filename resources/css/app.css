@@ -145,13 +145,13 @@
         @apply no-scrollbar flex w-full items-center gap-1 overflow-x-auto rounded-xl border border-slate-200/80 bg-white p-1.5 sm:w-auto sm:flex-wrap;
     }
 
-    /* Baris alat di atas tabel: tab di kiri, pencarian di kanan */
+    /* Baris alat di atas tabel: filter di kiri, pencarian di kanan (HP: tombol filter + pencarian sebaris) */
     .toolbar {
-        @apply mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between;
+        @apply mb-6 flex flex-wrap items-center gap-2 sm:gap-3 lg:flex-nowrap lg:justify-between;
     }
 
     .search {
-        @apply relative w-full lg:w-72;
+        @apply relative min-w-0 flex-1 sm:w-full sm:flex-none lg:w-72;
     }
 
     .search input {
