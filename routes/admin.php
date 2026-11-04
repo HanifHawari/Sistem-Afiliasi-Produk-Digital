@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PromoMaterialController;
+use App\Http\Controllers\Admin\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -33,8 +34,14 @@ Route::get('/products/{product:id}/promo-materials', [PromoMaterialController::c
 Route::post('/products/{product:id}/promo-materials', [PromoMaterialController::class, 'store'])->name('products.promo-materials.store');
 Route::delete('/promo-materials/{promoMaterial}', [PromoMaterialController::class, 'destroy'])->name('promo-materials.destroy');
 
+// Pencairan komisi afiliator
+Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
+Route::get('/withdrawals/{withdrawal}/proof', [WithdrawalController::class, 'proof'])->name('withdrawals.proof');
+Route::post('/withdrawals/{withdrawal}/approve', [WithdrawalController::class, 'approve'])->name('withdrawals.approve');
+Route::post('/withdrawals/{withdrawal}/pay', [WithdrawalController::class, 'pay'])->name('withdrawals.pay');
+Route::post('/withdrawals/{withdrawal}/reject', [WithdrawalController::class, 'reject'])->name('withdrawals.reject');
+
 // Belum dikerjakan (placeholder)
 Route::view('/affiliates', 'admin.affiliates.index')->name('affiliates.index');
-Route::view('/withdrawals', 'admin.withdrawals.index')->name('withdrawals.index');
 Route::view('/payment-accounts', 'admin.payment-accounts.index')->name('payment-accounts.index');
 Route::view('/reports', 'admin.reports.index')->name('reports.index');

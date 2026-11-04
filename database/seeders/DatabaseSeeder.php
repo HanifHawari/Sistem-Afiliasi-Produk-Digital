@@ -119,7 +119,13 @@ class DatabaseSeeder extends Seeder
             ]);
 
             if ($status !== OrderStatus::Pending) {
-                $order->update(['payment_proof' => $this->fakeTransferProof($order)]);
+                $order->update(['payment_proof' => $this->fakeReceipt("payment-proofs/{$order->invoice_number}.png", [
+                    'Tanggal : '.$order->created_at->format('d/m/Y H:i'),
+                    'Ke      : '.($account->bank_name ?? 'QRIS'),
+                    'Rek     : '.($account->account_number ?? '-'),
+                    'Nominal : Rp '.number_format($order->amount, 0, ',', '.'),
+                    'Berita  : '.$order->invoice_number,
+                ])]);
             }
 
             if ($order->isPaid()) {
@@ -127,22 +133,42 @@ class DatabaseSeeder extends Seeder
             }
         }
 
-        // Pengajuan pencairan contoh
-        foreach ([[30000, WithdrawalStatus::Pending], [15000, WithdrawalStatus::Pending]] as [$amount, $status]) {
-            $affiliate->withdrawals()->create([
-                'amount' => $amount,
-                'bank_name' => 'BCA',
-                'account_number' => '1234567890',
-                'account_holder' => 'Budi Santoso',
-                'status' => $status,
-            ]);
-        }
+        // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Budi 49.500)
+        $bank = ['bank_name' => 'BCA', 'account_number' => '1234567890', 'account_holder' => 'Budi Santoso'];
+
+        $paid = $affiliate->withdrawals()->create($bank + [
+            'amount' => 15000,
+            'status' => WithdrawalStatus::Paid,
+            'processed_by' => $admin->id,
+            'processed_at' => now(),
+            'note' => 'Ref. transfer 889120',
+        ]);
+        $paid->update(['transfer_proof' => $this->fakeReceipt("withdrawal-proofs/WD-{$paid->id}.png", [
+            'Ke      : BCA 1234567890',
+            'a.n     : Budi Santoso',
+            'Nominal : Rp 15.000',
+            'Berita  : Pencairan komisi',
+        ])]);
+
+        $affiliate->withdrawals()->create($bank + [
+            'amount' => 10000,
+            'status' => WithdrawalStatus::Approved,
+            'processed_by' => $admin->id,
+            'processed_at' => now(),
+        ]);
+
+        $affiliate->withdrawals()->create($bank + [
+            'amount' => 20000,
+            'status' => WithdrawalStatus::Pending,
+        ]);
     }
 
     /**
-     * Gambar struk transfer sederhana, supaya panel bukti bayar admin bisa dicoba.
+     * Gambar struk transfer sederhana untuk data contoh (bukti bayar & bukti pencairan).
+     *
+     * @param  list<string>  $lines
      */
-    private function fakeTransferProof(Order $order): ?string
+    private function fakeReceipt(string $path, array $lines): ?string
     {
         if (! function_exists('imagecreatetruecolor')) {
             return null;
@@ -154,22 +180,13 @@ class DatabaseSeeder extends Seeder
         $green = imagecolorallocate($image, 0, 108, 73);
         imagefill($image, 0, 0, $white);
 
-        $lines = [
-            [$green, 'TRANSFER BERHASIL'],
-            [$ink, ''],
-            [$ink, 'Tanggal : '.$order->created_at->format('d/m/Y H:i')],
-            [$ink, 'Ke      : '.($order->paymentAccount?->bank_name ?? 'QRIS')],
-            [$ink, 'Rek     : '.($order->paymentAccount?->account_number ?? '-')],
-            [$ink, 'Nominal : Rp '.number_format($order->amount, 0, ',', '.')],
-            [$ink, 'Berita  : '.$order->invoice_number],
-        ];
-        foreach ($lines as $i => [$color, $text]) {
-            imagestring($image, 5, 24, 40 + $i * 32, $text, $color);
+        imagestring($image, 5, 24, 40, 'TRANSFER BERHASIL', $green);
+        foreach ($lines as $i => $text) {
+            imagestring($image, 5, 24, 104 + $i * 32, $text, $ink);
         }
 
         ob_start();
         imagepng($image);
-        $path = "payment-proofs/{$order->invoice_number}.png";
         Storage::disk('local')->put($path, ob_get_clean());
         imagedestroy($image);
 
