@@ -4,7 +4,7 @@ Branch: `feature/setup-project` (PIC: Muhammad Hanif Hawari)
 Status: **kerangka selesai dibuat** (Laravel 13, Breeze, migration, model, role, layout, seeder). Cara instalasi ada di README.
 Setelah di-merge ke `develop`, semua anggota menjalankan `git merge origin/develop` di branch fitur masing-masing, lalu langkah instalasi di README.
 
-> **Pembaruan November 2026:** tema tampilan, komponen bersama, logo, dan akun contoh sudah berubah. Lihat [bagian 8](#8-pembaruan-tampilan--data-contoh-november-2026).
+> **Pembaruan November 2026:** tema tampilan, komponen bersama, logo, halaman login, animasi, dan akun contoh sudah berubah. Lihat [bagian 8](#8-pembaruan-tampilan--data-contoh-november-2026).
 
 ## 1. Tech Stack
 
@@ -147,6 +147,35 @@ Selain token, boleh langsung memakai warna bawaan Tailwind seperti `bg-blue-600`
 ### Logo & favicon
 Logo aplikasi sekarang ikon kotak produk (Material Symbols `package_2`) di kotak biru, dipakai di header dashboard,
 halaman login/daftar, dan navbar toko. Favicon: `public/favicon.svg`.
+Di atas latar biru pakai versi putih: `<x-application-logo inverse class="h-14 w-14" />`.
+
+### Halaman login & daftar
+Layout: `resources/views/layouts/guest.blade.php` (dipakai login, daftar, lupa password, reset, konfirmasi, verifikasi email).
+
+| Layar | Tampilan |
+|---|---|
+| Desktop | Kiri: panel biru bergambar samar (`partials/auth-backdrop`) berisi logo & nama sistem. Kanan: form dalam kartu putih |
+| HP | Seluruh layar biru bergambar samar, form dalam kartu putih di tengah |
+
+Judul & keterangan kartu diisi lewat atribut: `<x-guest-layout title="Masuk" subtitle="...">`.
+
+### Animasi & transisi
+| Kapan | Desktop | HP |
+|---|---|---|
+| Tombol Masuk/Daftar ditekan | Tombol jadi "Memproses...", lalu halaman login **terbelah di garis biru\|putih** (kiri ke kiri, kanan ke kanan) | Tombol jadi "Memproses...", halaman login memudar |
+| Halaman pertama setelah login | Menu samping muncul dari kiri satu per satu, **setelah itu** judul & kartu muncul dari bawah satu per satu | Judul & kartu muncul dari bawah (cepat) |
+| Pindah ke halaman lain (klik menu) | Hanya judul, kartu, & baris filter muncul dari bawah. Menu samping diam | Sama, lebih cepat |
+| Ganti filter / paginasi / setelah tombol aksi (halaman sama), tombol Back | Tanpa animasi | Tanpa animasi |
+
+Yang perlu diketahui saat membuat halaman di **layout dashboard** (admin & afiliator):
+- Elemen yang otomatis ikut animasi: `<x-page-header>`, `<x-stat-card>`, elemen ber-class `.card` dan `.toolbar` di dalam `<main>`.
+  Elemen lain bisa ikut dengan atribut `data-enter="up"`.
+- Form login/daftar memakai atribut `data-intro` (pemicu animasi setelah login). Jangan dipakai di form lain.
+- Layout toko (`<x-layouts.shop>`) **tidak** terpengaruh, kecuali transisi terbelah/memudar setelah customer login.
+- Pengguna yang mematikan animasi di perangkatnya (pengaturan aksesibilitas) tidak mendapat animasi sama sekali.
+- Transisi terbelah memakai View Transitions API (Chrome, Edge, Safari terbaru). Di Firefox halaman langsung berpindah,
+  animasi menu & kartu tetap jalan.
+- Kode: `resources/css/app.css` (bagian "Halaman login / daftar"), `resources/js/app.js`, `resources/views/partials/head.blade.php`.
 
 ### Akun contoh (password: `password`)
 | Nama | Peran | Email |

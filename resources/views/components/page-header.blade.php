@@ -4,7 +4,7 @@
     Judul halaman: judul besar + deskripsi abu, tombol di kanan (slot $actions).
     Pakai class .btn-primary / .btn-outline untuk tombolnya. ($eyebrow tidak ditampilkan lagi.)
 --}}
-<div {{ $attributes->merge(['class' => 'mb-8 flex flex-col justify-between gap-5 lg:mb-10 lg:flex-row lg:items-center']) }}>
+<div data-enter="up" {{ $attributes->merge(['class' => 'mb-8 flex flex-col justify-between gap-5 lg:mb-10 lg:flex-row lg:items-center']) }}>
     <div class="min-w-0">
         <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.5rem] lg:leading-tight">{{ $title }}</h1>
         @if ($description)

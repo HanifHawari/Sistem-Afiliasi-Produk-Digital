@@ -178,3 +178,166 @@
         }
     }
 }
+
+/* =====================================================================
+   Halaman login / daftar & transisi masuk ke dashboard
+   ===================================================================== */
+
+/* Pola ikon samar di latar biru: kotak produk, grafik, koin, tautan */
+.auth-pattern {
+    position: absolute;
+    inset: -50%;
+    opacity: 0.13;
+    transform: rotate(-10deg);
+    background-size: 150px 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 14 46 22.5v17L30 48 14 39.5v-17zM14 22.5 30 31l16-8.5M30 31v17'/%3E%3Cpath d='M92 46V35M101 46V25M110 46V31M86 50h30'/%3E%3Ccircle cx='32' cy='104' r='12'/%3E%3Ccircle cx='32' cy='104' r='6.5'/%3E%3Cpath d='M98 96l-4 4a6 6 0 0 0 8.5 8.5l4-4M110 104l4-4a6 6 0 0 0-8.5-8.5l-4 4M101 105l8-8'/%3E%3C/g%3E%3Cg fill='white'%3E%3Ccircle cx='70' cy='70' r='1.8'/%3E%3Ccircle cx='128' cy='72' r='1.4'/%3E%3Ccircle cx='68' cy='128' r='1.4'/%3E%3Ccircle cx='70' cy='10' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Animasi masuk sederhana di halaman login/daftar */
+.anim-rise {
+    animation: auth-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-fade {
+    animation: auth-fade 0.6s ease-out 0.1s both;
+}
+
+@keyframes auth-rise {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.985);
+    }
+}
+
+@keyframes auth-fade {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+/* ---------- Transisi login -> halaman tujuan (View Transitions API) ----------
+   Desktop: halaman login terbelah tepat di garis biru|putih, panel kiri bergeser ke kiri,
+   panel kanan ke kanan, memperlihatkan dashboard di baliknya.
+   HP: cukup memudar (bawaan browser). Browser yang belum mendukung: langsung pindah halaman. */
+@media (min-width: 1024px) {
+    .auth-left {
+        view-transition-name: auth-left;
+    }
+
+    .auth-right {
+        view-transition-name: auth-right;
+    }
+
+    /* Halaman baru langsung tampil di belakang, yang bergerak hanya dua belahan halaman login */
+    ::view-transition-old(root) {
+        animation: none;
+        opacity: 0;
+    }
+
+    ::view-transition-new(root) {
+        animation: none;
+    }
+
+    ::view-transition-old(auth-left):only-child {
+        animation: auth-split-left 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.1s both;
+        box-shadow: 24px 0 48px rgba(15, 23, 42, 0.18);
+    }
+
+    ::view-transition-old(auth-right):only-child {
+        animation: auth-split-right 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.1s both;
+        box-shadow: -24px 0 48px rgba(15, 23, 42, 0.12);
+    }
+}
+
+@keyframes auth-split-left {
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes auth-split-right {
+    to {
+        transform: translateX(100%);
+    }
+}
+
+/* ---------- Animasi masuk halaman dashboard ----------
+   Kelas di <html> dipasang oleh partials/head:
+   - .intro : halaman pertama setelah login/daftar -> menu samping dari kiri dulu, lalu kartu dari bawah
+   - .enter : pindah ke halaman lain -> hanya kartu dari bawah
+   Urutan (--i) & kelas .anim-run diisi resources/js/app.js. Hanya berlaku di layout dashboard. */
+@keyframes enter-left {
+    from {
+        opacity: 0;
+        transform: translateX(-32px);
+    }
+}
+
+@keyframes enter-up {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+}
+
+/* Sembunyikan dulu sampai urutan animasi siap, supaya tidak berkedip */
+:is(.intro, .enter):not(.anim-run) [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+    opacity: 0;
+}
+
+/* Pindah halaman (desktop & HP): kartu muncul dari bawah satu per satu, cepat */
+.enter.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+    animation: enter-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(0.05s + var(--i, 0) * 60ms) both;
+}
+
+@media (min-width: 1024px) {
+    .intro:not(.anim-run) [data-layout="dashboard"] :is([data-enter-group="left"] > *, [data-enter="left"]) {
+        opacity: 0;
+    }
+
+    /* Setelah login: menu samping dari kiri satu per satu (pelan)... */
+    .intro.anim-run [data-layout="dashboard"] :is([data-enter-group="left"] > *, [data-enter="left"]) {
+        animation: enter-left 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(0.4s + var(--i, 0) * 90ms) both;
+    }
+
+    /* ...setelah menu selesai, baru kartu dari bawah satu per satu */
+    .intro.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+        animation: enter-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(2s + var(--i, 0) * 100ms) both;
+    }
+}
+
+/* HP: sederhana. Halaman login memudar dulu, lalu kartu muncul dari bawah (tanpa animasi menu) */
+@media (max-width: 1023px) {
+    ::view-transition-old(root) {
+        animation: enter-fade-out 0.18s ease-out both;
+    }
+
+    ::view-transition-new(root) {
+        animation: enter-fade-in 0.3s ease-out 0.12s both;
+    }
+
+    .intro.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+        animation: enter-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(0.25s + var(--i, 0) * 60ms) both;
+    }
+}
+
+@keyframes enter-fade-out {
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes enter-fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+/* Pengguna yang mematikan animasi di perangkatnya: tanpa animasi */
+@media (prefers-reduced-motion: reduce) {
+    .anim-rise,
+    .anim-fade {
+        animation: none;
+    }
+}

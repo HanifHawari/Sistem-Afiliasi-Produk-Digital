@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout title="Buat Password Baru">
     <form method="POST" action="{{ route('password.store') }}">
         @csrf
 
