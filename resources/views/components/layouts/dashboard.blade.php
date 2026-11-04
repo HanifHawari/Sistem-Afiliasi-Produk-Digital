@@ -13,7 +13,7 @@
 <head>
     @include('partials.head', ['title' => $title])
 </head>
-<body class="bg-slate-50 font-sans text-slate-900 antialiased" x-data="{ sidebarOpen: false }">
+<body class="bg-slate-50 font-sans text-slate-900 antialiased" data-layout="dashboard" x-data="{ sidebarOpen: false }">
     {{-- Header --}}
     <header class="fixed inset-x-0 top-0 z-40 h-16 border-b border-slate-200/80 bg-white lg:h-20">
         <div class="flex h-full items-center justify-between px-4 lg:px-10">
@@ -78,12 +78,12 @@
             </button>
         </div>
 
-        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto" data-intro-group="left">
+        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto" data-enter-group="left">
             {{ $nav }}
         </nav>
 
         @isset($sidebarFooter)
-            <div class="mt-4" data-intro="left">{{ $sidebarFooter }}</div>
+            <div class="mt-4" data-enter="left">{{ $sidebarFooter }}</div>
         @endisset
     </aside>
 

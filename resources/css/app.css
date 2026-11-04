@@ -262,66 +262,73 @@
     }
 }
 
-/* ---------- Halaman pertama setelah login ----------
-   Kelas .intro dipasang oleh partials/head, urutan (--i) & .intro-run oleh resources/js/app.js */
-@keyframes intro-left {
+/* ---------- Animasi masuk halaman dashboard ----------
+   Kelas di <html> dipasang oleh partials/head:
+   - .intro : halaman pertama setelah login/daftar -> menu samping dari kiri dulu, lalu kartu dari bawah
+   - .enter : pindah ke halaman lain -> hanya kartu dari bawah
+   Urutan (--i) & kelas .anim-run diisi resources/js/app.js. Hanya berlaku di layout dashboard. */
+@keyframes enter-left {
     from {
         opacity: 0;
-        transform: translateX(-28px);
+        transform: translateX(-32px);
     }
 }
 
-@keyframes intro-up {
+@keyframes enter-up {
     from {
         opacity: 0;
-        transform: translateY(32px);
+        transform: translateY(24px);
     }
 }
 
-@keyframes intro-fade {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
+/* Sembunyikan dulu sampai urutan animasi siap, supaya tidak berkedip */
+:is(.intro, .enter):not(.anim-run) [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+    opacity: 0;
 }
 
-/* Desktop: menu samping muncul dari kiri satu per satu, kartu muncul dari bawah satu per satu */
+/* Pindah halaman (desktop & HP): kartu muncul dari bawah satu per satu, cepat */
+.enter.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+    animation: enter-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(0.05s + var(--i, 0) * 60ms) both;
+}
+
 @media (min-width: 1024px) {
-    .intro:not(.intro-run) :is([data-intro-group="left"] > *, [data-intro="left"], [data-intro="up"], main .card) {
+    .intro:not(.anim-run) [data-layout="dashboard"] :is([data-enter-group="left"] > *, [data-enter="left"]) {
         opacity: 0;
     }
 
-    .intro-run :is([data-intro-group="left"] > *, [data-intro="left"]) {
-        animation: intro-left 0.55s cubic-bezier(0.22, 1, 0.36, 1) calc(0.35s + var(--i, 0) * 60ms) both;
+    /* Setelah login: menu samping dari kiri satu per satu (pelan)... */
+    .intro.anim-run [data-layout="dashboard"] :is([data-enter-group="left"] > *, [data-enter="left"]) {
+        animation: enter-left 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(0.4s + var(--i, 0) * 90ms) both;
     }
 
-    .intro-run :is([data-intro="up"], main .card) {
-        animation: intro-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(0.5s + var(--i, 0) * 90ms) both;
+    /* ...setelah menu selesai, baru kartu dari bawah satu per satu */
+    .intro.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+        animation: enter-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) calc(2s + var(--i, 0) * 100ms) both;
     }
 }
 
-/* HP: sederhana. Halaman login memudar dulu, lalu konten tujuan memudar naik sekali (tanpa saling menimpa) */
+/* HP: sederhana. Halaman login memudar dulu, lalu kartu muncul dari bawah (tanpa animasi menu) */
 @media (max-width: 1023px) {
     ::view-transition-old(root) {
-        animation: intro-fade-out 0.18s ease-out both;
+        animation: enter-fade-out 0.18s ease-out both;
     }
 
     ::view-transition-new(root) {
-        animation: intro-fade-in 0.3s ease-out 0.12s both;
+        animation: enter-fade-in 0.3s ease-out 0.12s both;
     }
 
-    .intro main {
-        animation: intro-fade 0.5s ease-out 0.15s both;
+    .intro.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
+        animation: enter-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(0.25s + var(--i, 0) * 60ms) both;
     }
 }
 
-@keyframes intro-fade-out {
+@keyframes enter-fade-out {
     to {
         opacity: 0;
     }
 }
 
-@keyframes intro-fade-in {
+@keyframes enter-fade-in {
     from {
         opacity: 0;
     }

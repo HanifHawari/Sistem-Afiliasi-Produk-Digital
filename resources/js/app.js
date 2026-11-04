@@ -8,7 +8,8 @@ Alpine.start();
  * Transisi masuk (login / daftar):
  * 1. Form dengan atribut data-intro: tombol berubah "Memproses...", penanda disimpan di sessionStorage.
  * 2. <head> halaman berikutnya (partials/head) membaca penanda -> kelas .intro + izin View Transition.
- * 3. Di sini: beri urutan (--i) ke menu samping & kartu, lalu jalankan animasinya (.intro-run).
+ * 3. Di sini: beri urutan (--i) ke menu samping & kartu, lalu jalankan animasinya (.anim-run).
+ *    Pindah halaman biasa (.enter, juga dari partials/head) hanya menganimasikan kartu.
  * Gaya & animasi: resources/css/app.css.
  */
 const root = document.documentElement;
@@ -20,7 +21,7 @@ document.addEventListener('submit', (event) => {
     }
 
     try {
-        sessionStorage.setItem('afp-intro', '1');
+        sessionStorage.setItem('afp-intro', String(Date.now()));
     } catch (e) {
         // sessionStorage tidak tersedia: tetap login, hanya tanpa animasi
     }
@@ -44,15 +45,19 @@ window.addEventListener('pageshow', (event) => {
     });
 });
 
-if (root.classList.contains('intro')) {
-    if (window.matchMedia('(min-width: 1024px)').matches) {
-        document.querySelectorAll('[data-intro-group="left"] > *, [data-intro="left"]')
-            .forEach((el, i) => el.style.setProperty('--i', Math.min(i, 12)));
+const intro = root.classList.contains('intro');
+if (intro || root.classList.contains('enter')) {
+    const layout = document.querySelector('[data-layout="dashboard"]');
 
-        document.querySelectorAll('[data-intro="up"], main .card')
-            .forEach((el, i) => el.style.setProperty('--i', Math.min(i, 10)));
+    if (layout) {
+        if (intro) {
+            layout.querySelectorAll('[data-enter-group="left"] > *, [data-enter="left"]')
+                .forEach((el, i) => el.style.setProperty('--i', Math.min(i, 12)));
+        }
+        layout.querySelectorAll('[data-enter="up"], main .card, main .toolbar')
+            .forEach((el, i) => el.style.setProperty('--i', Math.min(i, intro ? 10 : 8)));
     }
 
-    root.classList.add('intro-run');
-    setTimeout(() => root.classList.remove('intro', 'intro-run'), 3000);
+    root.classList.add('anim-run');
+    setTimeout(() => root.classList.remove('intro', 'enter', 'anim-run'), intro ? 4500 : 2000);
 }
