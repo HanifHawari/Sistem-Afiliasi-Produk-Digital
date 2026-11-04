@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentAccountController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\PromoMaterialController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,5 +56,6 @@ Route::get('/affiliates', [AffiliateController::class, 'index'])->name('affiliat
 Route::get('/affiliates/{affiliate}', [AffiliateController::class, 'show'])->name('affiliates.show');
 Route::patch('/affiliates/{affiliate}/toggle', [AffiliateController::class, 'toggle'])->name('affiliates.toggle');
 
-// Belum dikerjakan (placeholder)
-Route::view('/reports', 'admin.reports.index')->name('reports.index');
+// Laporan penjualan
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');

@@ -14,6 +14,7 @@ use App\Models\User;
 use App\Services\Commission\CommissionService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -162,6 +163,9 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // Riwayat penjualan 45 hari terakhir, supaya laporan & grafik punya data
+        $this->seedSalesHistory($products, [$links, $dina->referralLinks()->get()->keyBy('product_id')], $qris, $bca);
+
         // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Budi 49.500)
         $bank = ['bank_name' => 'BCA', 'account_number' => '1234567890', 'account_holder' => 'Budi Santoso'];
 
@@ -190,6 +194,41 @@ class DatabaseSeeder extends Seeder
             'amount' => 20000,
             'status' => WithdrawalStatus::Pending,
         ]);
+    }
+
+    /**
+     * Order berstatus paid yang tersebar di 45 hari terakhir (data contoh laporan).
+     *
+     * @param  array<int, Collection>  $linkSets  link referral per afiliator, key = product_id
+     */
+    private function seedSalesHistory($products, array $linkSets, PaymentAccount $qris, PaymentAccount $bca): void
+    {
+        mt_srand(45);
+        $customers = User::factory()->customer()->count(8)->create();
+        $commissions = app(CommissionService::class);
+
+        foreach (range(1, 30) as $n) {
+            $product = $products[mt_rand(0, $products->count() - 1)];
+            $paidAt = now()->subDays(mt_rand(1, 45))->setTime(mt_rand(8, 21), mt_rand(0, 59));
+            // Kurang lebih 60% penjualan datang dari afiliator
+            $link = mt_rand(1, 10) <= 6 ? $linkSets[mt_rand(0, count($linkSets) - 1)]->get($product->id) : null;
+            $account = mt_rand(0, 1) ? $qris : $bca;
+
+            $order = Order::create([
+                'invoice_number' => 'INV-'.$paidAt->format('Ymd').'-H'.str_pad($n, 3, '0', STR_PAD_LEFT),
+                'customer_id' => $customers[mt_rand(0, $customers->count() - 1)]->id,
+                'product_id' => $product->id,
+                'referral_link_id' => $link?->id,
+                'amount' => $product->price,
+                'payment_method' => $account->isQris() ? PaymentMethod::Qris : PaymentMethod::BankTransfer,
+                'payment_account_id' => $account->id,
+                'status' => OrderStatus::Paid,
+                'verified_at' => $paidAt,
+            ]);
+            $order->forceFill(['created_at' => $paidAt->copy()->subHours(2), 'updated_at' => $paidAt])->saveQuietly();
+
+            $commissions->createForOrder($order)?->forceFill(['created_at' => $paidAt, 'updated_at' => $paidAt])->saveQuietly();
+        }
     }
 
     /**
