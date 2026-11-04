@@ -98,7 +98,7 @@ class ReportController extends Controller
     private function range(Request $request): array
     {
         $today = CarbonImmutable::today();
-        $preset = (string) $request->query('preset', '30d');
+        $preset = is_string($preset = $request->query('preset')) ? $preset : '30d';
 
         $start = $this->parseDate($request->query('start'));
         $end = $this->parseDate($request->query('end'));
@@ -131,10 +131,13 @@ class ReportController extends Controller
         }
 
         try {
-            return CarbonImmutable::createFromFormat('Y-m-d', $value)->startOfDay();
+            $date = CarbonImmutable::createFromFormat('Y-m-d', $value)->startOfDay();
         } catch (\Throwable) {
             return null;
         }
+
+        // Tolak tanggal yang "meluber" seperti 2025-13-45
+        return $date->format('Y-m-d') === $value ? $date : null;
     }
 
     private function paidOrders(CarbonImmutable $start, CarbonImmutable $end): Builder

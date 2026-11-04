@@ -1,6 +1,6 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-on-surface">
+        <h2 class="card-title">
             {{ __('Profile Information') }}
         </h2>
 

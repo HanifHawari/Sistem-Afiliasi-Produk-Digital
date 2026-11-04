@@ -56,6 +56,22 @@ class AuditFixesTest extends TestCase
         $this->actingAs($admin)->get('/admin/withdrawals?status=ngawur&withdrawal=abc')->assertOk();
     }
 
+    public function test_array_query_params_do_not_crash_admin_pages(): void
+    {
+        $admin = User::factory()->admin()->create();
+
+        foreach ([
+            '/admin/orders?q[]=x&status[]=y&order[]=1',
+            '/admin/withdrawals?q[]=x&status[]=y&withdrawal[]=1',
+            '/admin/products?q[]=x',
+            '/admin/affiliates?q[]=x&sort[]=y&status[]=z',
+            '/admin/reports?preset[]=x&start[]=a&end[]=b',
+            '/admin/reports?start=2025-13-45&end=2025-02-30',
+        ] as $url) {
+            $this->actingAs($admin)->get($url)->assertOk();
+        }
+    }
+
     public function test_validation_messages_are_in_indonesian(): void
     {
         $this->actingAs(User::factory()->admin()->create())

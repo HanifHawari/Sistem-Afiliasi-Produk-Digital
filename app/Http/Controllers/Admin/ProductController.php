@@ -26,7 +26,7 @@ class ProductController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = trim((string) $request->query('q', ''));
+        $search = mb_substr(trim(is_string($q = $request->query('q')) ? $q : ''), 0, 100);
 
         $products = Product::query()
             ->withCount(['orders as sold_count' => fn ($q) => $q->where('status', OrderStatus::Paid)])
@@ -34,7 +34,7 @@ class ProductController extends Controller
             ->withCount('promoMaterials')
             ->when($search !== '', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
             ->latest()
-            ->paginate(8)
+            ->paginate(5)
             ->withQueryString();
 
         $pendingWithdrawals = Withdrawal::with('affiliate')

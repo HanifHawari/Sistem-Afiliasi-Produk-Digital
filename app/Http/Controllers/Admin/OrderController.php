@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\CommissionStatus;
 use App\Enums\OrderStatus;
+use App\Http\Controllers\Admin\Concerns\ServesProofFiles;
 use App\Http\Controllers\Controller;
 use App\Models\Commission;
 use App\Models\Order;
@@ -12,7 +13,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -21,6 +21,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class OrderController extends Controller
 {
+    use ServesProofFiles;
+
     private const RELATIONS = ['customer', 'product', 'referralLink.affiliate', 'paymentAccount', 'commission', 'verifier'];
 
     public function index(Request $request): View
@@ -30,7 +32,7 @@ class OrderController extends Controller
         if (! in_array($status, ['all', ...array_column(OrderStatus::cases(), 'value')], true)) {
             $status = OrderStatus::WaitingVerification->value;
         }
-        $search = mb_substr(trim((string) $request->query('q', '')), 0, 100);
+        $search = mb_substr(trim(is_string($q = $request->query('q')) ? $q : ''), 0, 100);
         $selectedId = filter_var($request->query('order'), FILTER_VALIDATE_INT) ?: null;
 
         $orders = Order::with(self::RELATIONS)
@@ -43,7 +45,7 @@ class OrderController extends Controller
                     ->orWhereHas('referralLink', fn (Builder $r) => $r->where('code', 'like', "%{$search}%"));
             }))
             ->latest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         $selected = $selectedId
@@ -121,9 +123,7 @@ class OrderController extends Controller
      */
     public function proof(Order $order): StreamedResponse
     {
-        abort_unless($order->payment_proof && Storage::disk('local')->exists($order->payment_proof), 404);
-
-        return Storage::disk('local')->response($order->payment_proof);
+        return $this->proofResponse($order->payment_proof);
     }
 
     private function canBeVerified(Order $order): bool

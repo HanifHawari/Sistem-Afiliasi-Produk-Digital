@@ -30,8 +30,8 @@ class AffiliateController extends Controller
     {
         // Filter yang tidak valid diabaikan
         $status = in_array($request->query('status'), ['active', 'inactive'], true) ? $request->query('status') : 'all';
-        $sort = array_key_exists((string) $request->query('sort'), self::SORTS) ? $request->query('sort') : 'latest';
-        $search = mb_substr(trim((string) $request->query('q', '')), 0, 100);
+        $sort = in_array($request->query('sort'), array_keys(self::SORTS), true) ? $request->query('sort') : 'latest';
+        $search = mb_substr(trim(is_string($q = $request->query('q')) ? $q : ''), 0, 100);
 
         $affiliates = $this->withPerformance(User::query()->where('role', UserRole::Affiliate))
             ->with('affiliateProfile')
@@ -44,7 +44,7 @@ class AffiliateController extends Controller
             ->when($sort === 'commission', fn (Builder $q) => $q->orderByDesc('earned'))
             ->when($sort === 'clicks', fn (Builder $q) => $q->orderByDesc('referral_clicks_count'))
             ->latest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         $base = User::where('role', UserRole::Affiliate);

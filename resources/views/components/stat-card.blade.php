@@ -1,52 +1,20 @@
-@props([
-    'label',
-    'value',
-    'icon' => null,
-    'tone' => 'primary',   // primary | secondary | tertiary | error
-    'caption' => null,
-    'highlight' => false,  // kartu latar biru muda, mis. antrean yang perlu tindakan
-    'valueClass' => 'text-on-surface',
-])
+@props(['label', 'value', 'caption' => null])
 
 {{--
-    Kartu statistik (Stitch: Metric Overview Cards).
-    Slot default = baris paling bawah (tren / tautan), opsional.
+    Kartu statistik biru: LABEL kapital, angka besar, keterangan, lalu garis & baris bawah (slot).
+    Untuk pill di baris bawah pakai class .pill-on-blue, mis.
+    <span class="pill-on-blue text-emerald-600">+12% vs lalu</span>
 --}}
-@php
-    $iconTones = [
-        'primary' => 'bg-primary-fixed text-primary',
-        'secondary' => 'bg-secondary-fixed text-secondary',
-        'tertiary' => 'bg-tertiary-fixed text-tertiary',
-        'error' => 'bg-error-container text-error',
-    ];
-@endphp
-
-<div {{ $attributes->class([
-    'flex flex-col justify-between rounded-xl p-space-md shadow-sm',
-    'bg-surface-container-high' => $highlight,
-    'bg-surface-container-lowest' => ! $highlight,
-]) }}>
-    <div class="flex items-center justify-between">
-        <span @class(['font-body-sm text-body-sm', 'text-on-surface' => $highlight, 'text-on-surface-variant' => ! $highlight])>{{ $label }}</span>
-        @if ($icon)
-            <div @class([
-                'flex h-8 w-8 items-center justify-center rounded-lg',
-                'bg-surface-container-lowest text-primary' => $highlight,
-                $iconTones[$tone] ?? $iconTones['primary'] => ! $highlight,
-            ])>
-                <span class="material-symbols-outlined text-[18px]">{{ $icon }}</span>
-            </div>
-        @endif
-    </div>
-
-    <div class="my-3">
-        <div class="tabular font-currency-metric text-currency-metric {{ $valueClass }}">{{ $value }}</div>
-        @if ($caption)
-            <span class="font-caption text-caption text-on-surface-variant">{{ $caption }}</span>
-        @endif
-    </div>
+<div {{ $attributes->class('flex min-w-0 flex-col rounded-2xl bg-blue-600 p-4 text-white shadow-lg shadow-blue-600/20 sm:p-6') }}>
+    <p class="text-[11px] font-bold uppercase tracking-wide text-white/90 sm:text-xs">{{ $label }}</p>
+    <p class="tabular mt-2 break-words text-xl font-bold tracking-tight sm:mt-3 sm:text-[1.75rem] sm:leading-9">{{ $value }}</p>
+    @if ($caption)
+        <p class="mt-1 text-xs text-white/80 sm:text-sm">{{ $caption }}</p>
+    @endif
 
     @if ($slot->isNotEmpty())
-        <div class="flex items-center justify-between gap-1.5 font-label-sm text-label-sm">{{ $slot }}</div>
+        <div class="mt-auto pt-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-white/20 pt-4 text-xs font-medium text-white/90 sm:text-sm">{{ $slot }}</div>
+        </div>
     @endif
 </div>
