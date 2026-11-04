@@ -8,7 +8,7 @@ Setelah selesai, branch ini di-merge ke `develop`, lalu semua anggota menjalanka
 | Bagian | Pilihan |
 |---|---|
 | Framework | Laravel (versi stabil terbaru) + Blade |
-| Tampilan | Tailwind CSS (via Vite), mengikuti design system di `design/stitch/afiliasi_precision/DESIGN.md` |
+| Tampilan | Tailwind CSS (via Vite), mengikuti design system di `design/stitch/semua_design-system/DESIGN.md` |
 | Font & ikon | Plus Jakarta Sans, Material Symbols Outlined |
 | Database | PostgreSQL |
 | Auth | Laravel Breeze (Blade) + kolom `role` di tabel `users` |
@@ -93,10 +93,10 @@ File bersama (model, migration, layout, komponen Blade) dibuat di kerangka ini. 
 
 | Layar Stitch | Dipakai untuk |
 |---|---|
-| `design/stitch/1._affiliate_dashboard_marketplace` | Layout & dashboard afiliator |
-| `design/stitch/2._checkout_produk_pembayaran` | Halaman checkout & pembayaran |
-| `design/stitch/3._admin_verifikasi_pembayaran` | Layout admin & verifikasi pembayaran |
-| `design/stitch/4._admin_produk_komisi_afiliasi` | Kelola produk & komisi |
-| `design/stitch/afiliasi_precision/DESIGN.md` | Warna, font, badge status, tabel, tombol |
+| `design/stitch/gibran_affiliate-dashboard` | Gibran: layout & dashboard afiliator |
+| `design/stitch/arif_storefront-checkout` | Arif: halaman checkout & pembayaran |
+| `design/stitch/hanif_admin-dashboard_verifikasi-pembayaran` | Hanif: layout admin & verifikasi pembayaran |
+| `design/stitch/hanif_admin-dashboard_produk-komisi` | Hanif: kelola produk & komisi |
+| `design/stitch/semua_design-system/DESIGN.md` | Semua: warna, font, badge status, tabel, tombol |
 
 Layar yang belum ada di Stitch (login, laporan, pencairan, katalog customer, dll.) dibuat mengikuti `DESIGN.md`.
