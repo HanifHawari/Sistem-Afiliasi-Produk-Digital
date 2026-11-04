@@ -22,15 +22,15 @@
 @endphp
 
 <div {{ $attributes->class([
-    'flex flex-col justify-between rounded-xl p-space-md shadow-sm',
+    'flex min-w-0 flex-col justify-between rounded-xl p-3 shadow-sm sm:p-space-md',
     'bg-surface-container-high' => $highlight,
     'bg-surface-container-lowest' => ! $highlight,
 ]) }}>
-    <div class="flex items-center justify-between">
+    <div class="flex items-start justify-between gap-2">
         <span @class(['font-body-sm text-body-sm', 'text-on-surface' => $highlight, 'text-on-surface-variant' => ! $highlight])>{{ $label }}</span>
         @if ($icon)
             <div @class([
-                'flex h-8 w-8 items-center justify-center rounded-lg',
+                'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg',
                 'bg-surface-container-lowest text-primary' => $highlight,
                 $iconTones[$tone] ?? $iconTones['primary'] => ! $highlight,
             ])>
@@ -39,14 +39,14 @@
         @endif
     </div>
 
-    <div class="my-3">
-        <div class="tabular font-currency-metric text-currency-metric {{ $valueClass }}">{{ $value }}</div>
+    <div class="my-2 sm:my-3">
+        <div class="tabular break-words font-currency-metric text-lg font-bold leading-6 sm:text-currency-metric {{ $valueClass }}">{{ $value }}</div>
         @if ($caption)
-            <span class="font-caption text-caption text-on-surface-variant">{{ $caption }}</span>
+            <span class="block font-caption text-caption text-on-surface-variant">{{ $caption }}</span>
         @endif
     </div>
 
     @if ($slot->isNotEmpty())
-        <div class="flex items-center justify-between gap-1.5 font-label-sm text-label-sm">{{ $slot }}</div>
+        <div class="flex flex-wrap items-center justify-between gap-1.5 font-label-sm text-label-sm">{{ $slot }}</div>
     @endif
 </div>

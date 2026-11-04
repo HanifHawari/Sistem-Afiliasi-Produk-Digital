@@ -19,7 +19,7 @@
     </x-page-header>
 
     {{-- Statistik --}}
-    <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
         <x-stat-card label="Pengajuan Baru" icon="pending_actions" tone="tertiary" :value="rupiah($stats['pending_sum'])"
             :caption="$stats['pending_count'].' pengajuan menunggu persetujuan'">
             @if ($stats['pending_oldest'])
@@ -49,11 +49,12 @@
 
     {{-- Tab status + pencarian --}}
     <div class="mb-space-lg flex flex-wrap items-center justify-between gap-space-sm rounded-xl bg-surface-container-low p-1.5">
-        <div class="flex flex-wrap items-center gap-1">
+        <div class="no-scrollbar flex w-full items-center gap-1 overflow-x-auto sm:w-auto sm:flex-wrap">
             @foreach ($tabs as $key => [$label, $total])
                 <a href="{{ route('admin.withdrawals.index', array_filter(['status' => $key, 'q' => $search])) }}"
+                   @if ($status === $key) x-data x-init="$el.parentElement.scrollLeft = $el.offsetLeft - 24" @endif
                    @class([
-                       'flex items-center gap-1.5 rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
+                       'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
                        'bg-surface-container-lowest font-semibold text-primary shadow-sm' => $status === $key,
                        'text-on-surface-variant hover:text-on-surface' => $status !== $key,
                    ])>
@@ -81,7 +82,7 @@
         {{-- Tabel pengajuan --}}
         <div class="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm xl:col-span-8">
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="ledger w-full border-collapse text-left">
                     <thead>
                         <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                             <th class="px-3 py-3">Afiliator</th>
@@ -166,7 +167,8 @@
                     $isOpen = in_array($selected->status, [WithdrawalStatus::Pending, WithdrawalStatus::Approved]);
                     $insufficient = $balance['remaining'] < 0;
                 @endphp
-                <div class="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-md"
+                <div id="inspeksi" class="flex scroll-mt-20 flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-md"
+                     x-init="if (new URLSearchParams(location.search).has('withdrawal') && innerWidth < 1280) $el.scrollIntoView()"
                      x-data="{ rejecting: {{ $errors->has('note') ? 'true' : 'false' }}, copied: false }">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex min-w-0 items-center gap-2">

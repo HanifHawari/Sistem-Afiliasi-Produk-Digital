@@ -45,7 +45,7 @@
         @endif
 
         {{-- Statistik --}}
-        <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-3">
+        <div class="mb-space-lg grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-space-md [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
             <x-stat-card label="QRIS Aktif" icon="qr_code_2" :value="$stats['active_qris'].' QRIS'" :caption="$qrisAccounts->count().' QRIS terdaftar'" />
             <x-stat-card label="Rekening Aktif" icon="account_balance" tone="tertiary" :value="$stats['active_bank'].' rekening'" :caption="$bankAccounts->count().' rekening terdaftar'" />
             <x-stat-card label="Dana Masuk Bulan Ini" icon="savings" tone="secondary" value-class="text-secondary" :value="rupiah($stats['paid_month'])" caption="Dari pembayaran yang sudah diverifikasi" />

@@ -17,4 +17,38 @@
     .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
+
+    /* Baris yang bisa digeser horizontal tanpa scrollbar terlihat (tab status di HP) */
+    .no-scrollbar {
+        scrollbar-width: none;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    /*
+     * Tabel data (DESIGN.md, mobile < 768px): tabel di-scroll ke samping,
+     * kolom pertama tetap terlihat. Pakai: <table class="ledger ..."> di dalam div overflow-x-auto.
+     */
+    @media (max-width: 767px) {
+        .ledger {
+            min-width: 600px;
+        }
+
+        .ledger th:first-child,
+        .ledger td:first-child {
+            position: sticky;
+            left: 0;
+            z-index: 1;
+            max-width: 11rem;
+            white-space: normal !important;
+            background-color: theme('colors.surface-container-lowest');
+            box-shadow: 1px 0 0 theme('colors.surface-container');
+        }
+
+        .ledger thead th:first-child {
+            background-color: theme('colors.surface-container-low');
+        }
+    }
 }

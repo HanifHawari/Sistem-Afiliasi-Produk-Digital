@@ -7,7 +7,7 @@
         description="Pantau performa setiap afiliator: link, klik, penjualan, komisi, dan saldo yang belum dicairkan." />
 
     {{-- Statistik --}}
-    <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
         <x-stat-card label="Total Afiliator" icon="group" :value="$stats['total'].' orang'">
             <span class="flex items-center gap-1.5 text-secondary">
                 <span class="material-symbols-outlined text-[16px]">person_add</span>
@@ -24,11 +24,12 @@
 
     {{-- Filter --}}
     <form method="GET" action="{{ route('admin.affiliates.index') }}" class="mb-space-lg flex flex-wrap items-center justify-between gap-space-sm rounded-xl bg-surface-container-low p-1.5">
-        <div class="flex flex-wrap items-center gap-1">
+        <div class="no-scrollbar flex w-full items-center gap-1 overflow-x-auto sm:w-auto sm:flex-wrap">
             @foreach ($tabs as $key => $label)
                 <a href="{{ route('admin.affiliates.index', array_filter(['status' => $key, 'sort' => $sort, 'q' => $search])) }}"
+                   @if ($status === $key) x-data x-init="$el.parentElement.scrollLeft = $el.offsetLeft - 24" @endif
                    @class([
-                       'flex items-center gap-1.5 rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
+                       'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
                        'bg-surface-container-lowest font-semibold text-primary shadow-sm' => $status === $key,
                        'text-on-surface-variant hover:text-on-surface' => $status !== $key,
                    ])>
@@ -58,7 +59,7 @@
     {{-- Tabel afiliator --}}
     <div class="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
         <div class="overflow-x-auto">
-            <table class="w-full border-collapse text-left">
+            <table class="ledger w-full border-collapse text-left">
                 <thead>
                     <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                         <th class="px-space-md py-3">Afiliator</th>

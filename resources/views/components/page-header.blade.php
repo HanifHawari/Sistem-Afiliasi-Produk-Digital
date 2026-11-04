@@ -25,6 +25,6 @@
     </div>
 
     @isset($actions)
-        <div class="flex flex-wrap items-center gap-space-sm self-start lg:self-center">{{ $actions }}</div>
+        <div class="flex w-full flex-wrap items-center gap-space-sm sm:w-auto lg:self-center [&>*]:flex-1 [&>*]:justify-center [&>*]:whitespace-nowrap sm:[&>*]:flex-none [&>form>button]:w-full [&>form>button]:justify-center">{{ $actions }}</div>
     @endisset
 </div>

@@ -14,25 +14,25 @@
     {{-- Header --}}
     <header class="fixed inset-x-0 top-0 z-40 h-16 bg-surface-container-lowest/90 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-md">
         <div class="flex h-full items-center justify-between px-space-md lg:px-space-lg">
-            <div class="flex items-center gap-space-sm">
+            <div class="flex min-w-0 items-center gap-space-xs sm:gap-space-sm">
                 <button type="button" class="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container-low lg:hidden" @click="sidebarOpen = !sidebarOpen">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-space-sm">
-                    <x-application-logo class="h-9 w-9" />
-                    <span class="flex flex-col leading-tight">
-                        <span class="font-headline-sm text-headline-sm text-primary">{{ config('app.name') }}</span>
+                <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-space-sm">
+                    <x-application-logo class="h-9 w-9 shrink-0" />
+                    <span class="flex min-w-0 flex-col leading-tight">
+                        <span class="truncate font-label-md text-label-md text-primary sm:font-headline-sm sm:text-headline-sm">{{ config('app.name') }}</span>
                         <span class="font-caption text-caption text-on-surface-variant">{{ $area }}</span>
                     </span>
                 </a>
             </div>
 
-            <div class="flex items-center gap-space-sm">
+            <div class="flex shrink-0 items-center gap-space-xs sm:gap-space-sm">
                 {{ $headerActions ?? '' }}
 
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="flex items-center gap-space-sm rounded-xl px-space-sm py-1.5 hover:bg-surface-container-low">
+                        <button class="flex items-center gap-space-sm rounded-xl p-1 hover:bg-surface-container-low sm:px-space-sm sm:py-1.5">
                             <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed font-label-md text-label-md text-on-primary-fixed-variant">
                                 {{ str(Auth::user()->name)->substr(0, 1)->upper() }}
                             </span>
@@ -40,7 +40,7 @@
                                 <span class="font-label-md text-label-md text-on-surface">{{ Auth::user()->name }}</span>
                                 <span class="font-caption text-caption text-primary">{{ Auth::user()->role->label() }}</span>
                             </span>
-                            <span class="material-symbols-outlined text-[20px] text-on-surface-variant">expand_more</span>
+                            <span class="material-symbols-outlined hidden text-[20px] text-on-surface-variant sm:inline">expand_more</span>
                         </button>
                     </x-slot>
 

@@ -19,7 +19,7 @@
          })">
 
         {{-- Header & aksi cepat --}}
-        <div class="mb-space-lg flex flex-col justify-between gap-space-md rounded-xl bg-surface-container-lowest p-space-lg shadow-sm lg:flex-row lg:items-center">
+        <div class="mb-space-lg flex flex-col justify-between gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-sm sm:p-space-lg lg:flex-row lg:items-center">
             <div class="flex max-w-2xl flex-col">
                 <div class="mb-1.5 flex items-center gap-2">
                     <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-2.5 py-0.5 font-label-sm text-label-sm text-on-primary-fixed-variant">
@@ -32,7 +32,7 @@
                     Atur harga jual, persentase bagi hasil komisi afiliator, dan materi promosi untuk setiap produk.
                 </p>
             </div>
-            <div class="flex flex-wrap items-center gap-space-sm">
+            <div class="flex flex-wrap items-center gap-space-sm [&>*]:flex-1 [&>*]:justify-center [&>*]:whitespace-nowrap sm:[&>*]:flex-none">
                 <a href="{{ route('admin.payment-accounts.index') }}" class="flex items-center gap-2 rounded-lg bg-surface-container-low px-space-md py-2.5 font-label-md text-label-md text-on-surface transition-all hover:bg-surface-container">
                     <span class="material-symbols-outlined text-[18px]">account_balance</span> Atur Rekening (QRIS/Bank)
                 </a>
@@ -43,7 +43,7 @@
         </div>
 
         {{-- Statistik --}}
-        <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+        <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
             <x-stat-card label="Total Produk Aktif" icon="inventory_2" :value="$stats['active_products'].' Produk'" caption="Katalog digital tersedia">
                 <span class="flex items-center gap-1.5 text-secondary">
                     <span class="material-symbols-outlined text-[16px]">trending_up</span>
@@ -84,7 +84,7 @@
                 </div>
 
                 <div class="w-full overflow-x-auto">
-                    <table class="w-full border-collapse text-left">
+                    <table class="ledger w-full border-collapse text-left">
                         <thead>
                             <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                                 <th class="px-space-md py-3 font-semibold">Produk &amp; Penjualan</th>
@@ -99,9 +99,9 @@
                                     <td class="min-w-[240px] px-space-md py-3">
                                         <div class="flex items-center gap-3">
                                             @if ($product->thumbnail)
-                                                <img src="{{ asset('storage/'.$product->thumbnail) }}" alt="" class="h-11 w-11 shrink-0 rounded-lg object-cover">
+                                                <img src="{{ asset('storage/'.$product->thumbnail) }}" alt="" class="hidden h-11 w-11 shrink-0 rounded-lg object-cover sm:block">
                                             @else
-                                                <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-container-low text-primary">
+                                                <div class="hidden h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-container-low text-primary sm:flex">
                                                     <span class="material-symbols-outlined">{{ $categoryIcon($product->category) }}</span>
                                                 </div>
                                             @endif
@@ -112,7 +112,7 @@
                                                         <x-badge tone="neutral" :dot="false" class="!py-0">Nonaktif</x-badge>
                                                     @endunless
                                                 </div>
-                                                <span class="flex items-center gap-1 font-caption text-caption text-on-surface-variant">
+                                                <span class="flex flex-wrap items-center gap-x-1 font-caption text-caption text-on-surface-variant">
                                                     <span class="material-symbols-outlined text-[14px] text-primary">{{ $categoryIcon($product->category) }}</span>
                                                     {{ $product->category ?? 'Tanpa kategori' }}
                                                     · <span class="tabular">{{ $product->sold_count }} terjual ({{ rupiah($product->revenue) }})</span>
@@ -280,7 +280,7 @@
                 </a>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="ledger w-full border-collapse text-left">
                     <thead>
                         <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                             <th class="px-space-md py-3">Afiliator</th>

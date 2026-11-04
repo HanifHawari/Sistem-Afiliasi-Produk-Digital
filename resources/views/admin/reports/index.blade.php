@@ -25,8 +25,9 @@
         default => (string) $v,
     };
 
-    // Label sumbu X selektif: maksimal ±8 label supaya tidak bertabrakan
+    // Label sumbu X selektif supaya tidak bertabrakan: ±8 label di desktop, ±4 di HP
     $labelEvery = max(1, (int) ceil(count($points) / 8));
+    $labelEveryMobile = max(1, (int) ceil(count($points) / 4));
 
     $delta = function (int $now, int $before): ?float {
         return $before > 0 ? ($now - $before) / $before * 100 : null;
@@ -52,11 +53,12 @@
 
     {{-- Filter periode: satu baris di atas semua angka & grafik --}}
     <form method="GET" action="{{ route('admin.reports.index') }}" class="mb-space-lg flex flex-wrap items-center justify-between gap-space-sm rounded-xl bg-surface-container-low p-1.5">
-        <div class="flex flex-wrap items-center gap-1">
+        <div class="no-scrollbar flex w-full items-center gap-1 overflow-x-auto sm:w-auto sm:flex-wrap">
             @foreach ($presets as $key => $label)
                 <a href="{{ route('admin.reports.index', ['preset' => $key]) }}"
+                   @if ($preset === $key) x-data x-init="$el.parentElement.scrollLeft = $el.offsetLeft - 24" @endif
                    @class([
-                       'flex items-center gap-1.5 rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
+                       'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
                        'bg-surface-container-lowest font-semibold text-primary shadow-sm' => $preset === $key,
                        'text-on-surface-variant hover:text-on-surface' => $preset !== $key,
                    ])>
@@ -67,12 +69,12 @@
                 </a>
             @endforeach
         </div>
-        <div class="flex flex-wrap items-center gap-space-xs">
+        <div class="flex w-full items-center gap-space-xs sm:w-auto">
             <input type="date" name="start" value="{{ $start->toDateString() }}" aria-label="Tanggal mulai"
-                   class="rounded-lg border-0 bg-surface-container-lowest py-1.5 font-body-sm text-body-sm focus:ring-2 focus:ring-primary-container">
+                   class="min-w-0 flex-1 rounded-lg border-0 bg-surface-container-lowest py-1.5 font-body-sm text-body-sm focus:ring-2 focus:ring-primary-container">
             <span class="text-on-surface-variant">–</span>
             <input type="date" name="end" value="{{ $end->toDateString() }}" aria-label="Tanggal akhir"
-                   class="rounded-lg border-0 bg-surface-container-lowest py-1.5 font-body-sm text-body-sm focus:ring-2 focus:ring-primary-container">
+                   class="min-w-0 flex-1 rounded-lg border-0 bg-surface-container-lowest py-1.5 font-body-sm text-body-sm focus:ring-2 focus:ring-primary-container">
             <button @class([
                 'rounded-lg px-space-md py-1.5 font-label-md text-label-md shadow-sm',
                 'bg-primary-container text-on-primary' => $preset === 'custom',
@@ -82,7 +84,7 @@
     </form>
 
     {{-- KPI --}}
-    <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
         @foreach ([
             ['Omzet', 'payments', 'primary', rupiah($summary['revenue']), 'Rata-rata '.rupiah($summary['average']).' per order', $revenueDelta, 'text-on-surface'],
             ['Order Terverifikasi', 'receipt_long', 'tertiary', $summary['orders'].' order', 'Pembayaran yang disetujui admin', $ordersDelta, 'text-on-surface'],
@@ -167,9 +169,14 @@
                         {{-- Sumbu X --}}
                         <div class="relative mt-1.5 h-4">
                             @foreach ($points as $i => $point)
-                                @if ($i % $labelEvery === 0)
-                                    <span class="absolute -translate-x-1/2 whitespace-nowrap font-caption text-caption text-on-surface-variant"
-                                          style="left: {{ ($i + 0.5) / count($points) * 100 }}%">{{ $point['label'] }}</span>
+                                @php($desktop = $i % $labelEvery === 0)
+                                @php($mobile = $i % $labelEveryMobile === 0)
+                                @if ($desktop || $mobile)
+                                    <span @class([
+                                        'absolute -translate-x-1/2 whitespace-nowrap font-caption text-caption text-on-surface-variant',
+                                        'hidden sm:block' => $desktop && ! $mobile,
+                                        'sm:hidden' => $mobile && ! $desktop,
+                                    ]) style="left: {{ ($i + 0.5) / count($points) * 100 }}%">{{ $point['label'] }}</span>
                                 @endif
                             @endforeach
                         </div>
@@ -258,7 +265,7 @@
                 <p class="font-caption text-caption text-on-surface-variant">Diurutkan dari omzet terbesar</p>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="ledger w-full border-collapse text-left">
                     <thead>
                         <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                             <th class="px-space-md py-3">Produk</th>

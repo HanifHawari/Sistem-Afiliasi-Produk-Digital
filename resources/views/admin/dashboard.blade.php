@@ -17,7 +17,7 @@
     </x-page-header>
 
     {{-- Statistik --}}
-    <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
         <x-stat-card label="Penjualan Bulan Ini" icon="payments" :value="rupiah($stats['revenue_month'])"
             :caption="$stats['orders_month'].' pesanan berhasil'">
             <span class="flex items-center gap-1.5 text-on-surface-variant">
@@ -70,7 +70,7 @@
                 <a href="{{ route('admin.orders.index') }}" class="font-label-sm text-label-sm text-primary hover:underline">Lihat semua →</a>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="ledger w-full border-collapse text-left">
                     <thead>
                         <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                             <th class="px-4 py-3">Transaksi</th>

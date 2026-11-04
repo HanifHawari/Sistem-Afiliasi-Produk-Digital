@@ -34,7 +34,7 @@
     @endunless
 
     {{-- Statistik --}}
-    <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
         <x-stat-card label="Total Klik Link" icon="ads_click" :value="number_format($affiliate->referral_clicks_count, 0, ',', '.')"
             :caption="$affiliate->referral_links_count.' link produk dibuat'" />
         <x-stat-card label="Penjualan" icon="shopping_bag" tone="tertiary" :value="$affiliate->sales_count.' order'"
@@ -59,7 +59,7 @@
                     <p class="font-caption text-caption text-on-surface-variant">Link referral yang dibuat afiliator ini</p>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left">
+                    <table class="ledger w-full border-collapse text-left">
                         <thead>
                             <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                                 <th class="px-space-md py-3">Produk &amp; Kode</th>
@@ -98,7 +98,7 @@
                     <p class="font-caption text-caption text-on-surface-variant">10 komisi terakhir dari penjualan yang terverifikasi</p>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left">
+                    <table class="ledger w-full border-collapse text-left">
                         <thead>
                             <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                                 <th class="px-space-md py-3">Invoice &amp; Produk</th>

@@ -32,7 +32,7 @@
     </x-page-header>
 
     {{-- Statistik --}}
-    <div class="mb-space-lg grid grid-cols-1 gap-space-md sm:grid-cols-2 xl:grid-cols-4">
+    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
         <x-stat-card label="Volume Terverifikasi Hari Ini" icon="payments" :value="rupiah($stats['volume_today'])" caption="Total pembayaran disetujui hari ini" />
         <x-stat-card label="Menunggu Verifikasi" icon="pending_actions" tone="tertiary" :value="$stats['waiting_count'].' pesanan'">
             @if ($stats['waiting_oldest'])
@@ -52,11 +52,12 @@
 
     {{-- Tab status + pencarian --}}
     <div class="mb-space-lg flex flex-wrap items-center justify-between gap-space-sm rounded-xl bg-surface-container-low p-1.5">
-        <div class="flex flex-wrap items-center gap-1">
+        <div class="no-scrollbar flex w-full items-center gap-1 overflow-x-auto sm:w-auto sm:flex-wrap">
             @foreach ($tabs as $key => [$label, $total])
                 <a href="{{ route('admin.orders.index', array_filter(['status' => $key, 'q' => $search])) }}"
+                   @if ($status === $key) x-data x-init="$el.parentElement.scrollLeft = $el.offsetLeft - 24" @endif
                    @class([
-                       'flex items-center gap-1.5 rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
+                       'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
                        'bg-surface-container-lowest font-semibold text-primary shadow-sm' => $status === $key,
                        'text-on-surface-variant hover:text-on-surface' => $status !== $key,
                    ])>
@@ -84,7 +85,7 @@
         {{-- Tabel transaksi --}}
         <div class="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm xl:col-span-8">
             <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+                <table class="ledger w-full border-collapse text-left">
                     <thead>
                         <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
                             <th class="px-3 py-3">Transaksi &amp; Status</th>
@@ -196,7 +197,8 @@
                     $commissionAmount = $selected->referralLink ? ($selected->commission?->amount ?? (int) round($selected->amount * $rate / 100)) : 0;
                     $proofIsImage = $selected->payment_proof && in_array(strtolower(pathinfo($selected->payment_proof, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp', 'gif']);
                 @endphp
-                <div class="flex flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-md" x-data="{ rejecting: {{ $errors->has('rejection_note') ? 'true' : 'false' }} }">
+                <div id="inspeksi" class="flex scroll-mt-20 flex-col gap-space-md rounded-xl bg-surface-container-lowest p-space-md shadow-md" x-init="if (new URLSearchParams(location.search).has('order') && innerWidth < 1280) $el.scrollIntoView()"
+                     x-data="{ rejecting: {{ $errors->has('rejection_note') ? 'true' : 'false' }} }">
                     <div class="flex items-center justify-between gap-2">
                         <div class="flex min-w-0 items-center gap-2">
                             <span @class(['h-2.5 w-2.5 shrink-0 rounded-full', 'bg-tertiary' => $canVerify, 'bg-secondary' => $selected->isPaid(), 'bg-error' => $selected->status === OrderStatus::Rejected])></span>
