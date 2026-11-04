@@ -100,12 +100,6 @@
             </table>
         </div>
 
-        <div class="flex items-center justify-between border-t border-slate-100 px-5 py-4 sm:px-7">
-            <span class="text-sm text-slate-500">{{ $affiliates->firstItem() ?? 0 }}-{{ $affiliates->lastItem() ?? 0 }} dari {{ $affiliates->total() }} afiliator</span>
-            <div class="flex items-center gap-2">
-                <a href="{{ $affiliates->previousPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => $affiliates->onFirstPage()])>Sebelumnya</a>
-                <a href="{{ $affiliates->nextPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => ! $affiliates->hasMorePages()])>Berikutnya</a>
-            </div>
-        </div>
+        <x-pager :paginator="$affiliates" noun="afiliator" />
     </section>
 </x-layouts.admin>

@@ -163,7 +163,7 @@
                                 <p class="tabular shrink-0 font-semibold text-blue-600">{{ rupiah($withdrawal->amount) }}</p>
                             </div>
                             <div class="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
-                                <span class="pill-amber">Menunggu Transfer</span>
+                                <span class="pill-amber">Menunggu Persetujuan</span>
                                 <form method="POST" action="{{ route('admin.withdrawals.approve', $withdrawal) }}">
                                     @csrf
                                     <button class="btn-primary btn-sm">Setujui</button>

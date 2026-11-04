@@ -91,13 +91,7 @@
                 </table>
             </div>
 
-            <div class="flex items-center justify-between border-t border-slate-100 px-5 py-4 sm:px-7">
-                <span class="text-sm text-slate-500">{{ $withdrawals->firstItem() ?? 0 }}-{{ $withdrawals->lastItem() ?? 0 }} dari {{ $withdrawals->total() }} pengajuan</span>
-                <div class="flex items-center gap-2">
-                    <a href="{{ $withdrawals->previousPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => $withdrawals->onFirstPage()])>Sebelumnya</a>
-                    <a href="{{ $withdrawals->nextPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => ! $withdrawals->hasMorePages()])>Berikutnya</a>
-                </div>
-            </div>
+            <x-pager :paginator="$withdrawals" noun="pengajuan" />
         </section>
 
         {{-- Panel inspeksi --}}
@@ -129,7 +123,10 @@
                                     <p class="text-[13px] text-slate-400">a.n. {{ $selected->account_holder }}</p>
                                 </div>
                                 <button type="button" class="btn-soft"
-                                        @click="navigator.clipboard.writeText(@js($selected->account_number)); copied = true; setTimeout(() => copied = false, 1500)"
+                                        @click="navigator.clipboard?.writeText(@js($selected->account_number))
+                                            .then(() => { copied = true; setTimeout(() => copied = false, 1500) })
+                                            .catch(() => prompt('Salin nomor rekening:', @js($selected->account_number)))
+                                            ?? prompt('Salin nomor rekening:', @js($selected->account_number))"
                                         x-text="copied ? 'Tersalin' : 'Salin'"></button>
                             </div>
                         </div>

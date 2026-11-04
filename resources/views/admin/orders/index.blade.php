@@ -115,13 +115,7 @@
                 </table>
             </div>
 
-            <div class="flex items-center justify-between border-t border-slate-100 px-5 py-4 sm:px-7">
-                <span class="text-sm text-slate-500">{{ $orders->firstItem() ?? 0 }}-{{ $orders->lastItem() ?? 0 }} dari {{ $orders->total() }} transaksi</span>
-                <div class="flex items-center gap-2">
-                    <a href="{{ $orders->previousPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => $orders->onFirstPage()])>Sebelumnya</a>
-                    <a href="{{ $orders->nextPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => ! $orders->hasMorePages()])>Berikutnya</a>
-                </div>
-            </div>
+            <x-pager :paginator="$orders" noun="transaksi" />
         </section>
 
         {{-- Panel inspeksi --}}

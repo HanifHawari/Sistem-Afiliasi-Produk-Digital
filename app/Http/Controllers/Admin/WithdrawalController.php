@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\CommissionStatus;
 use App\Enums\WithdrawalStatus;
+use App\Http\Controllers\Admin\Concerns\ServesProofFiles;
 use App\Http\Controllers\Controller;
 use App\Models\Withdrawal;
 use App\Services\Commission\CommissionService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -21,6 +21,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class WithdrawalController extends Controller
 {
+    use ServesProofFiles;
+
     private const RELATIONS = ['affiliate', 'processor'];
 
     public function index(Request $request, CommissionService $commissions): View
@@ -30,7 +32,7 @@ class WithdrawalController extends Controller
         if (! in_array($status, ['all', ...array_column(WithdrawalStatus::cases(), 'value')], true)) {
             $status = WithdrawalStatus::Pending->value;
         }
-        $search = mb_substr(trim((string) $request->query('q', '')), 0, 100);
+        $search = mb_substr(trim(is_string($q = $request->query('q')) ? $q : ''), 0, 100);
         $selectedId = filter_var($request->query('withdrawal'), FILTER_VALIDATE_INT) ?: null;
 
         $withdrawals = Withdrawal::with(self::RELATIONS)
@@ -153,8 +155,6 @@ class WithdrawalController extends Controller
      */
     public function proof(Withdrawal $withdrawal): StreamedResponse
     {
-        abort_unless($withdrawal->transfer_proof && Storage::disk('local')->exists($withdrawal->transfer_proof), 404);
-
-        return Storage::disk('local')->response($withdrawal->transfer_proof);
+        return $this->proofResponse($withdrawal->transfer_proof);
     }
 }

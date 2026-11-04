@@ -44,7 +44,7 @@
                         <h2 class="card-title">Daftar Produk</h2>
                         <p class="card-subtitle">Harga jual dan bagi hasil per produk</p>
                     </div>
-                    <form method="GET" action="{{ route('admin.products.index') }}" class="search lg:w-60">
+                    <form method="GET" action="{{ route('admin.products.index') }}" class="search w-full lg:w-60">
                         <span class="material-symbols-outlined">search</span>
                         <input name="q" value="{{ $search }}" type="text" placeholder="Cari nama produk...">
                     </form>
@@ -107,20 +107,7 @@
                     </table>
                 </div>
 
-                <div class="flex items-center justify-between border-t border-slate-100 px-5 py-4 sm:px-7">
-                    <span class="text-sm text-slate-500">{{ $products->count() }} dari {{ $products->total() }} produk</span>
-                    @if ($products->hasPages())
-                        <div class="flex items-center gap-1">
-                            @foreach ($products->getUrlRange(1, $products->lastPage()) as $page => $url)
-                                <a href="{{ $url }}" @class([
-                                    'flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-2 text-sm font-semibold',
-                                    'bg-blue-600 text-white' => $page === $products->currentPage(),
-                                    'text-slate-500 hover:bg-slate-100' => $page !== $products->currentPage(),
-                                ])>{{ $page }}</a>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
+                <x-pager :paginator="$products" noun="produk" />
             </section>
 
             <div class="flex flex-col gap-6 2xl:col-span-4">

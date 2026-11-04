@@ -46,9 +46,10 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Produk terlaris bulan ini
+        // Produk terlaris bulan ini (hanya yang sudah terjual)
         $paidMonth = fn ($q) => $q->where('status', OrderStatus::Paid)->where('verified_at', '>=', $monthStart);
         $topProducts = Product::query()
+            ->whereHas('orders', $paidMonth)
             ->withCount(['orders as sold_count' => $paidMonth])
             ->withSum(['orders as revenue' => $paidMonth], 'amount')
             ->orderByDesc('sold_count')

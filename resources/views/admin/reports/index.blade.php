@@ -7,15 +7,15 @@
         if ($max <= 0) {
             return 25000;
         }
-        $raw = $max / 4;
+        $raw = max(1, $max / 4);
         $magnitude = 10 ** floor(log10($raw));
         foreach ([1, 2, 5, 10] as $m) {
             if ($raw <= $m * $magnitude) {
-                return (int) ($m * $magnitude);
+                return max(1, (int) ($m * $magnitude));
             }
         }
 
-        return (int) (10 * $magnitude);
+        return max(1, (int) (10 * $magnitude));
     };
     $step = $niceStep($maxRevenue);
     $axisMax = $step * 4;

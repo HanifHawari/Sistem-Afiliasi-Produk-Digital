@@ -136,7 +136,34 @@ class OrderVerificationTest extends TestCase
         $order = $this->makeOrder();
         $order->update(['payment_proof' => UploadedFile::fake()->image('bukti.png')->store('payment-proofs', 'local')]);
 
-        $this->actingAs($this->admin)->get(route('admin.orders.proof', $order))->assertOk();
+        $this->actingAs($this->admin)->get(route('admin.orders.proof', $order))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'image/png')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
         $this->actingAs($order->customer)->get(route('admin.orders.proof', $order))->assertForbidden();
+    }
+
+    public function test_disguised_html_proof_is_downloaded_not_rendered(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('payment-proofs/bukti.png', '<html><script>alert(1)</script></html>');
+        $order = $this->makeOrder();
+        $order->update(['payment_proof' => 'payment-proofs/bukti.png']);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.orders.proof', $order))->assertOk();
+
+        $this->assertSame('application/octet-stream', $response->headers->get('Content-Type'));
+        $this->assertStringStartsWith('attachment', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_dashboard_top_products_only_lists_products_sold_this_month(): void
+    {
+        Product::create(['name' => 'Produk Belum Laku', 'slug' => 'belum-laku', 'price' => 50000, 'commission_rate' => 10]);
+        $order = $this->makeOrder();
+        $order->update(['status' => OrderStatus::Paid, 'verified_at' => now()]);
+
+        $this->actingAs($this->admin)->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertViewHas('topProducts', fn ($products) => $products->pluck('name')->all() === ['Ebook Uji']);
     }
 }
