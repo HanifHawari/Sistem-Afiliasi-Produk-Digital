@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -26,13 +25,13 @@ class OrderController extends Controller
 
     public function index(Request $request): View
     {
-        $filters = $request->validate([
-            'status' => ['nullable', Rule::in(['all', ...array_column(OrderStatus::cases(), 'value')])],
-            'q' => ['nullable', 'string', 'max:100'],
-            'order' => ['nullable', 'integer'],
-        ]);
-        $status = $filters['status'] ?? OrderStatus::WaitingVerification->value;
-        $search = trim($filters['q'] ?? '');
+        // Nilai filter yang tidak valid diabaikan (tidak redirect, supaya tidak berputar-putar)
+        $status = $request->query('status');
+        if (! in_array($status, ['all', ...array_column(OrderStatus::cases(), 'value')], true)) {
+            $status = OrderStatus::WaitingVerification->value;
+        }
+        $search = mb_substr(trim((string) $request->query('q', '')), 0, 100);
+        $selectedId = filter_var($request->query('order'), FILTER_VALIDATE_INT) ?: null;
 
         $orders = Order::with(self::RELATIONS)
             ->when($status !== 'all', fn (Builder $q) => $q->where('status', $status))
@@ -47,8 +46,8 @@ class OrderController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $selected = isset($filters['order'])
-            ? Order::with(self::RELATIONS)->find($filters['order'])
+        $selected = $selectedId
+            ? Order::with(self::RELATIONS)->find($selectedId)
             : $orders->first();
 
         $counts = Order::query()

@@ -250,8 +250,9 @@
                             <input id="transfer_proof" name="transfer_proof" type="file" accept="image/*,.pdf" required
                                    class="w-full font-body-sm text-body-sm text-on-surface-variant file:mr-2 file:rounded-lg file:border-0 file:bg-secondary-fixed file:px-3 file:py-1.5 file:font-label-sm file:text-on-secondary-fixed">
                             <x-input-error :messages="$errors->get('transfer_proof')" />
-                            <input name="note" type="text" value="{{ old('note') }}" placeholder="Catatan (opsional), mis. no. referensi transfer"
+                            <input name="transfer_note" type="text" value="{{ old('transfer_note') }}" placeholder="Catatan (opsional), mis. no. referensi transfer"
                                    class="w-full rounded-lg border-0 bg-surface-container-lowest font-body-sm text-body-sm focus:ring-2 focus:ring-secondary">
+                            <x-input-error :messages="$errors->get('transfer_note')" />
                             <button class="flex w-full items-center justify-center gap-2 rounded-xl bg-secondary px-space-md py-3 font-label-md text-label-md text-on-secondary shadow-md transition-all hover:bg-secondary/90 active:scale-[0.99]">
                                 <span class="material-symbols-outlined text-[20px]">done_all</span>
                                 Tandai Sudah Ditransfer

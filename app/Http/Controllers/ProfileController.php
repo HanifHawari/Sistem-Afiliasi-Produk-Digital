@@ -48,6 +48,12 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        if (! $user->canDeleteAccount()) {
+            return back()->withErrors([
+                'password' => 'Akun ini tidak bisa dihapus karena sudah punya riwayat transaksi atau berperan sebagai admin.',
+            ], 'userDeletion');
+        }
+
         Auth::logout();
 
         $user->delete();

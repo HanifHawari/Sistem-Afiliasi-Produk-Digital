@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -26,13 +25,13 @@ class WithdrawalController extends Controller
 
     public function index(Request $request, CommissionService $commissions): View
     {
-        $filters = $request->validate([
-            'status' => ['nullable', Rule::in(['all', ...array_column(WithdrawalStatus::cases(), 'value')])],
-            'q' => ['nullable', 'string', 'max:100'],
-            'withdrawal' => ['nullable', 'integer'],
-        ]);
-        $status = $filters['status'] ?? WithdrawalStatus::Pending->value;
-        $search = trim($filters['q'] ?? '');
+        // Nilai filter yang tidak valid diabaikan (tidak redirect, supaya tidak berputar-putar)
+        $status = $request->query('status');
+        if (! in_array($status, ['all', ...array_column(WithdrawalStatus::cases(), 'value')], true)) {
+            $status = WithdrawalStatus::Pending->value;
+        }
+        $search = mb_substr(trim((string) $request->query('q', '')), 0, 100);
+        $selectedId = filter_var($request->query('withdrawal'), FILTER_VALIDATE_INT) ?: null;
 
         $withdrawals = Withdrawal::with(self::RELATIONS)
             ->when($status !== 'all', fn (Builder $q) => $q->where('status', $status))
@@ -47,8 +46,8 @@ class WithdrawalController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $selected = isset($filters['withdrawal'])
-            ? Withdrawal::with(self::RELATIONS)->find($filters['withdrawal'])
+        $selected = $selectedId
+            ? Withdrawal::with(self::RELATIONS)->find($selectedId)
             : $withdrawals->first();
 
         // Ringkasan saldo afiliator untuk pengajuan yang sedang diperiksa
@@ -107,8 +106,8 @@ class WithdrawalController extends Controller
     {
         $data = $request->validate([
             'transfer_proof' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'],
-            'note' => ['nullable', 'string', 'max:500'],
-        ], [], ['transfer_proof' => 'bukti transfer', 'note' => 'catatan']);
+            'transfer_note' => ['nullable', 'string', 'max:500'],
+        ], [], ['transfer_proof' => 'bukti transfer', 'transfer_note' => 'catatan']);
 
         if ($withdrawal->status !== WithdrawalStatus::Approved) {
             return back()->with('error', 'Hanya pengajuan yang sudah disetujui yang bisa ditandai lunas.');
@@ -117,7 +116,7 @@ class WithdrawalController extends Controller
         $withdrawal->update([
             'status' => WithdrawalStatus::Paid,
             'transfer_proof' => $request->file('transfer_proof')->store('withdrawal-proofs', 'local'),
-            'note' => $data['note'] ?? $withdrawal->note,
+            'note' => $data['transfer_note'] ?? $withdrawal->note,
             'processed_by' => $request->user()->id,
             'processed_at' => now(),
         ]);

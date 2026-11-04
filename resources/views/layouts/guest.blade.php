@@ -3,15 +3,14 @@
     <head>
         @include('partials.head')
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-surface">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
+        <div class="flex min-h-screen flex-col items-center px-space-md pt-space-2xl sm:justify-center sm:pt-0">
+            <a href="{{ route('shop.home') }}" class="flex items-center gap-space-sm">
+                <x-application-logo class="h-11 w-11" />
+                <span class="font-headline-md text-headline-md text-primary">{{ config('app.name') }}</span>
+            </a>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+            <div class="mt-space-lg w-full overflow-hidden rounded-xl bg-surface-container-lowest p-space-lg shadow-sm sm:max-w-md">
                 {{ $slot }}
             </div>
         </div>

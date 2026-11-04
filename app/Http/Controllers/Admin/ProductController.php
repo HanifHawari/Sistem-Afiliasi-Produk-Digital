@@ -100,7 +100,7 @@ class ProductController extends Controller
 
         return back()
             ->with('status', 'Produk diperbarui')
-            ->with('status_detail', "Harga & komisi baru berlaku untuk transaksi berikutnya.");
+            ->with('status_detail', 'Harga & komisi baru berlaku untuk transaksi berikutnya.');
     }
 
     public function toggle(Product $product): RedirectResponse

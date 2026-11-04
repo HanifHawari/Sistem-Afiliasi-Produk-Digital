@@ -1,29 +1,26 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Profile') }}
-        </h2>
-    </x-slot>
+{{-- Halaman profil memakai layout sesuai role (admin / afiliator / toko) --}}
+<x-dynamic-component :component="'layouts.'.Auth::user()->layoutArea()" title="Profil">
+    <x-page-header eyebrow="Akun" title="Profil Saya" description="Kelola nama, email, dan password akun Anda." />
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-profile-information-form')
-                </div>
+    <div class="flex max-w-3xl flex-col gap-space-lg">
+        <div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+            <div class="max-w-xl">
+                @include('profile.partials.update-profile-information-form')
             </div>
+        </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
-                <div class="max-w-xl">
-                    @include('profile.partials.update-password-form')
-                </div>
+        <div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
+            <div class="max-w-xl">
+                @include('profile.partials.update-password-form')
             </div>
+        </div>
 
-            <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
+        @if (Auth::user()->canDeleteAccount())
+            <div class="rounded-xl bg-surface-container-lowest p-space-lg shadow-sm">
                 <div class="max-w-xl">
                     @include('profile.partials.delete-user-form')
                 </div>
             </div>
-        </div>
+        @endif
     </div>
-</x-app-layout>
+</x-dynamic-component>

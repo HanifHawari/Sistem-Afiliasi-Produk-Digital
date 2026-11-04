@@ -14,6 +14,7 @@
     <div x-data="productPage({
             storeUrl: @js(route('admin.products.store')),
             updateUrl: @js(route('admin.products.update', '__ID__')),
+            downloadUrl: @js(route('admin.products.download', '__ID__')),
             old: @js($oldForm),
          })">
 
@@ -335,6 +336,7 @@
                 @csrf
                 <input type="hidden" name="_form" value="product">
                 <input type="hidden" name="_product_id" :value="form._product_id">
+                <input type="hidden" name="_has_file" :value="form.has_file ? 1 : 0">
                 <template x-if="mode === 'edit'"><input type="hidden" name="_method" value="PUT"></template>
 
                 <div class="flex items-center justify-between">
@@ -420,19 +422,32 @@
                     </label>
                 </div>
 
-                <div class="flex items-center justify-between gap-2 pt-2">
-                    <template x-if="mode === 'edit' && form.has_file">
-                        <a :href="@js(route('admin.products.download', '__ID__')).replace('__ID__', form._product_id)" class="flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline">
-                            <span class="material-symbols-outlined text-[16px]">download</span> Unduh file saat ini
-                        </a>
-                    </template>
-                    <span x-show="!(mode === 'edit' && form.has_file)"></span>
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+                    <div class="flex items-center gap-space-md">
+                        <template x-if="mode === 'edit'">
+                            <button type="submit" form="delete-product-form" class="flex items-center gap-1 font-label-sm text-label-sm text-error hover:underline"
+                                    onclick="return confirm('Hapus produk ini? Produk yang sudah punya transaksi tidak bisa dihapus, nonaktifkan saja.')">
+                                <span class="material-symbols-outlined text-[16px]">delete</span> Hapus
+                            </button>
+                        </template>
+                        <template x-if="mode === 'edit' && form.has_file">
+                            <a :href="config.downloadUrl.replace('__ID__', form._product_id)" class="flex items-center gap-1 font-label-sm text-label-sm text-primary hover:underline">
+                                <span class="material-symbols-outlined text-[16px]">download</span> Unduh file
+                            </a>
+                        </template>
+                    </div>
                     <div class="flex items-center gap-2">
                         <button type="button" @click="$dispatch('close-modal', 'product-form')" class="rounded-lg bg-surface-container-low px-4 py-2 font-label-md text-label-md text-on-surface-variant hover:bg-surface-container">Batal</button>
                         <button class="rounded-lg bg-primary px-4 py-2 font-label-md text-label-md text-on-primary shadow-sm hover:opacity-95"
                                 x-text="mode === 'edit' ? 'Simpan Perubahan' : 'Terbitkan Produk'"></button>
                     </div>
                 </div>
+            </form>
+
+            {{-- Form hapus terpisah (form tidak boleh bersarang), dipicu tombol "Hapus" di atas --}}
+            <form id="delete-product-form" method="POST" :action="config.updateUrl.replace('__ID__', form._product_id)" class="hidden">
+                @csrf
+                @method('DELETE')
             </form>
         </x-modal>
     </div>
@@ -443,8 +458,9 @@
             const old = config.old;
 
             return {
+                config,
                 mode: old && old._product_id ? 'edit' : 'create',
-                form: old ? { ...blank, ...old, is_active: old.is_active === '1' } : { ...blank },
+                form: old ? { ...blank, ...old, is_active: old.is_active === '1', has_file: old._has_file === '1' } : { ...blank },
                 sim: { price: 100000, rate: 40 },
 
                 get action() {

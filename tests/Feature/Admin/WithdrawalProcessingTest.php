@@ -78,11 +78,12 @@ class WithdrawalProcessingTest extends TestCase
 
         $this->actingAs($this->admin)->post(route('admin.withdrawals.pay', $withdrawal), [
             'transfer_proof' => UploadedFile::fake()->image('bukti.jpg'),
-            'note' => 'Ref 123',
+            'transfer_note' => 'Ref 123',
         ])->assertSessionHas('status');
 
         $withdrawal->refresh();
         $this->assertSame(WithdrawalStatus::Paid, $withdrawal->status);
+        $this->assertSame('Ref 123', $withdrawal->note);
         $this->assertSame($this->admin->id, $withdrawal->processed_by);
         Storage::disk('local')->assertExists($withdrawal->transfer_proof);
 
