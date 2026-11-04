@@ -6,7 +6,7 @@
     <body class="bg-surface font-body-md text-body-md text-on-surface antialiased">
         <div class="flex min-h-screen flex-col items-center px-space-md pt-space-2xl sm:justify-center sm:pt-0">
             <a href="{{ route('shop.home') }}" class="flex items-center gap-space-sm">
-                <x-application-logo class="h-11 w-11" />
+                <x-application-logo class="h-11 w-11 text-lg" />
                 <span class="font-headline-md text-headline-md text-primary">{{ config('app.name') }}</span>
             </a>
 
