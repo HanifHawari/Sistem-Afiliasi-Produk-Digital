@@ -1,13 +1,14 @@
 # Rencana Kerangka Project
 
 Branch: `feature/setup-project` (PIC: Muhammad Hanif Hawari)
-Setelah selesai, branch ini di-merge ke `develop`, lalu semua anggota menjalankan `git merge origin/develop` di branch fitur masing-masing.
+Status: **kerangka selesai dibuat** (Laravel 13, Breeze, migration, model, role, layout, seeder). Cara instalasi ada di README.
+Setelah di-merge ke `develop`, semua anggota menjalankan `git merge origin/develop` di branch fitur masing-masing, lalu langkah instalasi di README.
 
 ## 1. Tech Stack
 
 | Bagian | Pilihan |
 |---|---|
-| Framework | Laravel (versi stabil terbaru) + Blade |
+| Framework | Laravel 13 + Blade |
 | Tampilan | Tailwind CSS (via Vite), mengikuti design system di `design/stitch/semua_design-system/DESIGN.md` |
 | Font & ikon | Plus Jakarta Sans, Material Symbols Outlined |
 | Database | MySQL (bawaan Laragon) |
@@ -45,7 +46,7 @@ Semua nominal uang disimpan dalam Rupiah sebagai bilangan bulat (`bigint`), tanp
 |---|---|
 | `users` | name, email, password, phone, `role` (admin / affiliate / customer), `is_active` |
 | `affiliate_profiles` | user_id, bank_name, account_number, account_holder |
-| `products` | name, slug, description, price, `commission_rate` (persen, mis. 40.00), thumbnail, file_path, is_active |
+| `products` | name, slug, category, description, price, `commission_rate` (persen, mis. 40.00), thumbnail, file_path, is_active |
 | `promo_materials` | product_id, title, type (image / video / text), file_path, caption |
 | `payment_accounts` | type (qris / bank), bank_name, account_number, account_holder, qris_image, is_active |
 | `referral_links` | affiliate_id, product_id, `code` (unik) |

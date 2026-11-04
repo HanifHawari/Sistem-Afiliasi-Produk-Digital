@@ -1,0 +1,124 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Enums\OrderStatus;
+use App\Enums\PaymentAccountType;
+use App\Enums\PaymentMethod;
+use App\Enums\PromoMaterialType;
+use App\Models\Order;
+use App\Models\PaymentAccount;
+use App\Models\Product;
+use App\Models\User;
+use App\Services\Commission\CommissionService;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+
+/**
+ * Data contoh untuk development. Semua akun memakai password: password
+ *
+ *   admin@afiliasi.test      -> Admin
+ *   afiliator@afiliasi.test  -> Afiliator (Budi Santoso)
+ *   customer@afiliasi.test   -> Customer
+ */
+class DatabaseSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        $admin = User::factory()->admin()->create([
+            'name' => 'Admin Afiliasi',
+            'email' => 'admin@afiliasi.test',
+        ]);
+
+        $affiliate = User::factory()->affiliate()->create([
+            'name' => 'Budi Santoso',
+            'email' => 'afiliator@afiliasi.test',
+            'phone' => '081234567890',
+        ]);
+        $affiliate->affiliateProfile()->create([
+            'bank_name' => 'BCA',
+            'account_number' => '1234567890',
+            'account_holder' => 'Budi Santoso',
+        ]);
+
+        $customer = User::factory()->customer()->create([
+            'name' => 'Rian Firmansyah',
+            'email' => 'customer@afiliasi.test',
+            'phone' => '081288231194',
+        ]);
+
+        // Produk contoh, diambil dari desain Stitch
+        $products = collect([
+            ['Mastering TikTok Organic & Affiliate 2025', 'E-Course', 150000, 40],
+            ['Template Notion All-in-One Freelancer OS', 'Template Notion', 99000, 50],
+            ['Formula 100 Juta Pertama Bisnis Digital', 'Ebook', 75000, 40],
+            ['Preset Lightroom & CapCut Cinematic Pack', 'Creative Assets', 120000, 35],
+        ])->map(fn ($p) => Product::create([
+            'name' => $p[0],
+            'slug' => Str::slug($p[0]),
+            'category' => $p[1],
+            'description' => 'Deskripsi contoh untuk '.$p[0].'.',
+            'price' => $p[2],
+            'commission_rate' => $p[3],
+        ]));
+
+        $products->first()->promoMaterials()->create([
+            'title' => 'Caption TikTok',
+            'type' => PromoMaterialType::Text,
+            'caption' => 'Mau FYP tanpa iklan? Pelajari strateginya di sini 👇',
+        ]);
+
+        $qris = PaymentAccount::create([
+            'type' => PaymentAccountType::Qris,
+            'account_holder' => 'Afiliasi Produk Digital',
+        ]);
+        $bca = PaymentAccount::create([
+            'type' => PaymentAccountType::Bank,
+            'bank_name' => 'BCA',
+            'account_number' => '8091129900',
+            'account_holder' => 'PT Afiliasi Produk Digital',
+        ]);
+
+        // Link referral Budi untuk semua produk
+        $links = $products->mapWithKeys(fn (Product $product) => [
+            $product->id => $affiliate->referralLinks()->create([
+                'product_id' => $product->id,
+                'code' => 'BUDI'.$product->id,
+            ]),
+        ]);
+
+        // Order contoh dengan berbagai status, supaya halaman admin bisa langsung diuji
+        $orders = [
+            [$products[0], $links[$products[0]->id], PaymentMethod::BankTransfer, $bca, OrderStatus::WaitingVerification],
+            [$products[1], $links[$products[1]->id], PaymentMethod::Qris, $qris, OrderStatus::Paid],
+            [$products[2], null, PaymentMethod::BankTransfer, $bca, OrderStatus::Pending],
+            [$products[3], $links[$products[3]->id], PaymentMethod::Qris, $qris, OrderStatus::Rejected],
+        ];
+
+        foreach ($orders as $i => [$product, $link, $method, $account, $status]) {
+            $order = Order::create([
+                'invoice_number' => 'INV-'.now()->format('Ymd').'-'.str_pad($i + 1, 4, '0', STR_PAD_LEFT),
+                'customer_id' => $customer->id,
+                'product_id' => $product->id,
+                'referral_link_id' => $link?->id,
+                'amount' => $product->price,
+                'payment_method' => $method,
+                'payment_account_id' => $account->id,
+                'status' => $status,
+                'verified_by' => in_array($status, [OrderStatus::Paid, OrderStatus::Rejected]) ? $admin->id : null,
+                'verified_at' => in_array($status, [OrderStatus::Paid, OrderStatus::Rejected]) ? now() : null,
+                'rejection_note' => $status === OrderStatus::Rejected ? 'Nominal transfer tidak sesuai.' : null,
+            ]);
+
+            if ($order->isPaid()) {
+                app(CommissionService::class)->createForOrder($order);
+            }
+        }
+    }
+}
