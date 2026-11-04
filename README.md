@@ -73,7 +73,10 @@ Reset database ke data contoh: `php artisan migrate:fresh --seed`
 **File bersama** (kabari tim dulu sebelum mengubah): `app/Models/`, `app/Enums/`, `database/migrations/`,
 `resources/views/components/`, `tailwind.config.js`, `bootstrap/app.php`.
 
-Komponen siap pakai: `<x-page-header>`, `<x-stat-card>`, `<x-badge>`, helper `rupiah(150000)` → `Rp 150.000`.
+Komponen siap pakai: `<x-page-header>`, `<x-stat-grid>` + `<x-stat-card>` (kartu statistik biru, jadi carousel di HP),
+`<x-filter-menu>` (tab status, jadi tombol menu di HP), `<x-pager>` (navigasi "1-5 dari N" di bawah tabel), `<x-badge>`,
+dan class CSS `.card`, `.btn-primary`, `.btn-outline`, `.data-table`, `.pill-*` di `resources/css/app.css`.
+Helper `rupiah(150000)` → `Rp 150.000`.
 
 Rencana lengkap & struktur database: [docs/RENCANA-KERANGKA.md](docs/RENCANA-KERANGKA.md).
 Acuan desain: [design/stitch/](design/stitch/).

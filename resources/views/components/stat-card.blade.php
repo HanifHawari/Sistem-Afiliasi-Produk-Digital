@@ -1,13 +1,4 @@
-@props([
-    'label',
-    'value',
-    'caption' => null,
-    // Prop lama tetap diterima supaya pemanggil lama tidak error, tapi tidak ditampilkan lagi
-    'icon' => null,
-    'tone' => null,
-    'highlight' => false,
-    'valueClass' => null,
-])
+@props(['label', 'value', 'caption' => null])
 
 {{--
     Kartu statistik biru: LABEL kapital, angka besar, keterangan, lalu garis & baris bawah (slot).

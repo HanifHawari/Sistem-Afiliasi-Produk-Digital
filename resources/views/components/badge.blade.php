@@ -1,4 +1,4 @@
-@props(['tone' => 'neutral', 'dot' => false, 'pulse' => false])
+@props(['tone' => 'neutral'])
 
 {{--
     Badge status. tone: success | warning | danger | info | neutral
@@ -14,9 +14,4 @@
     ][$tone] ?? 'pill-gray';
 @endphp
 
-<span {{ $attributes->class($class) }}>
-    @if ($dot)
-        <span @class(['h-1.5 w-1.5 rounded-full bg-current', 'animate-pulse' => $pulse])></span>
-    @endif
-    {{ $slot }}
-</span>
+<span {{ $attributes->class($class) }}>{{ $slot }}</span>
