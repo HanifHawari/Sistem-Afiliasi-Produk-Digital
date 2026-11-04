@@ -43,7 +43,7 @@ class OrderController extends Controller
                     ->orWhereHas('referralLink', fn (Builder $r) => $r->where('code', 'like', "%{$search}%"));
             }))
             ->latest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         $selected = $selectedId

@@ -43,7 +43,7 @@ class WithdrawalController extends Controller
                         ->orWhere('email', 'like', "%{$search}%"));
             }))
             ->oldest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         $selected = $selectedId

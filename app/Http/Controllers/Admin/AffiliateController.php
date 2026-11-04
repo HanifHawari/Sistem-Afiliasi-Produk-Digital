@@ -44,7 +44,7 @@ class AffiliateController extends Controller
             ->when($sort === 'commission', fn (Builder $q) => $q->orderByDesc('earned'))
             ->when($sort === 'clicks', fn (Builder $q) => $q->orderByDesc('referral_clicks_count'))
             ->latest()
-            ->paginate(10)
+            ->paginate(5)
             ->withQueryString();
 
         $base = User::where('role', UserRole::Affiliate);

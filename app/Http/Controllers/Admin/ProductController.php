@@ -34,7 +34,7 @@ class ProductController extends Controller
             ->withCount('promoMaterials')
             ->when($search !== '', fn (Builder $q) => $q->where('name', 'like', "%{$search}%"))
             ->latest()
-            ->paginate(8)
+            ->paginate(5)
             ->withQueryString();
 
         $pendingWithdrawals = Withdrawal::with('affiliate')
