@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout title="Konfirmasi Password">
     <div class="mb-4 text-sm text-on-surface-variant">
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>

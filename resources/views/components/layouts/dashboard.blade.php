@@ -88,10 +88,11 @@
     </aside>
 
     {{-- Konten --}}
-    <main class="min-h-screen px-4 pb-12 pt-[calc(4rem+1.5rem)] sm:px-6 lg:ml-72 lg:px-10 lg:pt-[calc(5rem+2.5rem)] 2xl:ml-80">
+    <main data-door-content class="min-h-screen px-4 pb-12 pt-[calc(4rem+1.5rem)] sm:px-6 lg:ml-72 lg:px-10 lg:pt-[calc(5rem+2.5rem)] 2xl:ml-80">
         {{ $slot }}
     </main>
 
     <x-toast />
+    @include('partials.page-door')
 </body>
 </html>

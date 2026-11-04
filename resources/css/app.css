@@ -178,3 +178,280 @@
         }
     }
 }
+
+/* =====================================================================
+   Halaman login / daftar & transisi "pintu"
+   ===================================================================== */
+
+/* Pola ikon samar di latar biru: kotak produk, grafik, koin, tautan */
+.auth-pattern {
+    position: absolute;
+    inset: -50%;
+    opacity: 0.13;
+    transform: rotate(-10deg);
+    background-size: 150px 150px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='none' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M30 14 46 22.5v17L30 48 14 39.5v-17zM14 22.5 30 31l16-8.5M30 31v17'/%3E%3Cpath d='M92 46V35M101 46V25M110 46V31M86 50h30'/%3E%3Ccircle cx='32' cy='104' r='12'/%3E%3Ccircle cx='32' cy='104' r='6.5'/%3E%3Cpath d='M98 96l-4 4a6 6 0 0 0 8.5 8.5l4-4M110 104l4-4a6 6 0 0 0-8.5-8.5l-4 4M101 105l8-8'/%3E%3C/g%3E%3Cg fill='white'%3E%3Ccircle cx='70' cy='70' r='1.8'/%3E%3Ccircle cx='128' cy='72' r='1.4'/%3E%3Ccircle cx='68' cy='128' r='1.4'/%3E%3Ccircle cx='70' cy='10' r='1.4'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Animasi masuk sederhana di halaman login/daftar */
+.anim-rise {
+    animation: auth-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-fade {
+    animation: auth-fade 0.6s ease-out 0.1s both;
+}
+
+@keyframes auth-rise {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.985);
+    }
+}
+
+@keyframes auth-fade {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}
+
+/* ---------- Pintu transisi ---------- */
+.page-door {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.door-closing .page-door,
+.door-opening .page-door {
+    visibility: visible;
+}
+
+/* Saat menutup, klik ditahan supaya form tidak terkirim dua kali */
+.door-closing .page-door {
+    pointer-events: auto;
+}
+
+/* HP: pintu atas & bawah */
+.page-door-half {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 50%;
+    overflow: hidden;
+    transform: var(--door-out);
+    will-change: transform;
+}
+
+.page-door-a {
+    top: 0;
+    --door-out: translate3d(0, -100%, 0);
+}
+
+.page-door-b {
+    bottom: 0;
+    --door-out: translate3d(0, 100%, 0);
+}
+
+/* Isi pintu = 2x ukuran pintu (seukuran layar) & menempel ke tepi luar, supaya pola menyambung di garis tengah */
+.page-door-canvas {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 200%;
+}
+
+.page-door-a .page-door-canvas {
+    top: 0;
+}
+
+.page-door-b .page-door-canvas {
+    bottom: 0;
+}
+
+/* Garis cahaya di tengah sebelum pintu membelah */
+.page-door-seam {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 2px;
+    margin-top: -1px;
+    opacity: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+    box-shadow: 0 0 18px 2px rgba(191, 219, 254, 0.7);
+    --seam-from: scaleX(0);
+}
+
+.page-door-brand {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+}
+
+/* Desktop: pintu kiri & kanan */
+@media (min-width: 1024px) {
+    .page-door-half {
+        top: 0;
+        bottom: 0;
+        width: 50%;
+        height: auto;
+    }
+
+    .page-door-a {
+        left: 0;
+        right: auto;
+        --door-out: translate3d(-100%, 0, 0);
+    }
+
+    .page-door-b {
+        left: auto;
+        right: 0;
+        --door-out: translate3d(100%, 0, 0);
+    }
+
+    .page-door-canvas,
+    .page-door-b .page-door-canvas {
+        top: 0;
+        bottom: auto;
+        width: 200%;
+        height: 100%;
+    }
+
+    .page-door-b .page-door-canvas {
+        left: auto;
+        right: 0;
+    }
+
+    .page-door-seam {
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        right: auto;
+        width: 2px;
+        height: auto;
+        margin-top: 0;
+        margin-left: -1px;
+        background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.95), transparent);
+        --seam-from: scaleY(0);
+    }
+}
+
+/* Menutup (setelah tombol Masuk/Daftar ditekan) */
+.door-closing .page-door-half {
+    animation: door-close 0.6s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+.door-closing .page-door-brand {
+    animation: door-brand-in 0.3s ease-out 0.3s both;
+}
+
+/* Membuka (halaman tujuan baru tampil) */
+.door-opening .page-door-brand {
+    animation: door-brand-out 0.3s ease-in 0.1s both;
+}
+
+.door-opening .page-door-seam {
+    animation: door-seam-draw 0.35s ease-out 0.3s both, door-seam-fade 0.35s ease-out 0.7s forwards;
+}
+
+.door-opening .page-door-half {
+    animation: door-open 0.85s cubic-bezier(0.76, 0, 0.24, 1) 0.6s both;
+}
+
+.door-opening [data-door-content] {
+    animation: door-content-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.75s both;
+}
+
+@keyframes door-close {
+    from {
+        transform: var(--door-out);
+    }
+
+    to {
+        transform: none;
+    }
+}
+
+@keyframes door-open {
+    from {
+        transform: none;
+    }
+
+    to {
+        transform: var(--door-out);
+    }
+}
+
+@keyframes door-brand-in {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes door-brand-out {
+    from {
+        opacity: 1;
+        transform: none;
+    }
+
+    to {
+        opacity: 0;
+        transform: scale(0.92);
+    }
+}
+
+@keyframes door-seam-draw {
+    from {
+        opacity: 1;
+        transform: var(--seam-from);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes door-seam-fade {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes door-content-in {
+    from {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+}
+
+/* Pengguna yang mematikan animasi di perangkatnya: tanpa transisi */
+@media (prefers-reduced-motion: reduce) {
+    .anim-rise,
+    .anim-fade,
+    .door-opening [data-door-content] {
+        animation: none;
+    }
+
+    .page-door {
+        display: none;
+    }
+}

@@ -11,4 +11,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
+{{-- Transisi pintu setelah login/daftar: ditandai sebelum halaman tampil supaya tidak berkedip (lihat resources/js/app.js) --}}
+<script>
+    try {
+        if (sessionStorage.getItem('afp-door')) {
+            sessionStorage.removeItem('afp-door');
+            if (! matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.documentElement.classList.add('door-opening');
+            }
+        }
+    } catch (e) {}
+</script>
+
 @vite(['resources/css/app.css', 'resources/js/app.js'])
