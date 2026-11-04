@@ -1,17 +1,30 @@
 @props(['title', 'eyebrow' => null, 'description' => null])
 
-<div class="mb-space-lg flex flex-col gap-space-md md:flex-row md:items-end md:justify-between">
-    <div>
-        @if ($eyebrow)
-            <p class="font-label-sm text-label-sm uppercase text-primary">{{ $eyebrow }}</p>
+{{--
+    Judul halaman (Stitch). Slot opsional:
+    - $meta    : teks kecil di samping eyebrow, mis. "9 transaksi butuh tindakan"
+    - $actions : tombol di kanan
+--}}
+<div {{ $attributes->merge(['class' => 'mb-space-lg flex flex-col justify-between gap-space-md lg:flex-row lg:items-center']) }}>
+    <div class="flex max-w-2xl flex-col">
+        @if ($eyebrow || isset($meta))
+            <div class="mb-1 flex items-center gap-space-xs">
+                @if ($eyebrow)
+                    <span class="font-caption text-caption font-semibold uppercase tracking-wider text-primary">{{ $eyebrow }}</span>
+                @endif
+                @isset($meta)
+                    <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
+                    <span class="font-caption text-caption font-medium text-secondary">{{ $meta }}</span>
+                @endisset
+            </div>
         @endif
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface md:font-headline-lg md:text-headline-lg">{{ $title }}</h1>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tight text-on-background md:font-headline-lg md:text-headline-lg">{{ $title }}</h1>
         @if ($description)
-            <p class="mt-1 max-w-2xl text-on-surface-variant">{{ $description }}</p>
+            <p class="mt-0.5 font-body-md text-body-md text-on-surface-variant">{{ $description }}</p>
         @endif
     </div>
 
     @isset($actions)
-        <div class="flex flex-wrap gap-space-sm">{{ $actions }}</div>
+        <div class="flex flex-wrap items-center gap-space-sm self-start lg:self-center">{{ $actions }}</div>
     @endisset
 </div>

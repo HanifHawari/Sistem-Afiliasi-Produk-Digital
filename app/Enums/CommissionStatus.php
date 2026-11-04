@@ -16,4 +16,16 @@ enum CommissionStatus: string
             self::Cancelled => 'Dibatalkan',
         };
     }
+
+    /**
+     * Warna badge: success | warning | danger | info | neutral (lihat <x-badge>).
+     */
+    public function tone(): string
+    {
+        return match ($this) {
+            self::Pending => 'warning',
+            self::Approved => 'success',
+            self::Cancelled => 'danger',
+        };
+    }
 }

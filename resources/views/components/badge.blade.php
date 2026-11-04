@@ -1,23 +1,24 @@
-@props(['tone' => 'neutral', 'dot' => true])
+@props(['tone' => 'neutral', 'dot' => true, 'pulse' => false])
 
 {{--
-    Badge status (DESIGN.md: Badges). tone: success | warning | danger | info | neutral
-    Contoh: <x-badge tone="warning">Menunggu Verifikasi</x-badge>
+    Badge status (warna mengikuti code.html Stitch).
+    tone: success | warning | danger | info | neutral
+    Contoh: <x-badge :tone="$order->status->tone()">{{ $order->status->label() }}</x-badge>
 --}}
 @php
     $tones = [
-        'success' => ['bg-[#ECFDF5] text-[#059669]', 'bg-[#059669]'],
-        'warning' => ['bg-[#FFFBEB] text-[#D97706]', 'bg-[#D97706]'],
-        'danger' => ['bg-[#FEF2F2] text-[#DC2626]', 'bg-[#DC2626]'],
-        'info' => ['bg-primary-fixed text-on-primary-fixed-variant', 'bg-primary-container'],
-        'neutral' => ['bg-slate-100 text-slate-600', 'bg-slate-400'],
+        'success' => ['bg-secondary-fixed text-on-secondary-fixed', 'bg-secondary'],
+        'warning' => ['bg-tertiary-fixed text-on-tertiary-fixed', 'bg-tertiary'],
+        'danger' => ['bg-error-container text-on-error-container', 'bg-error'],
+        'info' => ['bg-primary-fixed text-on-primary-fixed-variant', 'bg-primary'],
+        'neutral' => ['bg-surface-container-highest text-on-surface-variant', 'bg-outline'],
     ];
     [$color, $dotColor] = $tones[$tone] ?? $tones['neutral'];
 @endphp
 
-<span {{ $attributes->merge(['class' => "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-label-sm text-label-sm $color"]) }}>
+<span {{ $attributes->merge(['class' => "inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 font-label-sm text-label-sm $color"]) }}>
     @if ($dot)
-        <span class="h-1.5 w-1.5 rounded-full {{ $dotColor }}"></span>
+        <span @class(['h-1.5 w-1.5 rounded-full', $dotColor, 'animate-pulse' => $pulse])></span>
     @endif
     {{ $slot }}
 </span>

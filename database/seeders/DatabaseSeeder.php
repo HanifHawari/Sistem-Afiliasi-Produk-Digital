@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentAccountType;
 use App\Enums\PaymentMethod;
 use App\Enums\PromoMaterialType;
+use App\Enums\WithdrawalStatus;
 use App\Models\Order;
 use App\Models\PaymentAccount;
 use App\Models\Product;
@@ -13,6 +14,7 @@ use App\Models\User;
 use App\Services\Commission\CommissionService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -116,9 +118,61 @@ class DatabaseSeeder extends Seeder
                 'rejection_note' => $status === OrderStatus::Rejected ? 'Nominal transfer tidak sesuai.' : null,
             ]);
 
+            if ($status !== OrderStatus::Pending) {
+                $order->update(['payment_proof' => $this->fakeTransferProof($order)]);
+            }
+
             if ($order->isPaid()) {
                 app(CommissionService::class)->createForOrder($order);
             }
         }
+
+        // Pengajuan pencairan contoh
+        foreach ([[30000, WithdrawalStatus::Pending], [15000, WithdrawalStatus::Pending]] as [$amount, $status]) {
+            $affiliate->withdrawals()->create([
+                'amount' => $amount,
+                'bank_name' => 'BCA',
+                'account_number' => '1234567890',
+                'account_holder' => 'Budi Santoso',
+                'status' => $status,
+            ]);
+        }
+    }
+
+    /**
+     * Gambar struk transfer sederhana, supaya panel bukti bayar admin bisa dicoba.
+     */
+    private function fakeTransferProof(Order $order): ?string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $image = imagecreatetruecolor(360, 480);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $ink = imagecolorallocate($image, 11, 28, 48);
+        $green = imagecolorallocate($image, 0, 108, 73);
+        imagefill($image, 0, 0, $white);
+
+        $lines = [
+            [$green, 'TRANSFER BERHASIL'],
+            [$ink, ''],
+            [$ink, 'Tanggal : '.$order->created_at->format('d/m/Y H:i')],
+            [$ink, 'Ke      : '.($order->paymentAccount?->bank_name ?? 'QRIS')],
+            [$ink, 'Rek     : '.($order->paymentAccount?->account_number ?? '-')],
+            [$ink, 'Nominal : Rp '.number_format($order->amount, 0, ',', '.')],
+            [$ink, 'Berita  : '.$order->invoice_number],
+        ];
+        foreach ($lines as $i => [$color, $text]) {
+            imagestring($image, 5, 24, 40 + $i * 32, $text, $color);
+        }
+
+        ob_start();
+        imagepng($image);
+        $path = "payment-proofs/{$order->invoice_number}.png";
+        Storage::disk('local')->put($path, ob_get_clean());
+        imagedestroy($image);
+
+        return $path;
     }
 }
