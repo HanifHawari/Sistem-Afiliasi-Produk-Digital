@@ -1,15 +1,52 @@
-@props(['label', 'value', 'icon' => null])
+@props([
+    'label',
+    'value',
+    'icon' => null,
+    'tone' => 'primary',   // primary | secondary | tertiary | error
+    'caption' => null,
+    'highlight' => false,  // kartu latar biru muda, mis. antrean yang perlu tindakan
+    'valueClass' => 'text-on-surface',
+])
 
-{{-- Kartu statistik (DESIGN.md: Stat Cards). Slot default = teks kecil di bawah angka. --}}
-<div {{ $attributes->merge(['class' => 'rounded-2xl border border-slate-200 bg-white p-space-md shadow-[0_1px_3px_rgba(30,27,75,0.04),0_1px_2px_rgba(30,27,75,0.02)]']) }}>
-    <div class="flex items-start justify-between">
-        <span class="font-body-sm text-body-sm text-slate-500">{{ $label }}</span>
+{{--
+    Kartu statistik (Stitch: Metric Overview Cards).
+    Slot default = baris paling bawah (tren / tautan), opsional.
+--}}
+@php
+    $iconTones = [
+        'primary' => 'bg-primary-fixed text-primary',
+        'secondary' => 'bg-secondary-fixed text-secondary',
+        'tertiary' => 'bg-tertiary-fixed text-tertiary',
+        'error' => 'bg-error-container text-error',
+    ];
+@endphp
+
+<div {{ $attributes->class([
+    'flex flex-col justify-between rounded-xl p-space-md shadow-sm',
+    'bg-surface-container-high' => $highlight,
+    'bg-surface-container-lowest' => ! $highlight,
+]) }}>
+    <div class="flex items-center justify-between">
+        <span @class(['font-body-sm text-body-sm', 'text-on-surface' => $highlight, 'text-on-surface-variant' => ! $highlight])>{{ $label }}</span>
         @if ($icon)
-            <span class="material-symbols-outlined text-[20px] text-primary-container">{{ $icon }}</span>
+            <div @class([
+                'flex h-8 w-8 items-center justify-center rounded-lg',
+                'bg-surface-container-lowest text-primary' => $highlight,
+                $iconTones[$tone] ?? $iconTones['primary'] => ! $highlight,
+            ])>
+                <span class="material-symbols-outlined text-[18px]">{{ $icon }}</span>
+            </div>
         @endif
     </div>
-    <p class="tabular mt-space-sm font-currency-metric text-currency-metric text-slate-900">{{ $value }}</p>
+
+    <div class="my-3">
+        <div class="tabular font-currency-metric text-currency-metric {{ $valueClass }}">{{ $value }}</div>
+        @if ($caption)
+            <span class="font-caption text-caption text-on-surface-variant">{{ $caption }}</span>
+        @endif
+    </div>
+
     @if ($slot->isNotEmpty())
-        <div class="mt-space-xs font-body-sm text-body-sm text-slate-500">{{ $slot }}</div>
+        <div class="flex items-center justify-between gap-1.5 font-label-sm text-label-sm">{{ $slot }}</div>
     @endif
 </div>

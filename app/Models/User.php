@@ -64,6 +64,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Akun yang sudah punya riwayat transaksi tidak boleh dihapus (data keuangan harus tetap utuh),
+     * dan admin tidak boleh menghapus akunnya sendiri.
+     */
+    public function canDeleteAccount(): bool
+    {
+        return ! $this->isAdmin()
+            && ! $this->orders()->exists()
+            && ! $this->commissions()->exists()
+            && ! $this->withdrawals()->exists();
+    }
+
+    /**
+     * Area layout sesuai role: admin | affiliate | shop
+     */
+    public function layoutArea(): string
+    {
+        return match ($this->role) {
+            UserRole::Admin => 'admin',
+            UserRole::Affiliate => 'affiliate',
+            UserRole::Customer => 'shop',
+        };
+    }
+
+    /**
      * Halaman utama sesuai role, dipakai setelah login.
      */
     public function homeRoute(): string

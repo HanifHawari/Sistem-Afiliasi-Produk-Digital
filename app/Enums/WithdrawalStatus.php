@@ -18,4 +18,17 @@ enum WithdrawalStatus: string
             self::Rejected => 'Ditolak',
         };
     }
+
+    /**
+     * Warna badge: success | warning | danger | info | neutral (lihat <x-badge>).
+     */
+    public function tone(): string
+    {
+        return match ($this) {
+            self::Pending => 'warning',
+            self::Approved => 'info',
+            self::Paid => 'success',
+            self::Rejected => 'danger',
+        };
+    }
 }

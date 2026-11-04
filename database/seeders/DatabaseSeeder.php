@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Enums\PaymentAccountType;
 use App\Enums\PaymentMethod;
 use App\Enums\PromoMaterialType;
+use App\Enums\WithdrawalStatus;
 use App\Models\Order;
 use App\Models\PaymentAccount;
 use App\Models\Product;
@@ -13,6 +14,7 @@ use App\Models\User;
 use App\Services\Commission\CommissionService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 /**
@@ -116,9 +118,78 @@ class DatabaseSeeder extends Seeder
                 'rejection_note' => $status === OrderStatus::Rejected ? 'Nominal transfer tidak sesuai.' : null,
             ]);
 
+            if ($status !== OrderStatus::Pending) {
+                $order->update(['payment_proof' => $this->fakeReceipt("payment-proofs/{$order->invoice_number}.png", [
+                    'Tanggal : '.$order->created_at->format('d/m/Y H:i'),
+                    'Ke      : '.($account->bank_name ?? 'QRIS'),
+                    'Rek     : '.($account->account_number ?? '-'),
+                    'Nominal : Rp '.number_format($order->amount, 0, ',', '.'),
+                    'Berita  : '.$order->invoice_number,
+                ])]);
+            }
+
             if ($order->isPaid()) {
                 app(CommissionService::class)->createForOrder($order);
             }
         }
+
+        // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Budi 49.500)
+        $bank = ['bank_name' => 'BCA', 'account_number' => '1234567890', 'account_holder' => 'Budi Santoso'];
+
+        $paid = $affiliate->withdrawals()->create($bank + [
+            'amount' => 15000,
+            'status' => WithdrawalStatus::Paid,
+            'processed_by' => $admin->id,
+            'processed_at' => now(),
+            'note' => 'Ref. transfer 889120',
+        ]);
+        $paid->update(['transfer_proof' => $this->fakeReceipt("withdrawal-proofs/WD-{$paid->id}.png", [
+            'Ke      : BCA 1234567890',
+            'a.n     : Budi Santoso',
+            'Nominal : Rp 15.000',
+            'Berita  : Pencairan komisi',
+        ])]);
+
+        $affiliate->withdrawals()->create($bank + [
+            'amount' => 10000,
+            'status' => WithdrawalStatus::Approved,
+            'processed_by' => $admin->id,
+            'processed_at' => now(),
+        ]);
+
+        $affiliate->withdrawals()->create($bank + [
+            'amount' => 20000,
+            'status' => WithdrawalStatus::Pending,
+        ]);
+    }
+
+    /**
+     * Gambar struk transfer sederhana untuk data contoh (bukti bayar & bukti pencairan).
+     *
+     * @param  list<string>  $lines
+     */
+    private function fakeReceipt(string $path, array $lines): ?string
+    {
+        if (! function_exists('imagecreatetruecolor')) {
+            return null;
+        }
+
+        $image = imagecreatetruecolor(360, 480);
+        $white = imagecolorallocate($image, 255, 255, 255);
+        $ink = imagecolorallocate($image, 11, 28, 48);
+        $green = imagecolorallocate($image, 0, 108, 73);
+        imagefill($image, 0, 0, $white);
+
+        imagestring($image, 5, 24, 40, 'TRANSFER BERHASIL', $green);
+        foreach ($lines as $i => $text) {
+            imagestring($image, 5, 24, 104 + $i * 32, $text, $ink);
+        }
+
+        ob_start();
+        imagepng($image);
+        Storage::disk('local')->put($path, ob_get_clean());
+        imagedestroy($image);
+
+        return $path;
     }
 }
