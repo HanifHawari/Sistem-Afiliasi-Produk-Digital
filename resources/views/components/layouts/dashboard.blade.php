@@ -1,46 +1,53 @@
 @props(['title' => null, 'area' => ''])
 
 {{--
-    Kerangka dashboard (header + sidebar) mengikuti desain Stitch.
+    Kerangka dashboard (header + sidebar).
     Dipakai oleh <x-layouts.admin> dan <x-layouts.affiliate>, jangan dipanggil langsung.
-    Slot: $nav (menu sidebar), $sidebarFooter (kartu bawah sidebar), $headerActions (ikon di header).
+    Slot: $nav (menu sidebar), $sidebarFooter (kartu bawah sidebar), $headerActions (tombol di header).
 --}}
+@php
+    $roleLabel = Auth::user()->isAdmin() ? 'Super Admin' : Auth::user()->role->label();
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     @include('partials.head', ['title' => $title])
 </head>
-<body class="bg-surface font-body-md text-body-md text-on-surface antialiased" x-data="{ sidebarOpen: false }">
+<body class="bg-slate-50 font-sans text-slate-900 antialiased" x-data="{ sidebarOpen: false }">
     {{-- Header --}}
-    <header class="fixed inset-x-0 top-0 z-40 h-16 bg-surface-container-lowest/90 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-md">
-        <div class="flex h-full items-center justify-between px-space-md lg:px-space-lg">
-            <div class="flex min-w-0 items-center gap-space-xs sm:gap-space-sm">
-                <button type="button" class="rounded-lg p-2 text-on-surface-variant hover:bg-surface-container-low lg:hidden" @click="sidebarOpen = !sidebarOpen">
+    <header class="fixed inset-x-0 top-0 z-40 h-16 border-b border-slate-200/80 bg-white lg:h-20">
+        <div class="flex h-full items-center justify-between px-4 lg:px-10">
+            <div class="flex min-w-0 items-center gap-2 sm:gap-3">
+                <button type="button" class="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden" @click="sidebarOpen = !sidebarOpen" aria-label="Buka menu">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
-                <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-space-sm">
-                    <x-application-logo class="h-9 w-9 shrink-0" />
+                <a href="{{ route('dashboard') }}" class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-600/30 lg:h-12 lg:w-12">
+                        <span class="material-symbols-outlined text-[24px] lg:text-[26px]">bolt</span>
+                    </span>
                     <span class="flex min-w-0 flex-col leading-tight">
-                        <span class="truncate font-label-md text-label-md text-primary sm:font-headline-sm sm:text-headline-sm">{{ config('app.name') }}</span>
-                        <span class="font-caption text-caption text-on-surface-variant">{{ $area }}</span>
+                        <span class="truncate text-base font-bold tracking-tight text-slate-900 lg:text-xl">{{ config('app.name') }}</span>
+                        <span class="text-[11px] font-semibold uppercase tracking-wide text-blue-600 lg:text-sm">{{ $area }}</span>
                     </span>
                 </a>
             </div>
 
-            <div class="flex shrink-0 items-center gap-space-xs sm:gap-space-sm">
+            <div class="flex shrink-0 items-center gap-2 sm:gap-4">
                 {{ $headerActions ?? '' }}
+
+                <span class="hidden h-10 w-px bg-slate-200 sm:block"></span>
 
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
-                        <button class="flex items-center gap-space-sm rounded-xl p-1 hover:bg-surface-container-low sm:px-space-sm sm:py-1.5">
-                            <span class="flex h-9 w-9 items-center justify-center rounded-full bg-primary-fixed font-label-md text-label-md text-on-primary-fixed-variant">
+                        <button class="flex items-center gap-3 rounded-xl p-1 hover:bg-slate-50">
+                            <span class="flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-base font-semibold text-blue-600 lg:h-11 lg:w-11 lg:text-lg">
                                 {{ str(Auth::user()->name)->substr(0, 1)->upper() }}
                             </span>
-                            <span class="hidden flex-col text-left sm:flex">
-                                <span class="font-label-md text-label-md text-on-surface">{{ Auth::user()->name }}</span>
-                                <span class="font-caption text-caption text-primary">{{ Auth::user()->role->label() }}</span>
+                            <span class="hidden flex-col text-left leading-tight sm:flex">
+                                <span class="text-[15px] font-semibold text-slate-900">{{ Auth::user()->name }}</span>
+                                <span class="mt-1 text-sm text-slate-400">{{ $roleLabel }}</span>
                             </span>
-                            <span class="material-symbols-outlined hidden text-[20px] text-on-surface-variant sm:inline">expand_more</span>
+                            <span class="material-symbols-outlined icon-light hidden text-[22px] text-slate-400 sm:inline">expand_more</span>
                         </button>
                     </x-slot>
 
@@ -59,24 +66,24 @@
     </header>
 
     {{-- Overlay sidebar (mobile) --}}
-    <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-20 bg-on-background/40 backdrop-blur-sm lg:hidden"></div>
+    <div x-cloak x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-20 bg-slate-900/40 backdrop-blur-sm lg:hidden"></div>
 
     {{-- Sidebar --}}
     <aside
-        class="fixed bottom-0 left-0 top-16 z-30 flex w-64 -translate-x-full flex-col bg-surface-container-lowest p-space-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] transition-transform lg:translate-x-0"
+        class="fixed bottom-0 left-0 top-16 z-30 flex w-72 -translate-x-full flex-col border-r border-slate-200/80 bg-white px-4 py-6 transition-transform lg:top-20 lg:translate-x-0 2xl:w-80 2xl:px-5"
         :class="sidebarOpen && '!translate-x-0'"
     >
-        <nav class="flex flex-1 flex-col gap-space-xs overflow-y-auto">
+        <nav class="flex flex-1 flex-col gap-1 overflow-y-auto">
             {{ $nav }}
         </nav>
 
         @isset($sidebarFooter)
-            <div class="mt-space-md">{{ $sidebarFooter }}</div>
+            <div class="mt-4">{{ $sidebarFooter }}</div>
         @endisset
     </aside>
 
     {{-- Konten --}}
-    <main class="min-h-screen px-space-md pb-space-2xl pt-[calc(4rem+1.5rem)] lg:ml-64 lg:px-space-lg">
+    <main class="min-h-screen px-4 pb-12 pt-[calc(4rem+1.5rem)] sm:px-6 lg:ml-72 lg:px-10 lg:pt-[calc(5rem+2.5rem)] 2xl:ml-80">
         {{ $slot }}
     </main>
 

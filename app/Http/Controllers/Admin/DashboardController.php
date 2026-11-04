@@ -21,7 +21,13 @@ class DashboardController extends Controller
         $monthStart = now()->startOfMonth();
         $paidThisMonth = Order::where('status', OrderStatus::Paid)->where('verified_at', '>=', $monthStart);
 
+        // Pembanding: periode yang sama di bulan lalu (tanggal 1 s/d hari ini bulan lalu)
+        $revenueLastMonth = (int) Order::where('status', OrderStatus::Paid)
+            ->whereBetween('verified_at', [now()->subMonthNoOverflow()->startOfMonth(), now()->subMonthNoOverflow()])
+            ->sum('amount');
+
         $stats = [
+            'revenue_last_month' => $revenueLastMonth,
             'revenue_month' => (int) (clone $paidThisMonth)->sum('amount'),
             'orders_month' => (clone $paidThisMonth)->count(),
             'waiting_count' => Order::where('status', OrderStatus::WaitingVerification)->count(),
@@ -40,11 +46,14 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Produk terlaris bulan ini
+        $paidMonth = fn ($q) => $q->where('status', OrderStatus::Paid)->where('verified_at', '>=', $monthStart);
         $topProducts = Product::query()
-            ->withCount(['orders as sold_count' => fn ($q) => $q->where('status', OrderStatus::Paid)])
-            ->withSum(['orders as revenue' => fn ($q) => $q->where('status', OrderStatus::Paid)], 'amount')
+            ->withCount(['orders as sold_count' => $paidMonth])
+            ->withSum(['orders as revenue' => $paidMonth], 'amount')
             ->orderByDesc('sold_count')
-            ->limit(5)
+            ->orderByDesc('revenue')
+            ->limit(4)
             ->get();
 
         $pendingWithdrawals = Withdrawal::with('affiliate')

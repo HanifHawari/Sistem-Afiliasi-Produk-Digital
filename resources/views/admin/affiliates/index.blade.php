@@ -3,116 +3,87 @@
 @endphp
 
 <x-layouts.admin title="Afiliator">
-    <x-page-header eyebrow="Kelola" title="Afiliator"
-        description="Pantau performa setiap afiliator: link, klik, penjualan, komisi, dan saldo yang belum dicairkan." />
+    <x-page-header title="Afiliator"
+        description="Pantau performa setiap afiliator: link, klik, penjualan, komisi, dan saldo." />
 
     {{-- Statistik --}}
-    <div class="mb-space-lg grid grid-cols-2 gap-3 sm:gap-space-md xl:grid-cols-4">
-        <x-stat-card label="Total Afiliator" icon="group" :value="$stats['total'].' orang'">
-            <span class="flex items-center gap-1.5 text-secondary">
-                <span class="material-symbols-outlined text-[16px]">person_add</span>
-                +{{ $stats['new_month'] }} bulan ini
-            </span>
+    <div class="mb-8 grid grid-cols-2 gap-3 sm:gap-6 xl:grid-cols-4">
+        <x-stat-card label="Total Afiliator" :value="$stats['total'].' orang'" caption="Terdaftar di platform">
+            <span>+{{ $stats['new_month'] }} bulan ini</span>
         </x-stat-card>
-        <x-stat-card label="Afiliator Aktif" icon="how_to_reg" tone="secondary" :value="$stats['active'].' orang'"
-            :caption="($stats['total'] - $stats['active']).' akun dinonaktifkan'" />
-        <x-stat-card label="Sudah Menghasilkan Penjualan" icon="trending_up" tone="tertiary" :value="$stats['with_sales'].' orang'"
+        <x-stat-card label="Afiliator Aktif" :value="$stats['active'].' orang'" :caption="($stats['total'] - $stats['active']).' akun dinonaktifkan'" />
+        <x-stat-card label="Sudah Menjual" :value="$stats['with_sales'].' orang'"
             :caption="$stats['total'] ? round($stats['with_sales'] / $stats['total'] * 100).'% dari semua afiliator' : 'Belum ada afiliator'" />
-        <x-stat-card label="Total Komisi Afiliator" icon="paid" highlight value-class="text-primary" :value="rupiah($stats['commission_total'])"
-            caption="Komisi dari pembayaran yang disetujui" />
+        <x-stat-card label="Total Komisi Afiliator" :value="rupiah($stats['commission_total'])" caption="Dari pembayaran yang disetujui" />
     </div>
 
     {{-- Filter --}}
-    <form method="GET" action="{{ route('admin.affiliates.index') }}" class="mb-space-lg flex flex-wrap items-center justify-between gap-space-sm rounded-xl bg-surface-container-low p-1.5">
-        <div class="no-scrollbar flex w-full items-center gap-1 overflow-x-auto sm:w-auto sm:flex-wrap">
+    <form method="GET" action="{{ route('admin.affiliates.index') }}" class="toolbar">
+        <div class="tabs">
             @foreach ($tabs as $key => $label)
-                <a href="{{ route('admin.affiliates.index', array_filter(['status' => $key, 'sort' => $sort, 'q' => $search])) }}"
-                   @if ($status === $key) x-data x-init="$el.parentElement.scrollLeft = $el.offsetLeft - 24" @endif
-                   @class([
-                       'flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg px-space-md py-1.5 font-label-md text-label-md transition-colors',
-                       'bg-surface-container-lowest font-semibold text-primary shadow-sm' => $status === $key,
-                       'text-on-surface-variant hover:text-on-surface' => $status !== $key,
-                   ])>
-                    @if ($status === $key)
-                        <span class="h-2 w-2 rounded-full bg-tertiary"></span>
-                    @endif
-                    {{ $label }}
-                </a>
+                <x-tab-link :href="route('admin.affiliates.index', array_filter(['status' => $key, 'sort' => $sort, 'q' => $search]))" :active="$status === $key">{{ $label }}</x-tab-link>
             @endforeach
         </div>
-        <div class="flex w-full flex-wrap items-center gap-space-xs sm:w-auto">
+        <div class="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
             <input type="hidden" name="status" value="{{ $status }}">
-            <select name="sort" onchange="this.form.submit()"
-                    class="rounded-lg border-0 bg-surface-container-lowest py-1.5 pl-3 pr-8 font-body-sm text-body-sm text-on-surface focus:ring-2 focus:ring-primary-container">
+            <select name="sort" onchange="this.form.submit()" class="input sm:w-56">
                 @foreach ($sorts as $key => $label)
                     <option value="{{ $key }}" @selected($sort === $key)>Urutkan: {{ $label }}</option>
                 @endforeach
             </select>
-            <div class="flex flex-1 items-center gap-space-xs rounded-lg bg-surface-container-lowest px-space-sm py-1">
-                <span class="material-symbols-outlined text-[18px] text-outline">search</span>
-                <input name="q" value="{{ $search }}" type="text" placeholder="Cari nama, email, no. HP..."
-                       class="w-full border-0 bg-transparent p-1 font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:ring-0 sm:w-56">
+            <div class="search">
+                <span class="material-symbols-outlined">search</span>
+                <input name="q" value="{{ $search }}" type="text" placeholder="Cari nama, email, no. HP...">
             </div>
         </div>
     </form>
 
     {{-- Tabel afiliator --}}
-    <div class="overflow-hidden rounded-xl bg-surface-container-lowest shadow-sm">
-        <div class="overflow-x-auto">
-            <table class="ledger w-full border-collapse text-left">
+    <section class="card overflow-hidden">
+        <div class="relative overflow-x-auto">
+            <table class="data-table ledger">
                 <thead>
-                    <tr class="bg-surface-container-low font-caption text-caption uppercase tracking-wider text-on-surface-variant">
-                        <th class="px-space-md py-3">Afiliator</th>
-                        <th class="px-space-md py-3 text-right">Link &amp; Klik</th>
-                        <th class="px-space-md py-3 text-right">Penjualan</th>
-                        <th class="px-space-md py-3 text-right">Komisi &amp; Saldo</th>
-                        <th class="px-space-md py-3 text-center">Status</th>
-                        <th class="px-space-md py-3 text-right">Aksi</th>
+                    <tr>
+                        <th>Afiliator</th>
+                        <th>Klik</th>
+                        <th>Penjualan</th>
+                        <th>Komisi &amp; Saldo</th>
+                        <th>Status</th>
+                        <th><span class="sr-only">Aksi</span></th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-surface-container-low">
+                <tbody>
                     @forelse ($affiliates as $affiliate)
                         @php
                             $conversion = $affiliate->referral_clicks_count ? $affiliate->sales_count / $affiliate->referral_clicks_count * 100 : 0;
                             $balance = (int) $affiliate->earned - (int) $affiliate->withdrawn;
                         @endphp
-                        <tr @class(['transition-colors hover:bg-surface-container-low/60', 'opacity-60' => ! $affiliate->is_active])>
-                            <td class="px-space-md py-3">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-fixed font-label-md text-label-md text-on-primary-fixed-variant">{{ str($affiliate->name)->substr(0, 1)->upper() }}</span>
-                                    <div class="min-w-0">
-                                        <a href="{{ route('admin.affiliates.show', $affiliate) }}" class="font-label-md text-label-md text-on-surface hover:text-primary hover:underline">{{ $affiliate->name }}</a>
-                                        <p class="font-caption text-caption text-on-surface-variant">{{ $affiliate->email }}{{ $affiliate->phone ? ' · '.$affiliate->phone : '' }}</p>
-                                        <p class="font-caption text-caption text-outline">Bergabung {{ $affiliate->created_at->translatedFormat('d M Y') }}</p>
-                                    </div>
-                                </div>
+                        <tr @class(['opacity-60' => ! $affiliate->is_active])>
+                            <td>
+                                <a href="{{ route('admin.affiliates.show', $affiliate) }}" class="block font-semibold text-slate-800 hover:text-blue-600">{{ $affiliate->name }}</a>
+                                <span class="block text-[13px] text-slate-400">{{ $affiliate->email }}{{ $affiliate->phone ? ' • '.$affiliate->phone : '' }}</span>
                             </td>
-                            <td class="tabular whitespace-nowrap px-space-md py-3 text-right">
-                                <p class="font-label-md text-label-md text-on-surface">{{ number_format($affiliate->referral_clicks_count, 0, ',', '.') }} klik</p>
-                                <p class="font-caption text-caption text-on-surface-variant">{{ $affiliate->referral_links_count }} link produk</p>
+                            <td class="tabular whitespace-nowrap">
+                                <span class="block font-semibold text-slate-800">{{ number_format($affiliate->referral_clicks_count, 0, ',', '.') }} klik</span>
+                                <span class="block text-[13px] text-slate-400">{{ $affiliate->referral_links_count }} link produk</span>
                             </td>
-                            <td class="tabular whitespace-nowrap px-space-md py-3 text-right">
-                                <p class="font-label-md text-label-md text-on-surface">{{ $affiliate->sales_count }} terjual</p>
-                                <p class="font-caption text-caption text-on-surface-variant">{{ rupiah($affiliate->revenue) }} · konversi {{ number_format($conversion, 1, ',', '.') }}%</p>
+                            <td class="tabular">
+                                <span class="block font-semibold text-slate-800">{{ $affiliate->sales_count }} terjual</span>
+                                <span class="block text-[13px] text-slate-400">{{ rupiah($affiliate->revenue) }} &bull; konversi {{ number_format($conversion, 1, ',', '.') }}%</span>
                             </td>
-                            <td class="tabular whitespace-nowrap px-space-md py-3 text-right">
-                                <p class="font-label-md text-label-md font-bold text-secondary">{{ rupiah($affiliate->earned) }}</p>
-                                <p class="font-caption text-caption text-on-surface-variant">Saldo {{ rupiah($balance) }}</p>
+                            <td class="tabular whitespace-nowrap">
+                                <span class="block font-bold text-emerald-600">{{ rupiah($affiliate->earned) }}</span>
+                                <span class="block text-[13px] text-slate-400">Saldo {{ rupiah($balance) }}</span>
                             </td>
-                            <td class="px-space-md py-3 text-center">
-                                <x-badge :tone="$affiliate->is_active ? 'success' : 'neutral'">{{ $affiliate->is_active ? 'Aktif' : 'Nonaktif' }}</x-badge>
-                            </td>
-                            <td class="px-space-md py-3">
-                                <div class="flex items-center justify-end gap-1">
-                                    <a href="{{ route('admin.affiliates.show', $affiliate) }}" class="rounded-lg bg-surface-container-high p-1.5 text-on-surface-variant transition-colors hover:bg-surface-container-highest" title="Lihat detail">
-                                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                    </a>
+                            <td><x-badge :tone="$affiliate->is_active ? 'success' : 'neutral'">{{ $affiliate->is_active ? 'Aktif' : 'Nonaktif' }}</x-badge></td>
+                            <td>
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('admin.affiliates.show', $affiliate) }}" class="btn-soft">Detail</a>
                                     <form method="POST" action="{{ route('admin.affiliates.toggle', $affiliate) }}"
                                           onsubmit="return confirm({{ Js::from(($affiliate->is_active ? 'Nonaktifkan ' : 'Aktifkan ').$affiliate->name.'?') }})">
                                         @csrf @method('PATCH')
-                                        <button title="{{ $affiliate->is_active ? 'Nonaktifkan' : 'Aktifkan' }}"
-                                                @class(['rounded-lg p-1.5 transition-colors', 'text-error hover:bg-error-container' => $affiliate->is_active, 'text-secondary hover:bg-secondary-fixed' => ! $affiliate->is_active])>
-                                            <span class="material-symbols-outlined text-[18px]">power_settings_new</span>
+                                        <button @class(['btn btn-sm', 'bg-red-50 text-red-600 hover:bg-red-100' => $affiliate->is_active, 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' => ! $affiliate->is_active])>
+                                            {{ $affiliate->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                         </button>
                                     </form>
                                 </div>
@@ -120,8 +91,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-space-md py-space-2xl text-center text-on-surface-variant">
-                                <span class="material-symbols-outlined mb-1 block text-[36px] text-outline">group</span>
+                            <td colspan="6" class="py-12 text-center text-slate-500">
                                 {{ $search ? 'Afiliator "'.$search.'" tidak ditemukan.' : 'Belum ada afiliator terdaftar.' }}
                             </td>
                         </tr>
@@ -130,19 +100,12 @@
             </table>
         </div>
 
-        <div class="flex items-center justify-between bg-surface-container-low px-space-md py-3">
-            <span class="font-caption text-caption text-on-surface-variant">
-                Menampilkan {{ $affiliates->firstItem() ?? 0 }}-{{ $affiliates->lastItem() ?? 0 }} dari {{ $affiliates->total() }} afiliator
-            </span>
-            <div class="flex items-center gap-1">
-                <a href="{{ $affiliates->previousPageUrl() ?? '#' }}" @class(['flex h-7 w-7 items-center justify-center rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high', 'pointer-events-none opacity-50' => $affiliates->onFirstPage()])>
-                    <span class="material-symbols-outlined text-[16px]">chevron_left</span>
-                </a>
-                <span class="px-2 font-label-sm text-label-sm text-on-surface">Hal {{ $affiliates->currentPage() }} dari {{ $affiliates->lastPage() }}</span>
-                <a href="{{ $affiliates->nextPageUrl() ?? '#' }}" @class(['flex h-7 w-7 items-center justify-center rounded-lg bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high', 'pointer-events-none opacity-50' => ! $affiliates->hasMorePages()])>
-                    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-                </a>
+        <div class="flex items-center justify-between border-t border-slate-100 px-5 py-4 sm:px-7">
+            <span class="text-sm text-slate-500">{{ $affiliates->firstItem() ?? 0 }}-{{ $affiliates->lastItem() ?? 0 }} dari {{ $affiliates->total() }} afiliator</span>
+            <div class="flex items-center gap-2">
+                <a href="{{ $affiliates->previousPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => $affiliates->onFirstPage()])>Sebelumnya</a>
+                <a href="{{ $affiliates->nextPageUrl() ?? '#' }}" @class(['btn-outline btn-sm', 'pointer-events-none opacity-40' => ! $affiliates->hasMorePages()])>Berikutnya</a>
             </div>
         </div>
-    </div>
+    </section>
 </x-layouts.admin>

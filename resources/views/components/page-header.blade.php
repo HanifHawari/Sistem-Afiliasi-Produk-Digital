@@ -1,30 +1,18 @@
-@props(['title', 'eyebrow' => null, 'description' => null])
+@props(['title', 'description' => null, 'eyebrow' => null])
 
 {{--
-    Judul halaman (Stitch). Slot opsional:
-    - $meta    : teks kecil di samping eyebrow, mis. "9 transaksi butuh tindakan"
-    - $actions : tombol di kanan
+    Judul halaman: judul besar + deskripsi abu, tombol di kanan (slot $actions).
+    Pakai class .btn-primary / .btn-outline untuk tombolnya. ($eyebrow tidak ditampilkan lagi.)
 --}}
-<div {{ $attributes->merge(['class' => 'mb-space-lg flex flex-col justify-between gap-space-md lg:flex-row lg:items-center']) }}>
-    <div class="flex max-w-2xl flex-col">
-        @if ($eyebrow || isset($meta))
-            <div class="mb-1 flex items-center gap-space-xs">
-                @if ($eyebrow)
-                    <span class="font-caption text-caption font-semibold uppercase tracking-wider text-primary">{{ $eyebrow }}</span>
-                @endif
-                @isset($meta)
-                    <span class="h-1.5 w-1.5 rounded-full bg-secondary"></span>
-                    <span class="font-caption text-caption font-medium text-secondary">{{ $meta }}</span>
-                @endisset
-            </div>
-        @endif
-        <h1 class="font-headline-lg-mobile text-headline-lg-mobile tracking-tight text-on-background md:font-headline-lg md:text-headline-lg">{{ $title }}</h1>
+<div {{ $attributes->merge(['class' => 'mb-8 flex flex-col justify-between gap-5 lg:mb-10 lg:flex-row lg:items-center']) }}>
+    <div class="min-w-0">
+        <h1 class="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl lg:text-[2.5rem] lg:leading-tight">{{ $title }}</h1>
         @if ($description)
-            <p class="mt-0.5 font-body-md text-body-md text-on-surface-variant">{{ $description }}</p>
+            <p class="mt-1.5 text-base text-slate-500 lg:text-lg">{{ $description }}</p>
         @endif
     </div>
 
     @isset($actions)
-        <div class="flex w-full flex-wrap items-center gap-space-sm sm:w-auto lg:self-center [&>*]:flex-1 [&>*]:justify-center [&>*]:whitespace-nowrap sm:[&>*]:flex-none [&>form>button]:w-full [&>form>button]:justify-center">{{ $actions }}</div>
+        <div class="flex w-full flex-wrap items-center gap-3 sm:w-auto lg:shrink-0 [&>*]:flex-1 sm:[&>*]:flex-none [&>form>button]:w-full">{{ $actions }}</div>
     @endisset
 </div>

@@ -76,7 +76,8 @@ class SalesReportTest extends TestCase
         $this->actingAs($this->admin)->get(route('admin.reports.index', ['preset' => '7d']))
             ->assertOk()
             ->assertViewHas('previous', fn ($p) => $p['revenue'] === 100000)
-            ->assertSee('+0,0% vs periode sebelumnya');
+            ->assertSee('vs periode sebelumnya')
+            ->assertSee('+0,0%');
     }
 
     public function test_custom_range_and_invalid_input(): void

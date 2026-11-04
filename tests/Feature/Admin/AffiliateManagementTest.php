@@ -26,7 +26,7 @@ class AffiliateManagementTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->admin()->create();
-        $this->affiliate = User::factory()->affiliate()->create(['name' => 'Budi Uji']);
+        $this->affiliate = User::factory()->affiliate()->create(['name' => 'Budi Uji', 'email' => 'budi@contoh.test']);
 
         // 4 klik, 1 penjualan Rp 100.000, komisi Rp 40.000, pencairan Rp 15.000
         $product = Product::create(['name' => 'Ebook Uji', 'slug' => 'ebook-uji', 'price' => 100000, 'commission_rate' => 40]);
@@ -62,7 +62,7 @@ class AffiliateManagementTest extends TestCase
 
     public function test_index_filters_and_search(): void
     {
-        User::factory()->affiliate()->create(['name' => 'Reza Nonaktif', 'is_active' => false]);
+        User::factory()->affiliate()->create(['name' => 'Reza Nonaktif', 'email' => 'reza@contoh.test', 'is_active' => false]);
 
         $this->actingAs($this->admin)->get(route('admin.affiliates.index', ['status' => 'inactive']))
             ->assertSee('Reza Nonaktif')->assertDontSee('Budi Uji');
