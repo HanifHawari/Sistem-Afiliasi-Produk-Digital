@@ -96,6 +96,34 @@ class DatabaseSeeder extends Seeder
             ]),
         ]);
 
+        // Klik contoh di link Budi (supaya angka konversi terlihat)
+        $channels = ['tiktok', 'instagram', 'wa', 'facebook', null];
+        foreach ($links->values() as $i => $link) {
+            foreach (range(1, [40, 25, 12, 8][$i] ?? 5) as $n) {
+                $link->clicks()->create([
+                    'ip_address' => '10.0.0.'.$n,
+                    'channel' => $channels[$n % count($channels)],
+                    'clicked_at' => now()->subHours($n * 3),
+                ]);
+            }
+        }
+
+        // Afiliator lain: satu aktif tanpa penjualan, satu nonaktif
+        $dina = User::factory()->affiliate()->create([
+            'name' => 'Dina Putri',
+            'email' => 'dina@afiliasi.test',
+            'phone' => '081377889900',
+        ]);
+        $dina->affiliateProfile()->create(['bank_name' => 'MANDIRI', 'account_number' => '1370019283', 'account_holder' => 'Dina Putri']);
+        $dina->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'DINA2'])
+            ->clicks()->create(['channel' => 'instagram', 'clicked_at' => now()->subDay()]);
+
+        User::factory()->affiliate()->create([
+            'name' => 'Reza Hardiansyah',
+            'email' => 'reza@afiliasi.test',
+            'is_active' => false,
+        ]);
+
         // Order contoh dengan berbagai status, supaya halaman admin bisa langsung diuji
         $orders = [
             [$products[0], $links[$products[0]->id], PaymentMethod::BankTransfer, $bca, OrderStatus::WaitingVerification],
