@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AffiliateController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PaymentAccountController;
@@ -49,6 +50,10 @@ Route::put('/payment-accounts/{paymentAccount}', [PaymentAccountController::clas
 Route::patch('/payment-accounts/{paymentAccount}/toggle', [PaymentAccountController::class, 'toggle'])->name('payment-accounts.toggle');
 Route::delete('/payment-accounts/{paymentAccount}', [PaymentAccountController::class, 'destroy'])->name('payment-accounts.destroy');
 
+// Afiliator
+Route::get('/affiliates', [AffiliateController::class, 'index'])->name('affiliates.index');
+Route::get('/affiliates/{affiliate}', [AffiliateController::class, 'show'])->name('affiliates.show');
+Route::patch('/affiliates/{affiliate}/toggle', [AffiliateController::class, 'toggle'])->name('affiliates.toggle');
+
 // Belum dikerjakan (placeholder)
-Route::view('/affiliates', 'admin.affiliates.index')->name('affiliates.index');
 Route::view('/reports', 'admin.reports.index')->name('reports.index');

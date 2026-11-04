@@ -146,7 +146,7 @@
                                 <td class="px-3 py-3.5 text-right align-top">
                                     <div class="flex items-center justify-end gap-1.5">
                                         @if (in_array($order->status, [OrderStatus::Pending, OrderStatus::WaitingVerification]))
-                                            <form method="POST" action="{{ route('admin.orders.approve', $order) }}" onsubmit="return confirm('Setujui pembayaran {{ $order->invoice_number }}?')">
+                                            <form method="POST" action="{{ route('admin.orders.approve', $order) }}" onsubmit="return confirm({{ Js::from('Setujui pembayaran '.$order->invoice_number.'?') }})">
                                                 @csrf
                                                 <button class="rounded-lg bg-secondary p-1.5 text-on-secondary shadow-sm transition-colors hover:bg-secondary/90" title="Setujui &amp; buka akses">
                                                     <span class="material-symbols-outlined text-[18px]">check</span>

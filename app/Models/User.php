@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -109,6 +110,22 @@ class User extends Authenticatable
     public function referralLinks(): HasMany
     {
         return $this->hasMany(ReferralLink::class, 'affiliate_id');
+    }
+
+    /**
+     * Semua klik dari link referral milik afiliator ini.
+     */
+    public function referralClicks(): HasManyThrough
+    {
+        return $this->hasManyThrough(ReferralClick::class, ReferralLink::class, 'affiliate_id');
+    }
+
+    /**
+     * Semua order yang datang dari link referral afiliator ini.
+     */
+    public function referralOrders(): HasManyThrough
+    {
+        return $this->hasManyThrough(Order::class, ReferralLink::class, 'affiliate_id');
     }
 
     public function commissions(): HasMany
