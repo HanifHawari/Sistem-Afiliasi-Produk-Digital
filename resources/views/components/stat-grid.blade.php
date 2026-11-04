@@ -2,7 +2,7 @@
 
 {{--
     Wadah kartu statistik.
-    - HP: carousel geser ke samping, satu kartu di tengah, titik penunjuk posisi di bawah.
+    - HP: carousel geser ke samping, satu kartu utuh selebar layar, titik penunjuk posisi di bawah.
     - Tablet ke atas: grid biasa (2 kolom, lalu 3/4 kolom di layar lebar).
 --}}
 @php
@@ -14,8 +14,8 @@
 
 <div {{ $attributes->class('mb-8') }} x-data="{ active: 0, total: 0 }" x-init="total = $refs.track.children.length">
     <div x-ref="track"
-         @scroll.debounce.50ms="active = Math.round($el.scrollLeft / ($el.children[0].offsetWidth + 12))"
-         class="no-scrollbar -mx-4 -mb-3 flex snap-x snap-mandatory gap-3 overflow-x-auto scroll-px-4 px-4 pb-5 [&>*]:w-[85%] [&>*]:shrink-0 [&>*]:snap-center sm:mx-0 sm:mb-0 sm:grid sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 sm:[&>*]:w-auto {{ $grid }}">
+         @scroll.debounce.50ms="active = Math.round($el.scrollLeft / ($el.children[0].offsetWidth + 16))"
+         class="no-scrollbar -mx-4 -mb-3 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-px-4 px-4 pb-5 [&>*]:w-full [&>*]:shrink-0 [&>*]:snap-center [&>*]:snap-always sm:mx-0 sm:mb-0 sm:grid sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 sm:[&>*]:w-auto {{ $grid }}">
         {{ $slot }}
     </div>
 
