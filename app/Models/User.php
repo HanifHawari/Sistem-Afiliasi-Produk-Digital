@@ -65,6 +65,14 @@ class User extends Authenticatable
     }
 
     /**
+     * URL foto profil, atau null bila belum diunggah (tampilkan inisial nama).
+     */
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar ? asset('storage/'.$this->avatar) : null;
+    }
+
+    /**
      * Akun yang sudah punya riwayat transaksi tidak boleh dihapus (data keuangan harus tetap utuh),
      * dan admin tidak boleh menghapus akunnya sendiri.
      */

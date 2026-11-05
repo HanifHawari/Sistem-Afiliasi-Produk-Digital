@@ -177,6 +177,12 @@ Yang perlu diketahui saat membuat halaman di **layout dashboard** (admin & afili
   animasi menu & kartu tetap jalan.
 - Kode: `resources/css/app.css` (bagian "Halaman login / daftar"), `resources/js/app.js`, `resources/views/partials/head.blade.php`.
 
+### Foto profil
+Semua pengguna (admin, afiliator, customer) bisa mengganti foto di halaman **Profil** (`/profile`).
+- Kolom baru `users.avatar`, file disimpan di `storage/app/public/avatars` (JPG/PNG/WEBP, maks. 2 MB). Foto lama otomatis dihapus saat diganti.
+- Tampilkan di mana saja dengan `<x-avatar :user="$user" class="h-10 w-10" />` (tanpa foto = inisial nama).
+- Setelah pull: jalankan `php artisan migrate` (atau `migrate:fresh --seed`) dan pastikan `php artisan storage:link` sudah pernah dijalankan.
+
 ### Akun contoh (password: `password`)
 | Nama | Peran | Email |
 |---|---|---|
