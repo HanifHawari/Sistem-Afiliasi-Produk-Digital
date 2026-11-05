@@ -20,8 +20,7 @@
         <div>
             <x-input-label for="password" :value="__('Password')" />
 
-            <x-text-input id="password" class="mt-1.5 block w-full"
-                            type="password"
+            <x-password-input id="password" class="mt-1.5 block w-full"
                             name="password"
                             required autocomplete="new-password" />
 
@@ -32,8 +31,7 @@
         <div>
             <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
 
-            <x-text-input id="password_confirmation" class="mt-1.5 block w-full"
-                            type="password"
+            <x-password-input id="password_confirmation" class="mt-1.5 block w-full"
                             name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />

@@ -23,8 +23,7 @@
                 @endif
             </div>
 
-            <x-text-input id="password" class="mt-1.5 block w-full"
-                            type="password"
+            <x-password-input id="password" class="mt-1.5 block w-full"
                             name="password"
                             required autocomplete="current-password" />
 
