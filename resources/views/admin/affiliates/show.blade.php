@@ -125,7 +125,7 @@
             <section class="card">
                 <div class="card-header items-center">
                     <div class="flex min-w-0 items-center gap-3">
-                        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-lg font-semibold text-blue-600">{{ str($affiliate->name)->substr(0, 1)->upper() }}</span>
+                        <x-avatar :user="$affiliate" class="h-12 w-12 text-lg" />
                         <h2 class="card-title truncate">{{ $affiliate->name }}</h2>
                     </div>
                     <x-badge :tone="$affiliate->is_active ? 'success' : 'neutral'">{{ $affiliate->is_active ? 'Aktif' : 'Nonaktif' }}</x-badge>

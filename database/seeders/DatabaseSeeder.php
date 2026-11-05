@@ -15,6 +15,7 @@ use App\Services\Commission\CommissionService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -35,6 +36,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->removeUnusedUploads();
+
         $admin = User::factory()->admin()->create([
             'name' => 'Hanif',
             'email' => 'hanif@afiliasi.test',
@@ -223,6 +226,38 @@ class DatabaseSeeder extends Seeder
             $order->forceFill(['created_at' => $paidAt->copy()->subHours(2), 'updated_at' => $paidAt])->saveQuietly();
 
             $commissions->createForOrder($order)?->forceFill(['created_at' => $paidAt, 'updated_at' => $paidAt])->saveQuietly();
+        }
+    }
+
+    /**
+     * migrate:fresh mengosongkan database tetapi tidak menyentuh folder storage. Hapus file unggahan
+     * yang tidak lagi dirujuk database (sisa seed / unggahan sebelumnya) supaya tidak menumpuk.
+     */
+    private function removeUnusedUploads(): void
+    {
+        $used = collect([
+            ...DB::table('orders')->pluck('payment_proof'),
+            ...DB::table('withdrawals')->pluck('transfer_proof'),
+            ...DB::table('products')->pluck('file_path'),
+            ...DB::table('products')->pluck('thumbnail'),
+            ...DB::table('payment_accounts')->pluck('qris_image'),
+            ...DB::table('promo_materials')->pluck('file_path'),
+            ...DB::table('users')->pluck('avatar'),
+        ])->filter()->flip();
+
+        $folders = [
+            'local' => ['payment-proofs', 'withdrawal-proofs', 'products/files'],
+            'public' => ['qris', 'products/thumbnails', 'promo-materials', 'avatars'],
+        ];
+
+        foreach ($folders as $disk => $dirs) {
+            foreach ($dirs as $dir) {
+                foreach (Storage::disk($disk)->allFiles($dir) as $file) {
+                    if (! $used->has($file)) {
+                        Storage::disk($disk)->delete($file);
+                    }
+                }
+            }
         }
     }
 

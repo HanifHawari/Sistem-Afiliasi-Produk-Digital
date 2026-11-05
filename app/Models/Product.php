@@ -37,14 +37,6 @@ class Product extends Model
         return (int) round($this->price * $this->commission_rate / 100);
     }
 
-    /**
-     * Bagian product owner per penjualan (Rupiah).
-     */
-    public function ownerAmount(): int
-    {
-        return $this->price - $this->commissionAmount();
-    }
-
     public function promoMaterials(): HasMany
     {
         return $this->hasMany(PromoMaterial::class);
