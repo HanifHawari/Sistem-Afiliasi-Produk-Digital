@@ -6,7 +6,7 @@
     Slot: $nav (menu sidebar), $sidebarFooter (kartu bawah sidebar), $headerActions (tombol di header).
 --}}
 @php
-    $roleLabel = Auth::user()->isAdmin() ? 'Super Admin' : Auth::user()->role->label();
+    $roleLabel = Auth::user()->isAdmin() ? '' : Auth::user()->role->label();
 @endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
@@ -35,9 +35,7 @@
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="flex items-center gap-3 rounded-xl p-1 hover:bg-slate-50">
-                            <span class="flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-blue-50 text-base font-semibold text-blue-600 lg:h-11 lg:w-11 lg:text-lg">
-                                {{ str(Auth::user()->name)->substr(0, 1)->upper() }}
-                            </span>
+                            <x-avatar :user="Auth::user()" class="h-10 w-10 text-base lg:h-11 lg:w-11 lg:text-lg" />
                             <span class="hidden flex-col text-left leading-tight sm:flex">
                                 <span class="text-[15px] font-semibold text-slate-900">{{ Auth::user()->name }}</span>
                                 <span class="mt-1 text-sm text-slate-400">{{ $roleLabel }}</span>

@@ -62,6 +62,17 @@ Reset database ke data contoh: `php artisan migrate:fresh --seed`
 - `npm run dev` di terminal kedua, supaya perubahan Blade/CSS langsung terlihat tanpa build ulang.
 - Jalankan test sebelum membuat Pull Request: `php artisan test`
 
+### Setelah mengambil perubahan terbaru (`git pull` / `git merge develop`)
+```bash
+composer install            # bila composer.json berubah
+npm install                 # bila package.json berubah
+php artisan migrate         # bila ada migration baru
+npm run build
+```
+Bila akun contoh atau data contoh berubah (lihat pesan PR), jalankan `php artisan migrate:fresh --seed`.
+Perintah ini mengosongkan database lokal lalu mengisi ulang data contoh (file unggahan lama di storage ikut dibersihkan).
+Kalau login dengan akun di tabel atas gagal padahal password benar, biasanya karena langkah ini belum dijalankan.
+
 ## Struktur Folder per Anggota
 | Bagian | Hanif (Admin) | Gibran (Afiliator) | Arif (Toko) | Fadhil (Referral & Komisi) |
 |---|---|---|---|---|

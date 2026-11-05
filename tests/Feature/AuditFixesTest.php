@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AuditFixesTest extends TestCase
@@ -88,5 +89,35 @@ class AuditFixesTest extends TestCase
             ->assertSessionHas('status');
 
         $this->assertModelMissing($product);
+    }
+
+    public function test_seeder_creates_only_team_accounts_and_removes_leftover_uploads(): void
+    {
+        Storage::fake('local');
+        Storage::fake('public');
+        Storage::disk('local')->put('payment-proofs/INV-LAMA-0001.png', 'sisa seed lama');
+        Storage::disk('public')->put('avatars/lama.jpg', 'sisa unggahan lama');
+
+        $this->seed();
+
+        $this->assertSame(
+            ['bagus@afiliasi.test', 'fadhil@afiliasi.test', 'gibran@afiliasi.test', 'hanif@afiliasi.test'],
+            User::orderBy('email')->pluck('email')->all(),
+        );
+        Storage::disk('local')->assertMissing('payment-proofs/INV-LAMA-0001.png');
+        Storage::disk('public')->assertMissing('avatars/lama.jpg');
+        Storage::disk('public')->assertExists('qris/contoh-qris.png');
+        foreach (Order::whereNotNull('payment_proof')->pluck('payment_proof') as $proof) {
+            Storage::disk('local')->assertExists($proof);
+        }
+    }
+
+    public function test_password_fields_have_show_password_button(): void
+    {
+        $this->get('/login')->assertOk()->assertSee('Tampilkan password');
+        $this->get('/register')->assertOk()->assertSee('Tampilkan password');
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->get('/profile')->assertOk()->assertSee('Tampilkan password');
     }
 }

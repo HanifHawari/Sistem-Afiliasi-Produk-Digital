@@ -44,11 +44,6 @@ class User extends Authenticatable
         ];
     }
 
-    public function hasRole(UserRole ...$roles): bool
-    {
-        return in_array($this->role, $roles, true);
-    }
-
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
@@ -62,6 +57,14 @@ class User extends Authenticatable
     public function isCustomer(): bool
     {
         return $this->role === UserRole::Customer;
+    }
+
+    /**
+     * URL foto profil, atau null bila belum diunggah (tampilkan inisial nama).
+     */
+    public function avatarUrl(): ?string
+    {
+        return $this->avatar ? asset('storage/'.$this->avatar) : null;
     }
 
     /**
