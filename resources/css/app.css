@@ -307,8 +307,7 @@
     }
 }
 
-/* HP (UJI COBA, hapus blok ini bila tidak dipakai -> kembali ke transisi memudar bawaan browser):
-   setelah login berhasil, kartu form bergeser ke kanan, logo & nama ke kiri,
+/* HP: setelah login berhasil, kartu form bergeser ke kanan, logo & nama ke kiri,
    lalu latar biru naik ke atas memperlihatkan dashboard. Kartu dashboard menyusul dari bawah. */
 @media (max-width: 1023px) {
     .auth-brand {

@@ -162,8 +162,8 @@ Judul & keterangan kartu diisi lewat atribut: `<x-guest-layout title="Masuk" sub
 ### Animasi & transisi
 | Kapan | Desktop | HP |
 |---|---|---|
-| Tombol Masuk/Daftar ditekan | Tombol jadi "Memproses...", lalu halaman login **terbelah di garis biru\|putih** (kiri ke kiri, kanan ke kanan) | Tombol jadi "Memproses...", halaman login memudar |
-| Halaman pertama setelah login | Menu samping muncul dari kiri satu per satu, **setelah itu** judul & kartu muncul dari bawah satu per satu | Judul & kartu muncul dari bawah (cepat) |
+| Tombol Masuk/Daftar ditekan | Tombol jadi "Memproses...", lalu halaman login **terbelah di garis biru\|putih** (kiri ke kiri, kanan ke kanan) | Tombol jadi "Memproses...", kartu form bergeser ke kanan, logo & nama ke kiri, lalu latar biru naik ke atas memperlihatkan dashboard |
+| Halaman pertama setelah login | Menu samping muncul dari kiri satu per satu, **setelah itu** judul & kartu muncul dari bawah satu per satu | Setelah latar biru naik, judul & kartu muncul dari bawah (cepat) |
 | Pindah ke halaman lain (klik menu) | Hanya judul, kartu, & baris filter muncul dari bawah. Menu samping diam | Sama, lebih cepat |
 | Ganti filter / paginasi / setelah tombol aksi (halaman sama), tombol Back | Tanpa animasi | Tanpa animasi |
 
