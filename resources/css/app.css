@@ -307,30 +307,56 @@
     }
 }
 
-/* HP: sederhana. Halaman login memudar dulu, lalu kartu muncul dari bawah (tanpa animasi menu) */
+/* HP (UJI COBA, hapus blok ini bila tidak dipakai -> kembali ke transisi memudar bawaan browser):
+   setelah login berhasil, kartu form bergeser ke kanan, logo & nama ke kiri,
+   lalu latar biru naik ke atas memperlihatkan dashboard. Kartu dashboard menyusul dari bawah. */
 @media (max-width: 1023px) {
+    .auth-brand {
+        view-transition-name: auth-brand;
+    }
+
+    .auth-card {
+        view-transition-name: auth-card;
+    }
+
+    ::view-transition-old(auth-card):only-child {
+        animation: auth-out-right 0.5s cubic-bezier(0.65, 0, 0.35, 1) both;
+    }
+
+    ::view-transition-old(auth-brand):only-child {
+        animation: auth-out-left 0.5s cubic-bezier(0.65, 0, 0.35, 1) 0.05s both;
+    }
+
+    /* Latar biru (halaman login) di atas halaman baru, lalu naik ke atas */
     ::view-transition-old(root) {
-        animation: enter-fade-out 0.18s ease-out both;
+        z-index: 1;
+        animation: auth-bg-up 0.7s cubic-bezier(0.76, 0, 0.24, 1) 0.4s both;
     }
 
     ::view-transition-new(root) {
-        animation: enter-fade-in 0.3s ease-out 0.12s both;
+        animation: none;
     }
 
     .intro.anim-run [data-layout="dashboard"] :is([data-enter="up"], main .card, main .toolbar) {
-        animation: enter-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(0.25s + var(--i, 0) * 60ms) both;
+        animation: enter-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) calc(0.95s + var(--i, 0) * 60ms) both;
     }
 }
 
-@keyframes enter-fade-out {
+@keyframes auth-out-right {
     to {
-        opacity: 0;
+        transform: translateX(100vw);
     }
 }
 
-@keyframes enter-fade-in {
-    from {
-        opacity: 0;
+@keyframes auth-out-left {
+    to {
+        transform: translateX(-100vw);
+    }
+}
+
+@keyframes auth-bg-up {
+    to {
+        transform: translateY(-100%);
     }
 }
 
