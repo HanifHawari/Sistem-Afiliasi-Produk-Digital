@@ -192,7 +192,7 @@
                         <div class="min-w-0 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <h2 class="font-headline-sm text-headline-sm text-amber-950">Menunggu Verifikasi Pembayaran</h2>
-                                <x-badge :tone="$order->status->tone()" pulse>{{ $order->status->label() }}</x-badge>
+                                @include('shop.orders.partials.status-badge', ['status' => $order->status])
                             </div>
                             <p class="mt-1.5 font-body-md text-body-md text-amber-900">
                                 Bukti pembayaran kamu sudah kami terima dan sedang diperiksa oleh tim admin. Setelah pembayaran disetujui, tombol unduh produk akan otomatis aktif di halaman pesanan.

@@ -12,8 +12,8 @@ class ProductController extends Controller
 {
     public function index(Request $request): View
     {
-        $search = mb_substr(trim((string) $request->query('q', '')), 0, 100);
-        $selectedCategory = trim((string) $request->query('category', ''));
+        $search = mb_substr(trim(is_string($q = $request->query('q')) ? $q : ''), 0, 100);
+        $selectedCategory = trim(is_string($cat = $request->query('category')) ? $cat : '');
 
         $categories = Product::active()
             ->whereNotNull('category')
@@ -47,4 +47,3 @@ class ProductController extends Controller
         return view('shop.products.show', compact('product'));
     }
 }
-

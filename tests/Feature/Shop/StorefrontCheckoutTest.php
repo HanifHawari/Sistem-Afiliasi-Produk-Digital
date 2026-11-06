@@ -152,8 +152,61 @@ class StorefrontCheckoutTest extends TestCase
             ])
             ->assertSessionHasNoErrors();
 
-        $orderWithSelfRef = Order::sole();
-        $this->assertNull($orderWithSelfRef->referral_link_id);
+        // 4. Referral milik afiliator nonaktif -> diabaikan diam-diam tanpa error
+        Order::query()->delete();
+        $this->affiliate->forceFill(['is_active' => false])->save();
+
+        $this->actingAs($this->customer)
+            ->post(route('shop.checkout.store', $this->product), [
+                'payment_method' => PaymentMethod::Qris->value,
+                'referral_code' => $this->validReferral->code,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $orderWithInactiveAffiliateRef = Order::sole();
+        $this->assertNull($orderWithInactiveAffiliateRef->referral_link_id);
+    }
+
+    public function test_array_query_and_input_parameters_do_not_cause_500_error(): void
+    {
+        $this->get('/?q[]=x')->assertOk();
+        $this->get('/products?q[]=x&category[]=x')->assertOk();
+
+        $this->actingAs($this->customer)
+            ->post(route('shop.checkout.store', $this->product), [
+                'payment_method' => PaymentMethod::Qris->value,
+                'referral_code' => ['x'],
+            ])
+            ->assertSessionHasNoErrors();
+
+        $order = Order::sole();
+        $this->assertNull($order->referral_link_id);
+    }
+
+    public function test_reused_pending_order_updates_amount_when_product_price_changes(): void
+    {
+        $this->actingAs($this->customer)
+            ->post(route('shop.checkout.store', $this->product), [
+                'payment_method' => PaymentMethod::Qris->value,
+            ]);
+
+        $order = Order::sole();
+        $this->assertSame(150000, $order->amount);
+
+        // Admin menaikkan harga produk menjadi Rp 200.000
+        $this->product->update(['price' => 200000]);
+
+        $this->actingAs($this->customer)
+            ->post(route('shop.checkout.store', $this->product), [
+                'payment_method' => PaymentMethod::BankTransfer->value,
+                'payment_account_id' => $this->bankAccount->id,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame(1, Order::count());
+        $order->refresh();
+        $this->assertSame(200000, $order->amount);
+        $this->assertSame(PaymentMethod::BankTransfer, $order->payment_method);
     }
 
     public function test_other_customer_cannot_access_someone_elses_order(): void
@@ -276,4 +329,3 @@ class StorefrontCheckoutTest extends TestCase
             ->assertDownload('mastering-tiktok.pdf');
     }
 }
-

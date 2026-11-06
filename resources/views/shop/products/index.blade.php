@@ -15,7 +15,12 @@
         title="Produk Digital"
         description="Temukan e-course, template, ebook, dan aset digital siap pakai dengan akses instan."
     >
-        <x-slot:meta>{{ $products->total() }} produk tersedia</x-slot:meta>
+        <x-slot:actions>
+            <span class="inline-flex items-center gap-1.5 rounded-full bg-primary-fixed px-3.5 py-1.5 font-label-sm text-label-sm text-on-primary-fixed-variant">
+                <span class="material-symbols-outlined text-[16px]">inventory_2</span>
+                <span class="tabular">{{ $products->total() }} produk tersedia</span>
+            </span>
+        </x-slot:actions>
     </x-page-header>
 
     {{-- Filter & Pencarian --}}

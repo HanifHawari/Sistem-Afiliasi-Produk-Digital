@@ -170,7 +170,7 @@
                 <div class="relative">
                     <span class="material-symbols-outlined pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">confirmation_number</span>
                     <input id="referral_code" name="referral_code" type="text" maxlength="50" autocomplete="off"
-                           value="{{ $referralCode }}" placeholder="Contoh: BUDI1"
+                           value="{{ $referralCode }}" placeholder="Contoh: GIBRAN1"
                            class="w-full rounded-lg border border-slate-300 bg-white py-2.5 pl-10 pr-3 font-body-md text-body-md uppercase text-on-surface placeholder:normal-case placeholder:text-slate-400 focus:border-primary-container focus:ring-2 focus:ring-primary-container">
                 </div>
                 <p class="mt-1.5 font-caption text-caption text-on-surface-variant">
@@ -207,7 +207,7 @@
                 <dl class="mt-space-md space-y-2 border-b border-slate-100 pb-space-md font-body-md text-body-md">
                     <div class="flex justify-between gap-2">
                         <dt class="text-on-surface-variant">Harga produk</dt>
-                        <dd class="tabular text-on-surface">{{ rupiah($pendingOrder?->amount ?? $product->price) }}</dd>
+                        <dd class="tabular text-on-surface">{{ rupiah($product->price) }}</dd>
                     </div>
                     <div class="flex justify-between gap-2">
                         <dt class="text-on-surface-variant">Biaya admin</dt>
@@ -217,7 +217,7 @@
 
                 <div class="flex items-end justify-between gap-2 pt-space-md">
                     <span class="font-label-md text-label-md text-on-surface">Total Pembayaran</span>
-                    <span class="tabular font-currency-metric text-currency-metric text-primary">{{ rupiah($pendingOrder?->amount ?? $product->price) }}</span>
+                    <span class="tabular font-currency-metric text-currency-metric text-primary">{{ rupiah($product->price) }}</span>
                 </div>
 
                 <button type="submit"

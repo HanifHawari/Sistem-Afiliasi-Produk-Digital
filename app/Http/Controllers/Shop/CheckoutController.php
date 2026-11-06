@@ -39,12 +39,14 @@ class CheckoutController extends Controller
             ->latest('id')
             ->first();
 
-        $referralCode = (string) old('referral_code', (string) $request->cookie(ReferralTracker::COOKIE_NAME, ''));
+        $cookieRef = $request->cookie(ReferralTracker::COOKIE_NAME);
+        $oldRef = old('referral_code', is_string($cookieRef) ? $cookieRef : '');
+        $referralCode = is_string($oldRef) ? trim($oldRef) : '';
 
         return view('shop.checkout', compact('product', 'qrisAccount', 'bankAccounts', 'pendingOrder', 'referralCode'));
     }
 
-    public function store(Request $request, Product $product): RedirectResponse
+    public function store(Request $request, Product $product, ReferralTracker $tracker): RedirectResponse
     {
         abort_unless($product->is_active, 404);
 
@@ -75,7 +77,7 @@ class CheckoutController extends Controller
 
         $user = $request->user();
         $method = PaymentMethod::from($data['payment_method']);
-        $referralLink = $this->resolveReferral((string) $request->input('referral_code', ''), $product, $user);
+        $referralLink = $this->resolveReferral($request, $product, $user, $tracker);
 
         $order = DB::transaction(function () use ($user, $product, $method, $data, $referralLink) {
             // Kunci baris user supaya klik dobel tidak membuat 2 order pending
@@ -97,14 +99,13 @@ class CheckoutController extends Controller
                 ->latest('id')
                 ->first();
 
-            // Pakai order pending yang sudah ada: nominal & invoice tetap,
-            // metode pembayaran mengikuti pilihan terbaru.
+            // Pakai order pending yang sudah ada dengan harga produk terbaru
+            // serta metode pembayaran dan referral yang valid saat ini.
             if ($existing) {
+                $existing->amount = $product->price;
                 $existing->payment_method = $method;
                 $existing->payment_account_id = $account->id;
-                if (! $existing->referral_link_id && $referralLink) {
-                    $existing->referral_link_id = $referralLink->id;
-                }
+                $existing->referral_link_id = $referralLink?->id;
                 $existing->save();
 
                 return $existing;
@@ -150,21 +151,33 @@ class CheckoutController extends Controller
     }
 
     /**
-     * Kode referral hanya dipakai jika ada, untuk produk yang sama, dan bukan milik pembeli sendiri.
-     * Selain itu diabaikan tanpa error.
+     * Gunakan ReferralTracker::resolveForCheckout() sesuai kontrak kerangka,
+     * dengan sanitasi input array dan verifikasi afiliator aktif & bukan self-referral.
      */
-    private function resolveReferral(string $code, Product $product, User $user): ?ReferralLink
+    private function resolveReferral(Request $request, Product $product, User $user, ReferralTracker $tracker): ?ReferralLink
     {
-        $code = trim($code);
-        if ($code === '' || mb_strlen($code) > 50) {
+        $rawInput = $request->input('referral_code');
+        $cleanCode = is_string($rawInput) ? mb_substr(trim($rawInput), 0, 50) : '';
+
+        // Buat salinan request dengan referral_code bertipe string yang aman
+        $safeRequest = clone $request;
+        $safeRequest->merge(['referral_code' => $cleanCode]);
+
+        $link = $tracker->resolveForCheckout($safeRequest, $product);
+
+        if (! $link) {
             return null;
         }
 
-        $link = ReferralLink::where('code', $code)
-            ->where('product_id', $product->id)
-            ->first();
+        if ((int) $link->product_id !== (int) $product->id) {
+            return null;
+        }
 
-        if (! $link || (int) $link->affiliate_id === (int) $user->id) {
+        if ((int) $link->affiliate_id === (int) $user->id) {
+            return null;
+        }
+
+        if (! $link->affiliate()->where('is_active', true)->exists()) {
             return null;
         }
 
@@ -185,4 +198,3 @@ class CheckoutController extends Controller
         return $number;
     }
 }
-

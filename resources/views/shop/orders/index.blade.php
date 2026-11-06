@@ -9,8 +9,11 @@
         title="Pesanan Saya"
         description="Pantau status pembayaran dan unduh produk digital yang sudah terverifikasi."
     >
-        <x-slot:meta>{{ $orders->total() }} pesanan</x-slot:meta>
         <x-slot:actions>
+            <span class="inline-flex items-center gap-1.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 font-label-sm text-label-sm text-[#475569]">
+                <span class="material-symbols-outlined text-[16px] text-primary">receipt_long</span>
+                <span class="tabular">{{ $orders->total() }} pesanan</span>
+            </span>
             <a href="{{ route('shop.products.index') }}"
                class="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 font-label-md text-label-md text-[#0F172A] shadow-sm transition hover:bg-[#F8FAFC]">
                 <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
