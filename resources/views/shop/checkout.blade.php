@@ -223,7 +223,7 @@
                 <button type="submit"
                         @disabled(! $hasQris && ! $hasBank)
                         :disabled="submitting || {{ (! $hasQris && ! $hasBank) ? 'true' : 'false' }}"
-                        class="mt-space-lg inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-[#818CF8] focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
+                        class="mt-space-lg inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
                     <span class="material-symbols-outlined text-[20px]" x-text="submitting ? 'progress_activity' : 'lock'">lock</span>
                     <span x-text="submitting ? 'Memproses Pesanan...' : 'Lanjut ke Pembayaran'">Lanjut ke Pembayaran</span>
                 </button>
