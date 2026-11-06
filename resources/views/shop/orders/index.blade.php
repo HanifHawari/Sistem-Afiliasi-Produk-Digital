@@ -77,13 +77,13 @@
                     <div class="mt-space-xs flex flex-col gap-2 border-t border-slate-100 pt-space-sm">
                         @if ($order->status === OrderStatus::Pending)
                             <a href="{{ route('shop.orders.pay', $order) }}"
-                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#4F46E5] px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-[#4338CA] active:scale-[0.98]">
+                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98]">
                                 <span class="material-symbols-outlined text-[16px]">payments</span>
                                 <span>Bayar</span>
                             </a>
                         @elseif ($order->status === OrderStatus::Rejected)
                             <a href="{{ route('shop.orders.pay', $order) }}"
-                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#4F46E5] px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-[#4338CA] active:scale-[0.98]">
+                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98]">
                                 <span class="material-symbols-outlined text-[16px]">upload_file</span>
                                 <span>Upload ulang bukti</span>
                             </a>
@@ -157,13 +157,13 @@
                                     <div class="inline-flex items-center justify-end gap-2">
                                         @if ($order->status === OrderStatus::Pending)
                                             <a href="{{ route('shop.orders.pay', $order) }}"
-                                               class="inline-flex items-center gap-1 rounded-lg bg-[#4F46E5] px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-[#4338CA]">
+                                               class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700">
                                                 <span class="material-symbols-outlined text-[15px]">payments</span>
                                                 <span>Bayar</span>
                                             </a>
                                         @elseif ($order->status === OrderStatus::Rejected)
                                             <a href="{{ route('shop.orders.pay', $order) }}"
-                                               class="inline-flex items-center gap-1 rounded-lg bg-[#4F46E5] px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-[#4338CA]">
+                                               class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700">
                                                 <span class="material-symbols-outlined text-[15px]">upload_file</span>
                                                 <span>Upload ulang bukti</span>
                                             </a>
@@ -196,7 +196,8 @@
                     dari <span class="tabular font-semibold text-[#0F172A]">{{ $orders->total() }}</span> pesanan
                 </p>
 
-                <div class="flex flex-wrap items-center gap-1">
+                {{-- HP: cukup Sebelumnya / Berikutnya; nomor halaman tampil mulai tablet --}}
+                <div class="flex flex-wrap items-center justify-center gap-1">
                     @if ($orders->onFirstPage())
                         <span class="inline-flex items-center rounded-lg px-2.5 py-1.5 font-label-sm text-label-sm text-outline opacity-50">Sebelumnya</span>
                     @else
@@ -206,8 +207,8 @@
                     @foreach ($orders->getUrlRange(1, $orders->lastPage()) as $page => $url)
                         <a href="{{ $url }}"
                            @class([
-                               'tabular inline-flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-2 font-label-sm text-label-sm transition',
-                               'bg-[#4F46E5] text-white shadow-sm' => $page === $orders->currentPage(),
+                               'tabular hidden h-8 min-w-[2rem] items-center justify-center rounded-lg px-2 font-label-sm text-label-sm transition sm:inline-flex',
+                               'bg-blue-600 text-white shadow-sm' => $page === $orders->currentPage(),
                                'bg-surface-container-low text-on-surface-variant hover:bg-surface-container' => $page !== $orders->currentPage(),
                            ])>
                             {{ $page }}
@@ -233,7 +234,7 @@
                 Kamu belum memiliki riwayat transaksi produk digital. Yuk jelajahi katalog produk pilihan kami.
             </p>
             <a href="{{ route('shop.products.index') }}"
-               class="mt-space-md inline-flex items-center gap-1.5 rounded-lg bg-[#4F46E5] px-4 py-2.5 font-label-md text-label-md text-white shadow-sm transition hover:bg-[#4338CA]">
+               class="mt-space-md inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-700">
                 <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
                 <span>Lihat Katalog Produk</span>
             </a>

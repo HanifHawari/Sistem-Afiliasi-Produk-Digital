@@ -74,6 +74,8 @@ class DatabaseSeeder extends Seeder
             'description' => 'Deskripsi contoh untuk '.$p[0].'.',
             'price' => $p[2],
             'commission_rate' => $p[3],
+            // File PDF contoh supaya alur beli -> unduh bisa langsung dicoba
+            'file_path' => $this->fakeProductFile(Str::slug($p[0]), $p[0]),
         ]));
 
         $products->first()->promoMaterials()->create([
@@ -259,6 +261,40 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+    }
+
+    /**
+     * PDF satu halaman berisi nama produk, sebagai file produk digital contoh (disk local/privat).
+     */
+    private function fakeProductFile(string $slug, string $name): string
+    {
+        $text = str_replace(['\\', '(', ')'], ['\\\\', '\\(', '\\)'], 'File contoh: '.$name);
+        $stream = "BT /F1 16 Tf 56 770 Td ({$text}) Tj ET";
+        $objects = [
+            '<< /Type /Catalog /Pages 2 0 R >>',
+            '<< /Type /Pages /Kids [3 0 R] /Count 1 >>',
+            '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>',
+            '<< /Length '.strlen($stream)." >>\nstream\n{$stream}\nendstream",
+            '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>',
+        ];
+
+        $pdf = "%PDF-1.4\n";
+        $offsets = [];
+        foreach ($objects as $i => $object) {
+            $offsets[] = strlen($pdf);
+            $pdf .= ($i + 1)." 0 obj\n{$object}\nendobj\n";
+        }
+        $xref = strlen($pdf);
+        $pdf .= "xref\n0 ".(count($objects) + 1)."\n0000000000 65535 f \n";
+        foreach ($offsets as $offset) {
+            $pdf .= sprintf("%010d 00000 n \n", $offset);
+        }
+        $pdf .= 'trailer << /Size '.(count($objects) + 1)." /Root 1 0 R >>\nstartxref\n{$xref}\n%%EOF\n";
+
+        $path = "products/files/{$slug}.pdf";
+        Storage::disk('local')->put($path, $pdf);
+
+        return $path;
     }
 
     /**

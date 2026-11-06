@@ -88,7 +88,7 @@
                             </p>
                             <div class="mt-space-md">
                                 <a href="{{ route('shop.orders.pay', $order) }}"
-                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#4F46E5] px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-[#818CF8] focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
+                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
                                     <span class="material-symbols-outlined text-[20px]">payments</span>
                                     <span>Bayar</span>
                                 </a>
@@ -125,7 +125,7 @@
                             @endif
                             <div class="mt-space-md">
                                 <a href="{{ route('shop.orders.pay', $order) }}"
-                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#4F46E5] px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-[#818CF8] focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
+                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
                                     <span class="material-symbols-outlined text-[20px]">upload_file</span>
                                     <span>Upload ulang bukti</span>
                                 </a>
