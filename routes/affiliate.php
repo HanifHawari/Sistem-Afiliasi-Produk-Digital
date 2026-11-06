@@ -4,6 +4,7 @@ use App\Http\Controllers\Affiliate\BankAccountController;
 use App\Http\Controllers\Affiliate\DashboardController;
 use App\Http\Controllers\Affiliate\LinkController;
 use App\Http\Controllers\Affiliate\ProductController;
+use App\Http\Controllers\Affiliate\PromoMaterialController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,7 +20,8 @@ Route::get('/', DashboardController::class)->name('dashboard');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::post('/products/{product}/links', [ProductController::class, 'generateLink'])->name('products.generate-link');
 Route::get('/links', [LinkController::class, 'index'])->name('links.index');
-Route::view('/promo-materials', 'affiliate.promo-materials.index')->name('promo-materials.index');
+Route::get('/promo-materials', [PromoMaterialController::class, 'index'])->name('promo-materials.index');
+Route::get('/promo-materials/{promoMaterial}/download', [PromoMaterialController::class, 'download'])->name('promo-materials.download');
 Route::view('/withdrawals', 'affiliate.withdrawals.index')->name('withdrawals.index');
 Route::get('/bank-account', [BankAccountController::class, 'edit'])->name('bank-account.edit');
 Route::put('/bank-account', [BankAccountController::class, 'update'])->name('bank-account.update');
