@@ -42,12 +42,12 @@
                 {{-- HP: latar biru bergambar samar --}}
                 <div class="lg:hidden">@include('partials.auth-backdrop')</div>
 
-                <a href="{{ route('shop.home') }}" class="anim-fade relative mb-7 flex flex-col items-center text-center lg:hidden">
+                <a href="{{ route('shop.home') }}" class="auth-brand anim-fade relative mb-7 flex flex-col items-center text-center lg:hidden">
                     <x-application-logo inverse class="h-14 w-14 rounded-2xl text-[1.75rem]" />
                     <span class="mt-3 text-xl font-bold tracking-tight text-white">{{ config('app.name') }}</span>
                 </a>
 
-                <div class="anim-rise relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl shadow-blue-950/30 sm:p-8 lg:rounded-2xl lg:border lg:border-slate-200/80 lg:p-10 lg:shadow-xl lg:shadow-slate-900/5">
+                <div class="auth-card anim-rise relative w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl shadow-blue-950/30 sm:p-8 lg:rounded-2xl lg:border lg:border-slate-200/80 lg:p-10 lg:shadow-xl lg:shadow-slate-900/5">
                     @if ($title)
                         <h2 class="text-2xl font-bold tracking-tight text-slate-900">{{ $title }}</h2>
                     @endif

@@ -145,6 +145,9 @@ class ProductManagementTest extends TestCase
 
     public function test_dashboard_renders_with_data(): void
     {
+        // Seeder membuat & membersihkan file contoh: jangan sentuh folder storage asli
+        Storage::fake('local');
+        Storage::fake('public');
         $this->seed();
 
         $this->actingAs(User::firstWhere('email', 'hanif@afiliasi.test'))
