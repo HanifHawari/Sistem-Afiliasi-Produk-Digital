@@ -93,3 +93,4 @@ Helper `rupiah(150000)` → `Rp 150.000`.
 Rencana lengkap & struktur database: [docs/RENCANA-KERANGKA.md](docs/RENCANA-KERANGKA.md).
 Acuan desain: [design/stitch/](design/stitch/).
 Panduan alur kerja tim: [CONTRIBUTING.md](CONTRIBUTING.md).
+Integrasi backend referral, checkout, dan statistik afiliator: [docs/REFERRAL-INTEGRATION.md](docs/REFERRAL-INTEGRATION.md).

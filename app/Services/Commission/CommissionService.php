@@ -7,6 +7,7 @@ use App\Enums\WithdrawalStatus;
 use App\Models\Commission;
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 /**
  * PIC: Muhammad Fadhil AL Fikry (feature/referral-tracking)
@@ -23,24 +24,45 @@ class CommissionService
      */
     public function createForOrder(Order $order): ?Commission
     {
-        // TODO (Fadhil): pastikan order sudah paid, cek afiliator aktif,
-        //               dan bungkus dalam DB::transaction bila perlu.
-        if (! $order->referral_link_id) {
-            return null;
-        }
+        return DB::transaction(function () use ($order) {
+            // Baca ulang agar status/relasi lama pada instance pemanggil tidak dipakai.
+            $order = Order::whereKey($order->id)->lockForUpdate()->first();
 
-        $order->loadMissing('product', 'referralLink');
-        $rate = $order->product->commission_rate;
+            if (! $order || ! $order->isPaid() || ! $order->referral_link_id) {
+                return null;
+            }
 
-        return Commission::firstOrCreate(
-            ['order_id' => $order->id], // 1 order hanya boleh 1 komisi
-            [
-                'affiliate_id' => $order->referralLink->affiliate_id,
-                'rate' => $rate,
-                'amount' => (int) round($order->amount * $rate / 100),
-                'status' => CommissionStatus::Approved,
-            ],
-        );
+            // Pemanggilan ulang mempertahankan nominal komisi yang sudah tercatat.
+            if ($existing = $order->commission()->first()) {
+                return $existing;
+            }
+
+            $order->load('product', 'referralLink.affiliate');
+            $link = $order->referralLink;
+            $affiliate = $link?->affiliate;
+
+            if (! $affiliate || ! $affiliate->isAffiliate() || ! $affiliate->is_active
+                || $affiliate->id === $order->customer_id
+                || $link->product_id !== $order->product_id || ! $order->product) {
+                return null;
+            }
+
+            $rate = $order->product->commission_rate;
+
+            if ($rate < 0 || $rate > 100 || $order->amount < 0) {
+                return null;
+            }
+
+            return Commission::firstOrCreate(
+                ['order_id' => $order->id],
+                [
+                    'affiliate_id' => $affiliate->id,
+                    'rate' => $rate,
+                    'amount' => (int) round($order->amount * $rate / 100),
+                    'status' => CommissionStatus::Approved,
+                ],
+            );
+        });
     }
 
     /**
