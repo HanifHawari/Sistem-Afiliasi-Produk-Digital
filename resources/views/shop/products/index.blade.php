@@ -61,12 +61,12 @@
                     name="q"
                     value="{{ $search }}"
                     placeholder="Cari produk digital..."
-                    class="w-full rounded-lg border border-slate-300 bg-surface-container-lowest py-2 pl-9 pr-3 font-body-md text-body-md text-on-surface placeholder:text-slate-400 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-[#818CF8]"
+                    class="w-full rounded-lg border border-slate-300 bg-surface-container-lowest py-2 pl-9 pr-3 font-body-md text-body-md text-on-surface placeholder:text-slate-400 focus:border-primary-container focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
             </div>
             <button type="submit"
                     :disabled="submitting"
-                    class="inline-flex shrink-0 items-center justify-center rounded-lg bg-primary-container px-3.5 py-2 font-label-sm text-label-sm text-on-primary shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-[#818CF8] disabled:cursor-not-allowed disabled:opacity-50">
+                    class="inline-flex shrink-0 items-center justify-center rounded-lg bg-primary-container px-3.5 py-2 font-label-sm text-label-sm text-on-primary shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:cursor-not-allowed disabled:opacity-50">
                 <span x-text="submitting ? '...' : 'Cari'">Cari</span>
             </button>
         </form>
@@ -131,7 +131,7 @@
                                 </div>
 
                                 <a href="{{ route('shop.products.show', $product) }}"
-                                   class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary-container px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-[#4338CA] focus:outline-none focus:ring-2 focus:ring-[#818CF8] focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
+                                   class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-primary-container px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
                                     <span>Lihat detail</span>
                                     <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
                                 </a>
@@ -150,7 +150,8 @@
                     dari <span class="tabular font-semibold text-on-surface">{{ $products->total() }}</span> produk
                 </p>
 
-                <div class="flex flex-wrap items-center gap-1">
+                {{-- HP: cukup Sebelumnya / Berikutnya; nomor halaman tampil mulai tablet --}}
+                <div class="flex flex-wrap items-center justify-center gap-1">
                     @if ($products->onFirstPage())
                         <span class="inline-flex items-center rounded-lg px-2.5 py-1.5 font-label-sm text-label-sm text-outline opacity-50">Sebelumnya</span>
                     @else
@@ -160,7 +161,7 @@
                     @foreach ($products->getUrlRange(1, $products->lastPage()) as $page => $url)
                         <a href="{{ $url }}"
                            @class([
-                               'tabular inline-flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-2 font-label-sm text-label-sm transition',
+                               'tabular hidden h-8 min-w-[2rem] items-center justify-center rounded-lg px-2 font-label-sm text-label-sm transition sm:inline-flex',
                                'bg-primary-container text-on-primary shadow-sm' => $page === $products->currentPage(),
                                'bg-surface-container-low text-on-surface-variant hover:bg-surface-container' => $page !== $products->currentPage(),
                            ])>
@@ -194,7 +195,7 @@
             </p>
             @if ($search !== '' || $selectedCategory !== '')
                 <a href="{{ route('shop.products.index') }}"
-                   class="mt-space-md inline-flex items-center gap-1.5 rounded-lg bg-primary-container px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-[#4338CA]">
+                   class="mt-space-md inline-flex items-center gap-1.5 rounded-lg bg-primary-container px-4 py-2.5 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-700">
                     <span class="material-symbols-outlined text-[18px]">refresh</span>
                     <span>Tampilkan Semua Produk</span>
                 </a>

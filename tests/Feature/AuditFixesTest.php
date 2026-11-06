@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
 class AuditFixesTest extends TestCase
@@ -110,6 +111,19 @@ class AuditFixesTest extends TestCase
         foreach (Order::whereNotNull('payment_proof')->pluck('payment_proof') as $proof) {
             Storage::disk('local')->assertExists($proof);
         }
+
+        // Setiap produk contoh punya file yang bisa diunduh pembeli setelah lunas
+        foreach (Product::all() as $product) {
+            $this->assertNotNull($product->file_path, $product->name.' tidak punya file');
+            Storage::disk('local')->assertExists($product->file_path);
+            $this->assertStringStartsWith('%PDF-', Storage::disk('local')->get($product->file_path));
+        }
+
+        $paid = Order::where('status', 'paid')->where('customer_id', User::firstWhere('email', 'bagus@afiliasi.test')->id)->first();
+        $this->actingAs($paid->customer)
+            ->get(URL::temporarySignedRoute('shop.orders.download', now()->addMinutes(10), ['order' => $paid]))
+            ->assertOk()
+            ->assertDownload();
     }
 
     public function test_password_fields_have_show_password_button(): void
