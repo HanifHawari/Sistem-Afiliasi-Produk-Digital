@@ -48,6 +48,13 @@ class RoleAccessTest extends TestCase
 
     public function test_customer_pages(): void
     {
+        Product::create([
+            'name' => 'Contoh Produk',
+            'slug' => 'contoh-produk',
+            'price' => 100000,
+            'commission_rate' => 30,
+        ]);
+
         $this->get('/')->assertOk();
         $this->get('/products/contoh-produk')->assertOk();
         $this->get('/orders')->assertRedirect(route('login'));
