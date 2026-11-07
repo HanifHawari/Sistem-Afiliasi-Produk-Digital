@@ -5,6 +5,7 @@ use App\Http\Controllers\Affiliate\DashboardController;
 use App\Http\Controllers\Affiliate\LinkController;
 use App\Http\Controllers\Affiliate\ProductController;
 use App\Http\Controllers\Affiliate\PromoMaterialController;
+use App\Http\Controllers\Affiliate\WithdrawalController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,6 +23,7 @@ Route::post('/products/{product}/links', [ProductController::class, 'generateLin
 Route::get('/links', [LinkController::class, 'index'])->name('links.index');
 Route::get('/promo-materials', [PromoMaterialController::class, 'index'])->name('promo-materials.index');
 Route::get('/promo-materials/{promoMaterial}/download', [PromoMaterialController::class, 'download'])->name('promo-materials.download');
-Route::view('/withdrawals', 'affiliate.withdrawals.index')->name('withdrawals.index');
+Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
+Route::post('/withdrawals', [WithdrawalController::class, 'store'])->name('withdrawals.store');
 Route::get('/bank-account', [BankAccountController::class, 'edit'])->name('bank-account.edit');
 Route::put('/bank-account', [BankAccountController::class, 'update'])->name('bank-account.update');
