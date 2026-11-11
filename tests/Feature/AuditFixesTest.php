@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Enums\PaymentMethod;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ReferralLink;
 use App\Models\User;
+use App\Models\Withdrawal;
+use App\Services\Commission\CommissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -132,6 +135,16 @@ class AuditFixesTest extends TestCase
             $this->assertLessThanOrEqual(1600, $width);
         }
         $this->assertNotNull(Product::firstWhere('slug', 'mastering-tiktok-organic-affiliate-2025')->thumbnail);
+
+        // Data contoh harus masuk akal: penjualan tiap link tidak melebihi kliknya (konversi maksimal 100%),
+        // setiap pencairan contoh memenuhi minimal Rp 50.000, dan tidak ada saldo afiliator yang negatif
+        foreach (ReferralLink::withCount('clicks')->withCount(['orders as paid_count' => fn ($q) => $q->where('status', 'paid')])->get() as $link) {
+            $this->assertLessThanOrEqual($link->clicks_count, $link->paid_count, "Link {$link->code}: penjualan melebihi klik");
+        }
+        $this->assertGreaterThanOrEqual(50000, Withdrawal::min('amount'));
+        foreach (User::where('role', 'affiliate')->get() as $affiliate) {
+            $this->assertGreaterThanOrEqual(0, app(CommissionService::class)->balanceFor($affiliate), "Saldo {$affiliate->email} negatif");
+        }
 
         // Setiap produk contoh punya deskripsi dan file yang bisa diunduh pembeli setelah lunas
         foreach (Product::all() as $product) {

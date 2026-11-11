@@ -10,6 +10,7 @@ use App\Enums\WithdrawalStatus;
 use App\Models\Order;
 use App\Models\PaymentAccount;
 use App\Models\Product;
+use App\Models\ReferralLink;
 use App\Models\User;
 use App\Services\Commission\CommissionService;
 use App\Services\Media\ProductThumbnail;
@@ -132,16 +133,10 @@ class DatabaseSeeder extends Seeder
             ]),
         ]);
 
-        // Klik contoh di link Gibran (supaya angka konversi terlihat)
-        $channels = ['tiktok', 'instagram', 'wa', 'facebook', null];
+        // Klik contoh di link Gibran. Jumlahnya selalu di atas jumlah penjualan link itu,
+        // supaya rasio konversi yang tampil masuk akal (tidak lebih dari 100%).
         foreach ($links->values() as $i => $link) {
-            foreach (range(1, [40, 25, 12, 8][$i] ?? 5) as $n) {
-                $link->clicks()->create([
-                    'ip_address' => '10.0.0.'.$n,
-                    'channel' => $channels[$n % count($channels)],
-                    'clicked_at' => now()->subHours($n * 3),
-                ]);
-            }
+            $this->seedClicks($link, [40, 25, 12, 8, 22, 18, 14, 16, 11][$i] ?? 10);
         }
 
         // Afiliator kedua: satu link produk
@@ -151,8 +146,7 @@ class DatabaseSeeder extends Seeder
             'phone' => '085261337840',
         ]);
         $fadhil->affiliateProfile()->create(['bank_name' => 'MANDIRI', 'account_number' => '1370045812', 'account_holder' => 'Fadhil']);
-        $fadhil->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'FADHIL2'])
-            ->clicks()->create(['channel' => 'instagram', 'clicked_at' => now()->subDay()]);
+        $this->seedClicks($fadhil->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'FADHIL2']), 30);
 
         // Order contoh dengan berbagai status, supaya halaman admin bisa langsung diuji
         $orders = [
@@ -195,11 +189,11 @@ class DatabaseSeeder extends Seeder
         // Riwayat penjualan 45 hari terakhir, supaya laporan & grafik punya data
         $this->seedSalesHistory($products, [$links, $fadhil->referralLinks()->get()->keyBy('product_id')], $customer, $qris, $bca);
 
-        // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Gibran)
+        // Pengajuan pencairan contoh: tiap pengajuan minimal Rp 50.000, total 185.000 (masih di bawah komisi Gibran)
         $bank = $affiliate->affiliateProfile->only(['bank_name', 'account_number', 'account_holder']);
 
         $paid = $affiliate->withdrawals()->create($bank + [
-            'amount' => 15000,
+            'amount' => 60000,
             'status' => WithdrawalStatus::Paid,
             'processed_by' => $admin->id,
             'processed_at' => now(),
@@ -208,21 +202,37 @@ class DatabaseSeeder extends Seeder
         $paid->update(['transfer_proof' => $this->fakeReceipt("withdrawal-proofs/WD-{$paid->id}.png", [
             'Ke      : BCA 7712045318',
             'a.n     : Gibran',
-            'Nominal : Rp 15.000',
+            'Nominal : Rp 60.000',
             'Berita  : Pencairan komisi',
         ])]);
 
         $affiliate->withdrawals()->create($bank + [
-            'amount' => 10000,
+            'amount' => 50000,
             'status' => WithdrawalStatus::Approved,
             'processed_by' => $admin->id,
             'processed_at' => now(),
         ]);
 
         $affiliate->withdrawals()->create($bank + [
-            'amount' => 20000,
+            'amount' => 75000,
             'status' => WithdrawalStatus::Pending,
         ]);
+    }
+
+    /**
+     * Klik contoh pada satu link referral, tersebar di beberapa channel dan jam.
+     */
+    private function seedClicks(ReferralLink $link, int $count): void
+    {
+        $channels = ['tiktok', 'instagram', 'wa', 'facebook', null];
+
+        foreach (range(1, $count) as $n) {
+            $link->clicks()->create([
+                'ip_address' => '10.0.0.'.$n,
+                'channel' => $channels[$n % count($channels)],
+                'clicked_at' => now()->subHours($n * 3),
+            ]);
+        }
     }
 
     /**
