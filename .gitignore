@@ -4,17 +4,33 @@
 !.env.example
 
 # Dependencies
-node_modules/
-vendor/
+/node_modules
+/vendor
 
 # Build / cache
-dist/
-build/
-storage/*.key
+/public/build
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+.phpunit.result.cache
+/.phpunit.cache
 *.log
 
-# OS / Editor
+# Editor / tools
+/.vscode
+/.idea
+/.cursor/
+/.codex
+/.zed
+/.nova
+.phpactor.json
+_ide_helper.php
+/auth.json
+Homestead.json
+Homestead.yaml
+
+# OS
 .DS_Store
 Thumbs.db
-.vscode/
-.idea/
