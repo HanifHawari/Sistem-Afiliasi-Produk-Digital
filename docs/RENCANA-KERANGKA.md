@@ -183,15 +183,31 @@ Semua pengguna (admin, afiliator, customer) bisa mengganti foto di halaman **Pro
 - Tampilkan di mana saja dengan `<x-avatar :user="$user" class="h-10 w-10" />` (tanpa foto = inisial nama).
 - Setelah pull: jalankan `php artisan migrate` (atau `migrate:fresh --seed`) dan pastikan `php artisan storage:link` sudah pernah dijalankan.
 
+### Gambar sampul produk
+Admin mengunggah gambar sampul di **Produk → Edit → Gambar sampul** (bukan di kolom *File produk*, yang berisi file unduhan pembeli).
+- Gambar otomatis dipotong dari tengah ke rasio **16:10** dan diperkecil ke lebar maksimal **1600 px**, lalu disimpan sebagai WebP di `storage/app/public/products/thumbnails`. Ukuran ideal: 1600×1000 px.
+- Batas unggah: JPG/PNG/WebP, maks. 5 MB, minimal 640×400 px, maksimal 4096 px per sisi.
+- Kode: `App\Services\Media\ProductThumbnail`. Tampilkan gambarnya dengan `asset('storage/'.$product->thumbnail)` di dalam kotak `aspect-[16/10]` + `object-cover`.
+- Gambar produk contoh disimpan di `database/seeders/sampul/` dengan nama file = slug produk, dan otomatis dipasang saat `migrate:fresh --seed`. Daftar nama filenya ada di README folder itu.
+- Ekstensi PHP **GD** bersifat opsional. Kalau aktif (cek: `php -m`), gambar dipotong dan diperkecil. Kalau tidak, gambar disimpan apa adanya dan katalog tetap menampilkannya 16:10 lewat CSS, hanya filenya lebih berat.
+
+### Keamanan & halaman error (hasil audit November 2026)
+Daftar pengaman dan checklist deploy ada di README, bagian **Keamanan** dan **Deploy ke server**. Yang perlu diingat saat coding:
+- Data ke JavaScript atau Alpine selalu lewat `@js(...)`. Pola `'{{ $nilai }}'` di dalam `x-data` bisa disusupi tanda petik.
+- Di elemen HTML biasa, `:disabled="$variabel"` dibaca Alpine sebagai JavaScript, bukan PHP. Pakai `@disabled($variabel)`.
+- Beberapa route sekarang dibatasi lajunya (`throttle:`). Kalau melewati batas, pengguna melihat halaman 429.
+- Halaman error (403, 404, 419, 429, 500, 503) ada di `resources/views/errors/`. Halamannya berdiri sendiri dan tidak memakai layout aplikasi.
+- Komponen `<x-placeholder>` dan view `shop/home` sudah dihapus karena tidak dipakai lagi.
+
 ### Akun contoh (password: `password`)
 | Nama | Peran | Email |
 |---|---|---|
-| Hanif | Admin | hanif@afiliasi.test |
+| Hanif | Admin | atmind@afiliasi.test |
 | Gibran | Afiliator utama (punya penjualan, komisi, pencairan) | gibran@afiliasi.test |
 | Fadhil | Afiliator kedua | fadhil@afiliasi.test |
 | Bagus | Customer (pemilik semua pesanan contoh) | bagus@afiliasi.test |
 
-Akun lama (`admin@`, `afiliator@`, `customer@afiliasi.test`) **sudah tidak ada**.
+Akun lama (`hanif@`, `admin@`, `afiliator@`, `customer@afiliasi.test`) **sudah tidak ada**.
 
 ### Yang perlu dijalankan setiap anggota setelah pembaruan ini di-merge
 ```
