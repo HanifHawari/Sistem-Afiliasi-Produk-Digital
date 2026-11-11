@@ -12,8 +12,10 @@ use App\Models\PaymentAccount;
 use App\Models\Product;
 use App\Models\User;
 use App\Services\Commission\CommissionService;
+use App\Services\Media\ProductThumbnail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\File;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +24,7 @@ use Illuminate\Support\Str;
 /**
  * Data contoh untuk development. Semua akun memakai password: password
  *
- *   hanif@afiliasi.test   -> Admin
+ *   atmind@afiliasi.test  -> Admin
  *   gibran@afiliasi.test  -> Afiliator utama
  *   fadhil@afiliasi.test  -> Afiliator kedua
  *   bagus@afiliasi.test   -> Customer
@@ -30,6 +32,36 @@ use Illuminate\Support\Str;
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
+
+    /**
+     * Produk contoh: nama, kategori, harga, komisi (%), deskripsi.
+     * Empat pertama diambil dari desain Stitch dan dipakai order contoh di bawah; jangan ubah urutannya.
+     *
+     * @var list<array{0: string, 1: string, 2: int, 3: int, 4: string}>
+     */
+    private const PRODUCTS = [
+        ['Mastering TikTok Organic & Affiliate 2025', 'E-Course', 150000, 40,
+            'Kelas video langkah demi langkah membangun akun TikTok dari nol sampai menghasilkan komisi afiliasi, tanpa iklan berbayar.'],
+        ['Template Notion All-in-One Freelancer OS', 'Template Notion', 99000, 50,
+            'Satu ruang kerja Notion untuk mengatur klien, proyek, invoice, dan keuangan freelancer. Tinggal duplikat dan pakai.'],
+        ['Formula 100 Juta Pertama Bisnis Digital', 'Ebook', 75000, 40,
+            'Ebook 120 halaman berisi peta jalan memilih produk, membangun audiens, dan mencapai omzet 100 juta pertama.'],
+        ['Preset Lightroom & CapCut Cinematic Pack', 'Creative Assets', 120000, 35,
+            'Kumpulan 60 preset Lightroom dan 25 template CapCut bernuansa sinematik untuk konten foto dan video pendek.'],
+        ['Kelas Copywriting Jualan Online dari Nol', 'E-Course', 135000, 40,
+            'Belajar menulis caption, headline, dan halaman penjualan yang membuat calon pembeli langsung checkout. Berisi 24 video dan lembar latihan.'],
+        ['Template Canva 150+ Konten Instagram UMKM', 'Template Canva', 69000, 45,
+            'Lebih dari 150 desain feed, story, dan carousel siap edit di Canva untuk promosi, testimoni, dan katalog produk UMKM.'],
+        ['Panduan Shopee Affiliate untuk Pemula', 'Ebook', 59000, 45,
+            'Panduan praktis memilih produk laris, membuat konten yang menarik pembeli, dan menaikkan komisi Shopee Affiliate dari bulan pertama.'],
+        ['Lisensi Plugin Auto Caption Video Pendek', 'Software / License Key', 199000, 30,
+            'Lisensi seumur hidup plugin pembuat subtitle otomatis berbahasa Indonesia untuk Reels, Shorts, dan TikTok.'],
+        ['Bundle 500+ Sound Effect & Musik Bebas Royalti', 'Creative Assets', 89000, 35,
+            'Lebih dari 500 efek suara dan musik latar bebas royalti, aman dipakai untuk konten YouTube, podcast, dan iklan.'],
+    ];
+
+    /** Format gambar sampul contoh yang dicari di database/seeders/sampul, berurutan. */
+    public const THUMBNAIL_EXTENSIONS = ['webp', 'jpg', 'jpeg', 'png'];
 
     /**
      * Seed the application's database.
@@ -40,7 +72,7 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::factory()->admin()->create([
             'name' => 'Hanif',
-            'email' => 'hanif@afiliasi.test',
+            'email' => 'atmind@afiliasi.test',
             'phone' => '085264019832',
         ]);
 
@@ -61,19 +93,15 @@ class DatabaseSeeder extends Seeder
             'phone' => '082169785312',
         ]);
 
-        // Produk contoh, diambil dari desain Stitch
-        $products = collect([
-            ['Mastering TikTok Organic & Affiliate 2025', 'E-Course', 150000, 40],
-            ['Template Notion All-in-One Freelancer OS', 'Template Notion', 99000, 50],
-            ['Formula 100 Juta Pertama Bisnis Digital', 'Ebook', 75000, 40],
-            ['Preset Lightroom & CapCut Cinematic Pack', 'Creative Assets', 120000, 35],
-        ])->map(fn ($p) => Product::create([
+        $products = collect(self::PRODUCTS)->map(fn ($p) => Product::create([
             'name' => $p[0],
             'slug' => Str::slug($p[0]),
             'category' => $p[1],
-            'description' => 'Deskripsi contoh untuk '.$p[0].'.',
+            'description' => $p[4],
             'price' => $p[2],
             'commission_rate' => $p[3],
+            // Gambar sampul dari database/seeders/sampul/{slug}.webp|jpg|png (kosong jika filenya belum ada)
+            'thumbnail' => $this->sampleThumbnail(Str::slug($p[0])),
             // File PDF contoh supaya alur beli -> unduh bisa langsung dicoba
             'file_path' => $this->fakeProductFile(Str::slug($p[0]), $p[0]),
         ]));
@@ -261,6 +289,24 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+    }
+
+    /**
+     * Gambar sampul contoh. Taruh gambarnya di folder database/seeders/sampul dengan nama = slug produk,
+     * misalnya mastering-tiktok-organic-affiliate-2025.webp. Gambar diproses seperti unggahan admin
+     * (dipotong 16:10, lebar maksimal 1600 px). Produk tanpa file di folder itu tidak diberi gambar.
+     */
+    private function sampleThumbnail(string $slug): ?string
+    {
+        foreach (self::THUMBNAIL_EXTENSIONS as $extension) {
+            $path = database_path("seeders/sampul/{$slug}.{$extension}");
+
+            if (is_file($path)) {
+                return app(ProductThumbnail::class)->store(new File($path));
+            }
+        }
+
+        return null;
     }
 
     /**

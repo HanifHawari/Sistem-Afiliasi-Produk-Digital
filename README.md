@@ -51,7 +51,7 @@ Buka http://localhost:8000
 ### Akun contoh (password: `password`)
 | Email | Role |
 |---|---|
-| hanif@afiliasi.test | Admin |
+| atmind@afiliasi.test | Admin |
 | gibran@afiliasi.test | Afiliator |
 | fadhil@afiliasi.test | Afiliator |
 | bagus@afiliasi.test | Customer |
@@ -89,6 +89,54 @@ Komponen siap pakai: `<x-page-header>`, `<x-stat-grid>` + `<x-stat-card>` (kartu
 `<x-filter-menu>` (tab status, jadi tombol menu di HP), `<x-pager>` (navigasi "1-5 dari N" di bawah tabel), `<x-badge>`,
 dan class CSS `.card`, `.btn-primary`, `.btn-outline`, `.data-table`, `.pill-*` di `resources/css/app.css`.
 Helper `rupiah(150000)` → `Rp 150.000`.
+
+## Keamanan
+Pengaman yang sudah terpasang, supaya tidak perlu dibuat ulang di tiap fitur:
+
+| Pengaman | Letak |
+|---|---|
+| Header keamanan di semua respons (anti-clickjacking, `nosniff`, CSP dasar, HSTS di HTTPS) | `app/Http/Middleware/AddSecurityHeaders.php` |
+| Akun yang dinonaktifkan admin langsung keluar dan tidak bisa login | `EnsureAccountIsActive`, `LoginRequest` |
+| Ganti atau reset password memutus sesi di perangkat lain | `authenticateSessions()` di `bootstrap/app.php` |
+| Pembatasan laju: login, daftar, lupa password, checkout, unggah bukti, link referral, pencairan | middleware `throttle:` di `routes/` |
+| Hanya host milik `APP_URL` yang dilayani di production | `trustHosts()` di `bootstrap/app.php` |
+| File yang diunggah ke folder publik dibatasi ke gambar atau video | validasi `mimes:` di controller terkait |
+| Bukti bayar, bukti transfer, dan file produk disimpan privat | disk `local` (`storage/app/private`) |
+| Keputusan admin (setujui, tolak, bayar) tidak bisa diproses dua kali | `lockForUpdate()` di `Admin/OrderController` dan `Admin/WithdrawalController` |
+| Ekspor CSV aman dari rumus Excel | `ReportController::csvText()` |
+
+Aturan saat menambah fitur:
+- Tampilkan data dengan `{{ }}`, jangan `{!! !!}`. Data yang masuk ke JavaScript atau Alpine wajib lewat `@js(...)`, bukan `'{{ ... }}'`.
+- Setiap form selain GET wajib `@csrf`, dan setiap halaman data milik pengguna wajib memeriksa pemiliknya.
+- File yang disimpan ke disk `public` wajib divalidasi jenisnya dengan `mimes:`.
+
+## Deploy ke server
+```bash
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+php artisan storage:link
+npm ci && npm run build        # atau unggah folder public/build dari laptop
+php artisan optimize
+```
+
+Isi `.env` di server:
+
+| Variabel | Nilai | Akibat jika salah |
+|---|---|---|
+| `APP_ENV` | `production` | Pengaman host tidak aktif |
+| `APP_DEBUG` | `false` | Detail error dan isi `.env` bisa terlihat pengunjung |
+| `APP_URL` | alamat asli, mis. `https://domainmu.my.id` | **Semua halaman menjadi 400 Bad Request**, karena hanya host ini yang dilayani |
+| `TRUSTED_PROXIES` | `*` atau IP proxy, **hanya** jika di belakang Nginx proxy, Cloudflare Tunnel, atau load balancer | Tampilan rusak (CSS diblokir) dan link unduhan ditolak |
+| `MAIL_*` | SMTP dari hosting | Email reset password hanya tercatat di log |
+
+Catatan lain:
+- Arahkan *document root* ke folder `public/`, bukan ke folder utama project.
+- Jangan jalankan `php artisan db:seed` di server. Akun contoh memakai password `password`. Kalau terlanjur, ganti semua password lewat halaman Profil.
+- Folder `storage/` dan `bootstrap/cache/` harus bisa ditulis web server.
+- Naikkan `upload_max_filesize` dan `post_max_size` PHP ke 64M supaya unggah file produk 50 MB tidak gagal.
+- Dengan `APP_URL` berawalan `https://`, cookie sesi otomatis hanya dikirim lewat HTTPS.
+- Ekstensi PHP GD bersifat opsional (dipakai untuk memperkecil gambar sampul).
+- Cadangkan database dan folder `storage/app` secara rutin.
 
 Rencana lengkap & struktur database: [docs/RENCANA-KERANGKA.md](docs/RENCANA-KERANGKA.md).
 Acuan desain: [design/stitch/](design/stitch/).

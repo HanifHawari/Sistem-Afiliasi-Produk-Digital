@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\PromoMaterial;
 use App\Models\User;
 use App\Models\Withdrawal;
+use App\Services\Media\ProductThumbnail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -59,14 +60,14 @@ class ProductController extends Controller
         return view('admin.products.index', compact('products', 'pendingWithdrawals', 'stats', 'categories', 'search'));
     }
 
-    public function store(ProductRequest $request): RedirectResponse
+    public function store(ProductRequest $request, ProductThumbnail $thumbnails): RedirectResponse
     {
         $data = $request->safe()->except(['thumbnail', 'file']);
         $data['slug'] = $this->uniqueSlug($data['name']);
         $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('products/thumbnails', 'public');
+            $data['thumbnail'] = $thumbnails->store($request->file('thumbnail'));
         }
         if ($request->hasFile('file')) {
             $data['file_path'] = $request->file('file')->store('products/files', 'local');
@@ -79,7 +80,7 @@ class ProductController extends Controller
             ->with('status_detail', "{$product->name} sekarang bisa dipromosikan afiliator.");
     }
 
-    public function update(ProductRequest $request, Product $product): RedirectResponse
+    public function update(ProductRequest $request, Product $product, ProductThumbnail $thumbnails): RedirectResponse
     {
         $data = $request->safe()->except(['thumbnail', 'file']);
         $data['is_active'] = $request->boolean('is_active');
@@ -88,8 +89,9 @@ class ProductController extends Controller
             $data['slug'] = $this->uniqueSlug($data['name'], $product->id);
         }
         if ($request->hasFile('thumbnail')) {
+            // Simpan yang baru dulu: kalau gagal diproses, gambar lama tidak ikut hilang
+            $data['thumbnail'] = $thumbnails->store($request->file('thumbnail'));
             Storage::disk('public')->delete((string) $product->thumbnail);
-            $data['thumbnail'] = $request->file('thumbnail')->store('products/thumbnails', 'public');
         }
         if ($request->hasFile('file')) {
             Storage::disk('local')->delete((string) $product->file_path);
