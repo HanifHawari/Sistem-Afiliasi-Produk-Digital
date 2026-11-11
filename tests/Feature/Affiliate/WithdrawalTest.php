@@ -33,13 +33,13 @@ class WithdrawalTest extends TestCase
         static $counter = 1;
         $customer = User::factory()->customer()->create();
         $product = Product::create([
-            'name' => 'Produk Digital Test ' . $counter,
-            'slug' => 'produk-digital-test-' . $counter,
+            'name' => 'Produk Digital Test '.$counter,
+            'slug' => 'produk-digital-test-'.$counter,
             'price' => $amount,
             'commission_rate' => 100,
         ]);
         $order = Order::create([
-            'invoice_number' => 'INV-TEST-WITHDRAWAL-' . $counter++,
+            'invoice_number' => 'INV-TEST-WITHDRAWAL-'.$counter++,
             'customer_id' => $customer->id,
             'product_id' => $product->id,
             'amount' => $amount,
@@ -110,7 +110,8 @@ class WithdrawalTest extends TestCase
         $response->assertOk()
             ->assertSee('Penarikan Komisi')
             ->assertSee(rupiah(75000))
-            ->assertSee('Mandiri');
+            ->assertSee('Mandiri')
+            ->assertSee('Minimal penarikan Rp 50.000.');
     }
 
     public function test_affiliate_cannot_request_withdrawal_without_complete_bank_account(): void
@@ -152,6 +153,7 @@ class WithdrawalTest extends TestCase
             'decimal' => 15000.75,
             'string' => 'lima_puluh_ribu',
             'empty' => '',
+            'below_min' => 49999,
         ];
 
         foreach ($invalidInputs as $scenario => $value) {
@@ -163,6 +165,51 @@ class WithdrawalTest extends TestCase
         }
 
         $this->assertDatabaseEmpty('withdrawals');
+    }
+
+    public function test_withdrawal_amount_below_minimum_of_50000_is_rejected(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate);
+        $this->addCommission($affiliate, 100000);
+
+        $response = $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
+            'amount' => 49999,
+        ]);
+
+        $response->assertSessionHasErrors([
+            'amount' => 'Nominal penarikan minimal Rp 50.000.',
+        ]);
+        $this->assertDatabaseEmpty('withdrawals');
+        $this->assertSame(100000, $this->commissionService->balanceFor($affiliate));
+    }
+
+    public function test_withdrawal_amount_of_50000_is_accepted_when_balance_and_bank_account_are_valid(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate, 'BCA', '1122334455', 'Siti Aminah');
+        $this->addCommission($affiliate, 100000);
+
+        $response = $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
+            'amount' => 50000,
+        ]);
+
+        $response->assertRedirect(route('affiliate.withdrawals.index'));
+        $response->assertSessionHas('status');
+
+        $this->assertDatabaseHas('withdrawals', [
+            'affiliate_id' => $affiliate->id,
+            'amount' => 50000,
+            'bank_name' => 'BCA',
+            'account_number' => '1122334455',
+            'account_holder' => 'Siti Aminah',
+            'status' => WithdrawalStatus::Pending->value,
+        ]);
+
+        $withdrawal = $affiliate->withdrawals()->first();
+        $this->assertNotNull($withdrawal);
+        $this->assertSame(WithdrawalStatus::Pending, $withdrawal->status);
+        $this->assertSame(50000, $this->commissionService->balanceFor($affiliate));
     }
 
     public function test_request_exceeding_available_balance_is_rejected(): void
@@ -187,7 +234,7 @@ class WithdrawalTest extends TestCase
         $this->addCommission($affiliate, 100000);
 
         $response = $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 45000,
+            'amount' => 60000,
         ]);
 
         $response->assertRedirect(route('affiliate.withdrawals.index'));
@@ -195,7 +242,7 @@ class WithdrawalTest extends TestCase
 
         $this->assertDatabaseHas('withdrawals', [
             'affiliate_id' => $affiliate->id,
-            'amount' => 45000,
+            'amount' => 60000,
             'bank_name' => 'BCA',
             'account_number' => '1122334455',
             'account_holder' => 'Siti Aminah',
@@ -210,7 +257,7 @@ class WithdrawalTest extends TestCase
         $this->addCommission($affiliate, 50000);
 
         $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 20000,
+            'amount' => 50000,
         ]);
 
         $withdrawal = $affiliate->withdrawals()->first();
@@ -225,7 +272,7 @@ class WithdrawalTest extends TestCase
         $this->addCommission($affiliate, 80000);
 
         $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 30000,
+            'amount' => 50000,
         ]);
 
         $withdrawal = $affiliate->withdrawals()->first();
@@ -256,10 +303,10 @@ class WithdrawalTest extends TestCase
         $this->assertSame(100000, $this->commissionService->balanceFor($affiliate));
 
         $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 35000,
+            'amount' => 50000,
         ]);
 
-        $this->assertSame(65000, $this->commissionService->balanceFor($affiliate));
+        $this->assertSame(50000, $this->commissionService->balanceFor($affiliate));
     }
 
     public function test_rejected_withdrawal_restores_available_balance(): void
@@ -269,10 +316,10 @@ class WithdrawalTest extends TestCase
         $this->addCommission($affiliate, 100000);
 
         $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 40000,
+            'amount' => 50000,
         ]);
 
-        $this->assertSame(60000, $this->commissionService->balanceFor($affiliate));
+        $this->assertSame(50000, $this->commissionService->balanceFor($affiliate));
 
         $withdrawal = $affiliate->withdrawals()->first();
         $withdrawal->update([
@@ -294,18 +341,18 @@ class WithdrawalTest extends TestCase
         $this->addCommission($affiliate1, 100000);
         $this->addCommission($affiliate2, 100000);
 
-        // Afiliator 1 punya withdrawal Rp 25.000
+        // Afiliator 1 punya withdrawal Rp 55.000
         $affiliate1->withdrawals()->create([
-            'amount' => 25000,
+            'amount' => 55000,
             'bank_name' => 'BCA',
             'account_number' => '1111111111',
             'account_holder' => 'Afiliator Satu',
             'status' => WithdrawalStatus::Pending,
         ]);
 
-        // Afiliator 2 punya withdrawal Rp 45.000
+        // Afiliator 2 punya withdrawal Rp 75.000
         $affiliate2->withdrawals()->create([
-            'amount' => 45000,
+            'amount' => 75000,
             'bank_name' => 'BRI',
             'account_number' => '2222222222',
             'account_holder' => 'Afiliator Dua',
@@ -315,15 +362,15 @@ class WithdrawalTest extends TestCase
         // Afiliator 1 membuka halaman penarikan
         $response1 = $this->actingAs($affiliate1)->get(route('affiliate.withdrawals.index'));
         $response1->assertOk()
-            ->assertSee(rupiah(25000))
-            ->assertDontSee(rupiah(45000))
+            ->assertSee(rupiah(55000))
+            ->assertDontSee(rupiah(75000))
             ->assertDontSee('2222222222');
 
         // Afiliator 2 membuka halaman penarikan
         $response2 = $this->actingAs($affiliate2)->get(route('affiliate.withdrawals.index'));
         $response2->assertOk()
-            ->assertSee(rupiah(45000))
-            ->assertDontSee(rupiah(25000))
+            ->assertSee(rupiah(75000))
+            ->assertDontSee(rupiah(55000))
             ->assertDontSee('1111111111');
     }
 
@@ -331,23 +378,23 @@ class WithdrawalTest extends TestCase
     {
         $affiliate = User::factory()->affiliate()->create();
         $this->setBankProfile($affiliate);
-        $this->addCommission($affiliate, 50000);
+        $this->addCommission($affiliate, 100000);
 
-        // Request 1: Rp 30.000 -> berhasil, saldo tersisa Rp 20.000
+        // Request 1: Rp 60.000 -> berhasil, saldo tersisa Rp 40.000
         $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 30000,
+            'amount' => 60000,
         ])->assertSessionHas('status');
 
-        $this->assertSame(20000, $this->commissionService->balanceFor($affiliate));
+        $this->assertSame(40000, $this->commissionService->balanceFor($affiliate));
 
-        // Request 2: Rp 30.000 -> harus ditolak karena saldo hanya Rp 20.000
+        // Request 2: Rp 50.000 -> harus ditolak karena saldo hanya Rp 40.000
         $this->actingAs($affiliate)->post(route('affiliate.withdrawals.store'), [
-            'amount' => 30000,
+            'amount' => 50000,
         ])->assertSessionHasErrors('amount');
 
         // Pastikan hanya 1 penarikan yang tercatat dan saldo tidak negatif
         $this->assertCount(1, $affiliate->withdrawals);
-        $this->assertSame(20000, $this->commissionService->balanceFor($affiliate));
+        $this->assertSame(40000, $this->commissionService->balanceFor($affiliate));
         $this->assertGreaterThanOrEqual(0, $this->commissionService->balanceFor($affiliate));
     }
 }

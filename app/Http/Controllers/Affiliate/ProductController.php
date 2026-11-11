@@ -100,7 +100,7 @@ class ProductController extends Controller
 
             $code = null;
             for ($attempt = 0; $attempt < 10; $attempt++) {
-                $candidate = substr($prefix . Str::upper(Str::random(6)), 0, 32);
+                $candidate = substr($prefix.Str::upper(Str::random(6)), 0, 32);
                 if (! ReferralLink::where('code', $candidate)->exists()) {
                     $code = $candidate;
                     break;
@@ -108,7 +108,7 @@ class ProductController extends Controller
             }
 
             if (! $code) {
-                $code = substr('REF' . Str::upper(Str::random(12)), 0, 32);
+                $code = substr('REF'.Str::upper(Str::random(12)), 0, 32);
             }
 
             ReferralLink::create([

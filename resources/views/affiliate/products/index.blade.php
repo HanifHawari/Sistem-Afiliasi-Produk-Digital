@@ -32,23 +32,23 @@
         {{-- ================================================================
              TOOLBAR: KATEGORI & PENCARIAN
              ================================================================ --}}
-        <div class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <form method="GET" action="{{ route('affiliate.products.index') }}" class="toolbar">
             {{-- Filter Kategori --}}
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+            <div class="tabs no-scrollbar">
                 <a href="{{ route('affiliate.products.index', array_filter(['q' => $search])) }}"
                    @class([
-                       'shrink-0 rounded-xl px-3.5 py-2 text-xs font-semibold transition',
+                       'shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition',
                        'bg-blue-600 text-white shadow-sm shadow-blue-600/20' => $selectedCategory === '',
-                       'bg-slate-100 text-slate-600 hover:bg-slate-200' => $selectedCategory !== '',
+                       'text-slate-600 hover:bg-slate-100' => $selectedCategory !== '',
                    ])>
                     Semua Kategori
                 </a>
                 @foreach ($categories as $category)
                     <a href="{{ route('affiliate.products.index', array_filter(['category' => $category, 'q' => $search])) }}"
                        @class([
-                           'shrink-0 rounded-xl px-3.5 py-2 text-xs font-semibold transition',
+                           'shrink-0 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition',
                            'bg-blue-600 text-white shadow-sm shadow-blue-600/20' => $selectedCategory === $category,
-                           'bg-slate-100 text-slate-600 hover:bg-slate-200' => $selectedCategory !== $category,
+                           'text-slate-600 hover:bg-slate-100' => $selectedCategory !== $category,
                        ])>
                         {{ $category }}
                     </a>
@@ -56,32 +56,22 @@
             </div>
 
             {{-- Form Pencarian --}}
-            <form method="GET" action="{{ route('affiliate.products.index') }}" class="flex w-full items-center gap-2 sm:w-80">
-                @if ($selectedCategory !== '')
-                    <input type="hidden" name="category" value="{{ $selectedCategory }}">
-                @endif
-                <div class="relative min-w-0 flex-1">
-                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                        <span class="material-symbols-outlined text-[18px]">search</span>
-                    </span>
-                    <input
-                        type="search"
-                        name="q"
-                        value="{{ $search }}"
-                        placeholder="Cari produk digital..."
-                        class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    >
-                </div>
-                <button type="submit" class="btn-primary btn-sm shrink-0">
-                    Cari
-                </button>
-                @if ($search !== '' || $selectedCategory !== '')
-                    <a href="{{ route('affiliate.products.index') }}" class="btn-outline btn-sm shrink-0 text-slate-500 hover:text-slate-700" title="Reset filter">
-                        <span class="material-symbols-outlined text-[18px]">restart_alt</span>
-                    </a>
-                @endif
-            </form>
-        </div>
+            @if ($selectedCategory !== '')
+                <input type="hidden" name="category" value="{{ $selectedCategory }}">
+            @endif
+            <div class="search lg:ml-auto">
+                <span class="material-symbols-outlined">search</span>
+                <input type="search" name="q" value="{{ $search }}" placeholder="Cari produk digital...">
+            </div>
+            <button type="submit" class="btn-primary btn-sm shrink-0">
+                Cari
+            </button>
+            @if ($search !== '' || $selectedCategory !== '')
+                <a href="{{ route('affiliate.products.index') }}" class="btn-outline btn-sm shrink-0" title="Reset filter">
+                    <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                </a>
+            @endif
+        </form>
 
         {{-- ================================================================
              GRID PRODUK
@@ -94,7 +84,7 @@
                         $commissionAmount = $product->commissionAmount();
                     @endphp
 
-                    <div class="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-blue-200">
+                    <div class="card group flex flex-col justify-between overflow-hidden transition hover:shadow-md hover:ring-1 hover:ring-blue-200">
                         {{-- Atas: Thumbnail & Info Utama --}}
                         <div>
                             {{-- Area Thumbnail --}}
@@ -139,7 +129,7 @@
                             </div>
 
                             {{-- Info Produk --}}
-                            <div class="p-5">
+                            <div class="card-body pt-4">
                                 <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-600">
                                     {{ $product->name }}
                                 </h3>
@@ -184,7 +174,7 @@
                         </div>
 
                         {{-- Bawah: Aksi Referral Link --}}
-                        <div class="border-t border-slate-100 bg-white p-4">
+                        <div class="card-body border-t border-slate-100 pt-4">
                             @if ($link)
                                 {{-- KONDISI 1: SUDAH MEMILIKI REFERRAL LINK --}}
                                 <div x-data="{
@@ -242,7 +232,7 @@
                                     <button
                                         type="submit"
                                         :disabled="loading"
-                                        class="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                                        class="btn-primary flex w-full justify-center disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <span class="material-symbols-outlined text-[18px]" x-show="!loading">add_link</span>
                                         <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" x-show="loading" x-cloak></span>
@@ -259,7 +249,7 @@
                  PAGINASI
                  ================================================================ --}}
             @if ($products->hasPages())
-                <div class="mt-2 rounded-2xl border border-slate-200/80 bg-white">
+                <div class="card mt-2">
                     <x-pager :paginator="$products" noun="produk" />
                 </div>
             @endif
@@ -268,7 +258,7 @@
             {{-- ================================================================
                  EMPTY STATE
                  ================================================================ --}}
-            <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm">
+            <div class="card flex flex-col items-center justify-center border-dashed px-6 py-16 text-center">
                 <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                     <span class="material-symbols-outlined text-[36px]">inventory_2</span>
                 </div>

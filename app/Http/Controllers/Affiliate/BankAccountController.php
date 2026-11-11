@@ -16,7 +16,7 @@ class BankAccountController extends Controller
      */
     public function edit(): View
     {
-        $user    = auth()->user();
+        $user = auth()->user();
         $profile = $user->affiliateProfile;
 
         return view('affiliate.bank-account.edit', compact('profile'));
@@ -32,7 +32,7 @@ class BankAccountController extends Controller
         $user = auth()->user();
 
         $validated = $request->validate([
-            'bank_name'      => ['required', 'string', 'max:255'],
+            'bank_name' => ['required', 'string', 'max:255'],
             // Nomor rekening: wajib berupa string digit agar angka nol di awal tetap tersimpan.
             // Panjang maks 50 sesuai struktur kolom account_number di tabel affiliate_profiles.
             'account_number' => ['required', 'string', 'digits_between:1,50'],
@@ -49,4 +49,3 @@ class BankAccountController extends Controller
             ->with('status_detail', "Rekening {$validated['bank_name']} a.n. {$validated['account_holder']} telah diperbarui.");
     }
 }
-

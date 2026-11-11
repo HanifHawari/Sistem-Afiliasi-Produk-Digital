@@ -24,253 +24,230 @@
         description="Ajukan pencairan komisi dan pantau riwayat penarikan Anda."
     />
 
-    <div class="flex flex-col gap-6" data-enter="up">
+    {{-- ================================================================
+         2. KARTU RINGKASAN
+         ================================================================ --}}
+    <x-stat-grid cols="3">
+        {{-- Kartu 1: Saldo Tersedia --}}
+        <x-stat-card
+            label="Saldo Tersedia"
+            :value="rupiah($balance)"
+            caption="Total komisi disetujui yang siap ditarik"
+        >
+            <span>Minimal penarikan</span>
+            <span class="font-bold text-white">Rp 50.000</span>
+        </x-stat-card>
 
-        {{-- ================================================================
-             2. KARTU RINGKASAN
-             ================================================================ --}}
-        <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {{-- Kartu 1: Saldo Tersedia --}}
-            <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo Tersedia</p>
-                        <p class="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                            {{ rupiah($balance) }}
-                        </p>
-                    </div>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                        <span class="material-symbols-outlined text-[22px]">account_balance_wallet</span>
-                    </div>
-                </div>
-                <p class="mt-4 text-xs text-slate-400">Total komisi disetujui yang siap ditarik</p>
-            </div>
+        {{-- Kartu 2: Rekening Tujuan --}}
+        <x-stat-card
+            label="Rekening Tujuan"
+            :value="$isBankComplete ? $profile->bank_name : 'Belum Lengkap'"
+            :caption="$isBankComplete ? $maskAccount($profile->account_number).' · a.n. '.$profile->account_holder : 'Rekening bank belum diatur'"
+        >
+            <span class="text-white/80">{{ $isBankComplete ? 'Tersimpan' : 'Wajib diisi' }}</span>
+            <a href="{{ route('affiliate.bank-account.edit') }}" class="font-bold text-white hover:underline">
+                {{ $isBankComplete ? 'Ubah Rekening' : 'Lengkapi Rekening' }}
+            </a>
+        </x-stat-card>
 
-            {{-- Kartu 2: Rekening Tujuan --}}
-            <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-                <div class="flex items-start justify-between">
-                    <div class="min-w-0 flex-1 pr-2">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Rekening Tujuan</p>
-                        @if ($isBankComplete)
-                            <p class="mt-2 truncate text-base font-bold text-slate-900">{{ $profile->bank_name }}</p>
-                            <p class="mt-0.5 truncate text-xs text-slate-600">
-                                <span class="font-mono font-semibold text-blue-700">{{ $maskAccount($profile->account_number) }}</span>
-                                · a.n. <span class="font-medium text-slate-800">{{ $profile->account_holder }}</span>
-                            </p>
-                        @else
-                            <p class="mt-2 text-base font-bold text-amber-600">Belum Lengkap</p>
-                            <p class="mt-0.5 text-xs text-slate-500">Rekening bank belum diatur</p>
-                        @endif
-                    </div>
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                        <span class="material-symbols-outlined text-[22px]">account_balance</span>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <a href="{{ route('affiliate.bank-account.edit') }}" class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700">
-                        <span>{{ $isBankComplete ? 'Ubah Rekening' : 'Lengkapi Rekening' }}</span>
-                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                    </a>
-                </div>
-            </div>
+        {{-- Kartu 3: Status Rekening --}}
+        <x-stat-card
+            label="Status Rekening"
+            :value="$isBankComplete ? 'Siap Dicairkan' : 'Perlu Dilengkapi'"
+            :caption="$isBankComplete ? 'Data rekening valid untuk transfer' : 'Isi form rekening untuk dapat menarik komisi'"
+        >
+            @if ($isBankComplete)
+                <span class="pill-on-blue text-emerald-600">Siap Ditransfer</span>
+                <span class="text-white/80">Rekening valid</span>
+            @else
+                <span class="pill-on-blue text-amber-600">Belum Lengkap</span>
+                <span class="text-white/80">Belum bisa tarik</span>
+            @endif
+        </x-stat-card>
+    </x-stat-grid>
 
-            {{-- Kartu 3: Status Rekening --}}
-            <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md sm:col-span-2 lg:col-span-1">
-                <div class="flex items-start justify-between">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status Rekening</p>
-                        <div class="mt-2">
-                            @if ($isBankComplete)
-                                <x-badge tone="success">Siap Dicairkan</x-badge>
-                            @else
-                                <x-badge tone="warning">Perlu Dilengkapi</x-badge>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                        <span class="material-symbols-outlined text-[22px]">credit_card</span>
-                    </div>
-                </div>
-                <p class="mt-4 text-xs text-slate-400">
-                    {{ $isBankComplete ? 'Data rekening valid untuk transfer' : 'Isi form rekening untuk dapat menarik komisi' }}
-                </p>
-            </div>
-        </section>
+    <div class="flex flex-col gap-6">
 
         {{-- ================================================================
              3. FORM PENARIKAN KOMISI
              ================================================================ --}}
-        <section class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-            <div class="flex flex-col gap-1 border-b border-slate-100 pb-4">
-                <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-600">
-                    <span class="material-symbols-outlined text-[16px]">payments</span>
-                    Pengajuan Penarikan
+        <section class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Ajukan Pencairan Saldo</h2>
+                    <p class="card-subtitle">
+                        Masukkan nominal komisi yang ingin Anda tarik. Pengajuan akan diverifikasi oleh admin sebelum dana ditransfer.
+                    </p>
                 </div>
-                <h3 class="text-base font-bold text-slate-900">Ajukan Pencairan Saldo</h3>
-                <p class="text-xs text-slate-500">
-                    Masukkan nominal komisi yang ingin Anda tarik. Pengajuan akan diverifikasi oleh admin sebelum dana ditransfer.
-                </p>
             </div>
 
-            {{-- Banner Peringatan jika Rekening Belum Lengkap --}}
-            @if (! $isBankComplete)
-                <div class="mt-5 flex items-start gap-4 rounded-xl border border-dashed border-amber-300 bg-amber-50 p-4">
-                    <span class="material-symbols-outlined shrink-0 text-[22px] text-amber-500">warning</span>
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-amber-800">Rekening bank belum lengkap</p>
-                        <p class="mt-0.5 text-xs text-amber-700">
-                            Anda harus melengkapi data rekening bank terlebih dahulu sebelum dapat mengajukan penarikan komisi.
-                        </p>
-                        <div class="mt-3">
-                            <a href="{{ route('affiliate.bank-account.edit') }}" class="btn-primary btn-sm inline-flex items-center gap-1.5 text-xs">
-                                <span class="material-symbols-outlined text-[16px]">edit</span>
-                                Lengkapi Rekening Bank
-                            </a>
+            <div class="card-body">
+                {{-- Banner Peringatan jika Rekening Belum Lengkap --}}
+                @if (! $isBankComplete)
+                    <div class="mb-5 flex items-start gap-4 rounded-xl border border-dashed border-amber-300 bg-amber-50 p-4">
+                        <span class="material-symbols-outlined shrink-0 text-[22px] text-amber-500">warning</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-amber-800">Rekening bank belum lengkap</p>
+                            <p class="mt-0.5 text-xs text-amber-700">
+                                Anda harus melengkapi data rekening bank terlebih dahulu sebelum dapat mengajukan penarikan komisi.
+                            </p>
+                            <div class="mt-3">
+                                <a href="{{ route('affiliate.bank-account.edit') }}" class="btn-primary btn-sm inline-flex items-center gap-1.5 text-xs">
+                                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                                    Lengkapi Rekening Bank
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @elseif ($balance <= 0)
-                <div class="mt-5 flex items-start gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4">
-                    <span class="material-symbols-outlined shrink-0 text-[22px] text-slate-400">info</span>
-                    <div class="flex-1">
-                        <p class="text-sm font-semibold text-slate-800">Saldo belum mencukupi untuk penarikan</p>
-                        <p class="mt-0.5 text-xs text-slate-500">
-                            Saldo tersedia Anda saat ini adalah Rp 0. Promosikan link referral produk digital Anda untuk menghasilkan komisi yang disetujui.
-                        </p>
-                        <div class="mt-3">
-                            <a href="{{ route('affiliate.products.index') }}" class="btn-outline btn-sm inline-flex items-center gap-1.5 text-xs">
-                                <span class="material-symbols-outlined text-[16px]">storefront</span>
-                                Buka Katalog Produk
-                            </a>
+                @elseif ($balance < 50000)
+                    <div class="mb-5 flex items-start gap-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4">
+                        <span class="material-symbols-outlined shrink-0 text-[22px] text-slate-400">info</span>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold text-slate-800">Saldo belum mencapai minimum penarikan</p>
+                            <p class="mt-0.5 text-xs text-slate-500">
+                                Saldo tersedia Anda saat ini adalah {{ rupiah($balance) }}. Minimum penarikan adalah Rp 50.000. Promosikan link referral produk digital Anda untuk menghasilkan komisi yang disetujui.
+                            </p>
+                            <div class="mt-3">
+                                <a href="{{ route('affiliate.products.index') }}" class="btn-outline btn-sm inline-flex items-center gap-1.5 text-xs">
+                                    <span class="material-symbols-outlined text-[16px]">storefront</span>
+                                    Buka Katalog Produk
+                                </a>
+                            </div>
                         </div>
                     </div>
-                </div>
-            @endif
+                @endif
 
-            {{-- Form Pengajuan Penarikan --}}
-            <form
-                method="POST"
-                action="{{ route('affiliate.withdrawals.store') }}"
-                class="mt-5"
-                x-data="{
-                    amount: '{{ old('amount', '') }}',
-                    submitting: false,
-                    maxAmount: {{ max(0, $balance) }},
-                    setAll() {
-                        this.amount = this.maxAmount > 0 ? this.maxAmount : '';
-                    }
-                }"
-                @submit="submitting = true"
-            >
-                @csrf
+                {{-- Form Pengajuan Penarikan --}}
+                <form
+                    method="POST"
+                    action="{{ route('affiliate.withdrawals.store') }}"
+                    class="max-w-xl"
+                    x-data="{
+                        amount: '{{ old('amount', '') }}',
+                        submitting: false,
+                        maxAmount: {{ max(0, $balance) }},
+                        setAll() {
+                            this.amount = this.maxAmount >= 50000 ? this.maxAmount : '';
+                        }
+                    }"
+                    @submit="submitting = true"
+                >
+                    @csrf
 
-                <div class="max-w-xl">
-                    <x-input-label for="amount">
-                        Nominal Penarikan
-                        <span class="font-normal text-slate-400">(angka bulat)</span>
-                    </x-input-label>
+                    <div>
+                        <x-input-label for="amount">
+                            Nominal Penarikan
+                            <span class="font-normal text-slate-400">(angka bulat)</span>
+                        </x-input-label>
 
-                    <div class="relative mt-1.5">
-                        <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
-                            Rp
-                        </span>
-                        <x-text-input
-                            id="amount"
-                            name="amount"
-                            type="number"
-                            min="1"
-                            max="{{ max(0, $balance) }}"
-                            step="1"
-                            x-model="amount"
-                            class="w-full pl-11 pr-32 font-mono @error('amount') ring-red-400 focus:ring-red-500 @enderror"
-                            placeholder="0"
-                            :disabled="!$isBankComplete || $balance <= 0"
-                            required
-                        />
-                        <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                        <div class="relative mt-1.5">
+                            <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                                Rp
+                            </span>
+                            <x-text-input
+                                id="amount"
+                                name="amount"
+                                type="number"
+                                min="50000"
+                                max="{{ max(0, $balance) }}"
+                                step="1"
+                                x-model="amount"
+                                class="w-full pl-11 pr-32 font-mono @error('amount') ring-red-400 focus:ring-red-500 @enderror"
+                                placeholder="0"
+                                :disabled="!$isBankComplete || $balance < 50000"
+                                required
+                            />
+                            <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                                <button
+                                    type="button"
+                                    @click="setAll()"
+                                    :disabled="!$isBankComplete || $balance < 50000"
+                                    class="btn-outline btn-sm py-1 px-2.5 text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                >
+                                    Tarik Semua Saldo
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="mt-1.5 text-xs text-slate-500">
+                            Minimal penarikan Rp 50.000.
+                        </p>
+
+                        <x-input-error :messages="$errors->get('amount')" class="mt-1.5" />
+
+                        <div class="mt-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                            <p class="text-xs text-slate-500">
+                                Maksimal penarikan:
+                                <span class="font-semibold text-slate-800">{{ rupiah($balance) }}</span>
+                            </p>
+                            @if ($isBankComplete)
+                                <p class="text-xs text-slate-400">
+                                    Dana ditransfer ke: <span class="font-semibold text-slate-600">{{ $profile->bank_name }} ({{ $maskAccount($profile->account_number) }})</span>
+                                </p>
+                            @endif
+                        </div>
+
+                        <div class="mt-5">
                             <button
-                                type="button"
-                                @click="setAll()"
-                                :disabled="!$isBankComplete || $balance <= 0"
-                                class="btn-outline btn-sm py-1 px-2.5 text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                type="submit"
+                                :disabled="submitting || !$isBankComplete || $balance < 50000"
+                                class="btn-primary inline-flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                Tarik Semua Saldo
+                                <span class="material-symbols-outlined text-[18px]" x-show="!submitting">payments</span>
+                                <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" x-show="submitting" x-cloak></span>
+                                <span x-text="submitting ? 'Mengajukan...' : 'Ajukan Penarikan'">Ajukan Penarikan</span>
                             </button>
                         </div>
                     </div>
-
-                    <x-input-error :messages="$errors->get('amount')" class="mt-1.5" />
-
-                    <div class="mt-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                        <p class="text-xs text-slate-500">
-                            Maksimal penarikan:
-                            <span class="font-semibold text-slate-800">{{ rupiah($balance) }}</span>
-                        </p>
-                        @if ($isBankComplete)
-                            <p class="text-xs text-slate-400">
-                                Dana ditransfer ke: <span class="font-semibold text-slate-600">{{ $profile->bank_name }} ({{ $maskAccount($profile->account_number) }})</span>
-                            </p>
-                        @endif
-                    </div>
-
-                    <div class="mt-5">
-                        <button
-                            type="submit"
-                            :disabled="submitting || !$isBankComplete || $balance <= 0"
-                            class="btn-primary inline-flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            <span class="material-symbols-outlined text-[18px]" x-show="!submitting">payments</span>
-                            <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" x-show="submitting" x-cloak></span>
-                            <span x-text="submitting ? 'Mengajukan...' : 'Ajukan Penarikan'">Ajukan Penarikan</span>
-                        </button>
-                    </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </section>
 
         {{-- ================================================================
              4. RIWAYAT PENARIKAN
              ================================================================ --}}
-        <section class="flex flex-col gap-4">
-            <div class="flex flex-col gap-1">
-                <h3 class="text-base font-bold text-slate-900">Riwayat Penarikan</h3>
-                <p class="text-xs text-slate-500">
-                    Daftar seluruh pengajuan penarikan komisi yang pernah Anda buat dan status terkininya.
-                </p>
+        <section class="card overflow-hidden">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Riwayat Penarikan</h2>
+                    <p class="card-subtitle">
+                        Daftar seluruh pengajuan penarikan komisi yang pernah Anda buat dan status terkininya.
+                    </p>
+                </div>
             </div>
 
             @if ($withdrawals->isNotEmpty())
                 {{-- A. TAMPILAN DESKTOP (TABLE) --}}
-                <div class="hidden overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm lg:block">
-                    <div class="overflow-x-auto">
-                        <table class="w-full border-collapse text-left">
+                <div class="hidden lg:block">
+                    <div class="relative overflow-x-auto">
+                        <table class="data-table ledger">
                             <thead>
-                                <tr class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                                    <th class="px-5 py-3.5">Tanggal Pengajuan</th>
-                                    <th class="px-5 py-3.5">Rekening Tujuan</th>
-                                    <th class="px-5 py-3.5">Nominal</th>
-                                    <th class="px-5 py-3.5">Status</th>
-                                    <th class="px-5 py-3.5">Catatan Admin</th>
+                                <tr>
+                                    <th>Tanggal Pengajuan</th>
+                                    <th>Rekening Tujuan</th>
+                                    <th>Nominal</th>
+                                    <th>Status</th>
+                                    <th>Catatan Admin</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                            <tbody>
                                 @foreach ($withdrawals as $withdrawal)
-                                    <tr class="transition hover:bg-slate-50/60">
+                                    <tr>
                                         {{-- Tanggal --}}
-                                        <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-600">
+                                        <td class="whitespace-nowrap">
                                             <div class="font-semibold text-slate-800">
                                                 {{ $withdrawal->created_at?->translatedFormat('d M Y') ?? '—' }}
                                             </div>
-                                            <div class="text-[11px] text-slate-400">
+                                            <div class="text-[13px] text-slate-400">
                                                 {{ $withdrawal->created_at?->translatedFormat('H:i') ?? '' }} WIB
                                             </div>
                                         </td>
 
                                         {{-- Rekening Tujuan (Snapshot) --}}
-                                        <td class="px-5 py-4">
+                                        <td>
                                             <div class="min-w-0">
                                                 <p class="font-semibold text-slate-900">{{ $withdrawal->bank_name }}</p>
-                                                <p class="text-xs text-slate-500">
+                                                <p class="text-[13px] text-slate-400">
                                                     <span class="font-mono font-medium text-slate-700">{{ $maskAccount($withdrawal->account_number) }}</span>
                                                     · a.n. <span class="font-medium text-slate-800">{{ $withdrawal->account_holder }}</span>
                                                 </p>
@@ -278,25 +255,28 @@
                                         </td>
 
                                         {{-- Nominal --}}
-                                        <td class="whitespace-nowrap px-5 py-4">
-                                            <span class="font-bold text-slate-900">
-                                                {{ rupiah($withdrawal->amount) }}
-                                            </span>
+                                        <td class="tabular whitespace-nowrap font-bold text-slate-900">
+                                            {{ rupiah($withdrawal->amount) }}
                                         </td>
 
                                         {{-- Status --}}
-                                        <td class="whitespace-nowrap px-5 py-4">
+                                        <td class="whitespace-nowrap">
                                             <x-badge :tone="$withdrawal->status->tone()">
                                                 {{ $withdrawal->status->label() }}
                                             </x-badge>
                                         </td>
 
                                         {{-- Catatan --}}
-                                        <td class="px-5 py-4 text-xs text-slate-600">
+                                        <td class="text-xs text-slate-600">
                                             @if ($withdrawal->note)
-                                                <span class="line-clamp-2 max-w-xs" title="{{ $withdrawal->note }}">
-                                                    {{ $withdrawal->note }}
-                                                </span>
+                                                <div class="max-w-xs">
+                                                    @if ($withdrawal->status === \App\Enums\WithdrawalStatus::Rejected)
+                                                        <span class="font-semibold text-red-600">Alasan: </span>
+                                                    @endif
+                                                    <span class="line-clamp-2" title="{{ $withdrawal->note }}">
+                                                        {{ $withdrawal->note }}
+                                                    </span>
+                                                </div>
                                             @else
                                                 <span class="text-slate-400">—</span>
                                             @endif
@@ -314,9 +294,9 @@
                 </div>
 
                 {{-- B. TAMPILAN MOBILE (KARTU) --}}
-                <div class="flex flex-col gap-3 lg:hidden">
+                <div class="flex flex-col gap-3 border-t border-slate-100 p-4 sm:p-5 lg:hidden">
                     @foreach ($withdrawals as $withdrawal)
-                        <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
+                        <div class="overflow-hidden rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
                             <div class="flex items-start justify-between gap-2">
                                 <div>
                                     <span class="text-[11px] text-slate-400">
@@ -339,7 +319,7 @@
 
                             @if ($withdrawal->note)
                                 <div class="mt-2.5 rounded-lg border border-slate-100 bg-slate-50/70 p-2 text-xs text-slate-600">
-                                    <span class="font-semibold text-slate-700">Catatan:</span> {{ $withdrawal->note }}
+                                    <span class="font-semibold text-slate-700">{{ $withdrawal->status === \App\Enums\WithdrawalStatus::Rejected ? 'Alasan Penolakan:' : 'Catatan:' }}</span> {{ $withdrawal->note }}
                                 </div>
                             @endif
                         </div>
@@ -347,7 +327,7 @@
 
                     {{-- Pager Mobile --}}
                     @if ($withdrawals->hasPages())
-                        <div class="rounded-2xl border border-slate-200/80 bg-white">
+                        <div class="rounded-xl border border-slate-200/80 bg-white">
                             <x-pager :paginator="$withdrawals" noun="pengajuan penarikan" />
                         </div>
                     @endif
@@ -355,7 +335,7 @@
 
             @else
                 {{-- Empty State --}}
-                <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
+                <div class="flex flex-col items-center justify-center border-t border-slate-100 px-6 py-14 text-center">
                     <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                         <span class="material-symbols-outlined text-[32px]">history</span>
                     </div>
