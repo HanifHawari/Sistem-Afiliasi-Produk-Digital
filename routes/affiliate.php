@@ -19,11 +19,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', DashboardController::class)->name('dashboard');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::post('/products/{product}/links', [ProductController::class, 'generateLink'])->name('products.generate-link');
+Route::post('/products/{product}/links', [ProductController::class, 'generateLink'])
+    ->middleware('throttle:30,1,generate-link')
+    ->name('products.generate-link');
 Route::get('/links', [LinkController::class, 'index'])->name('links.index');
 Route::get('/promo-materials', [PromoMaterialController::class, 'index'])->name('promo-materials.index');
 Route::get('/promo-materials/{promoMaterial}/download', [PromoMaterialController::class, 'download'])->name('promo-materials.download');
 Route::get('/withdrawals', [WithdrawalController::class, 'index'])->name('withdrawals.index');
-Route::post('/withdrawals', [WithdrawalController::class, 'store'])->name('withdrawals.store');
+Route::post('/withdrawals', [WithdrawalController::class, 'store'])
+    ->middleware('throttle:10,1,withdrawals')
+    ->name('withdrawals.store');
 Route::get('/bank-account', [BankAccountController::class, 'edit'])->name('bank-account.edit');
 Route::put('/bank-account', [BankAccountController::class, 'update'])->name('bank-account.update');

@@ -14,13 +14,17 @@ Route::get('/dashboard', fn (Request $request) => redirect($request->user()->hom
     ->middleware('auth')->name('dashboard');
 
 // Link referral afiliator, mis. /r/ANDI123  —  PIC: Fadhil (feature/referral-tracking)
-Route::get('/r/{code}', [ReferralController::class, 'redirect'])->name('referral.redirect');
+Route::get('/r/{code}', [ReferralController::class, 'redirect'])
+    ->middleware('throttle:60,1,referral')
+    ->name('referral.redirect');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    Route::post('/profile/avatar', [ProfileAvatarController::class, 'update'])->name('profile.avatar.update');
+    Route::post('/profile/avatar', [ProfileAvatarController::class, 'update'])
+        ->middleware('throttle:20,1,avatar')
+        ->name('profile.avatar.update');
     Route::delete('/profile/avatar', [ProfileAvatarController::class, 'destroy'])->name('profile.avatar.destroy');
 });
 

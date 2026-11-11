@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Middleware\AddSecurityHeaders;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -27,6 +29,19 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
         ]);
+
+        // Header keamanan untuk semua respons (anti-clickjacking, nosniff, dst.)
+        $middleware->append(AddSecurityHeaders::class);
+
+        // Akun yang dinonaktifkan admin langsung dikeluarkan di halaman mana pun
+        $middleware->web(append: [EnsureAccountIsActive::class]);
+
+        // Ganti atau reset password memutus sesi yang masih terbuka di perangkat lain
+        $middleware->authenticateSessions();
+
+        // Di luar lingkungan local, hanya host milik APP_URL (dan subdomainnya) yang dilayani.
+        // Mencegah Host header palsu, misalnya untuk membelokkan link reset password.
+        $middleware->trustHosts();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

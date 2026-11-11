@@ -56,6 +56,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Trusted Proxies
+    |--------------------------------------------------------------------------
+    |
+    | Isi bila aplikasi berjalan di belakang reverse proxy (Nginx, Cloudflare
+    | Tunnel, load balancer): alamat IP proxy dipisah koma, atau * untuk semua.
+    | Tanpa ini Laravel mengira semua pengunjung memakai HTTP dan ber-IP sama,
+    | sehingga link menjadi http:// dan pembatasan laju tidak akurat.
+    | Kosongkan bila aplikasi langsung menghadap internet.
+    |
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

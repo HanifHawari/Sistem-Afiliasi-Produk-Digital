@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Route;
 /*
 | Area Customer / Toko  —  PIC: Muhammad Arif Bagus (feature/storefront-checkout)
 | Nama route shop.*. Controller taruh di app/Http/Controllers/Shop.
-| Route::view di bawah hanya placeholder, ganti dengan controller.
 */
 
 Route::name('shop.')->group(function () {
@@ -20,12 +19,16 @@ Route::name('shop.')->group(function () {
     // Wajib login sebagai customer
     Route::middleware(['auth', 'role:customer'])->group(function () {
         Route::get('/checkout/{product:slug}', [CheckoutController::class, 'create'])->name('checkout');
-        Route::post('/checkout/{product:slug}', [CheckoutController::class, 'store'])->name('checkout.store');
+        Route::post('/checkout/{product:slug}', [CheckoutController::class, 'store'])
+            ->middleware('throttle:20,1,checkout')
+            ->name('checkout.store');
 
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order:invoice_number}', [OrderController::class, 'show'])->name('orders.show');
         Route::get('/orders/{order:invoice_number}/pay', [OrderController::class, 'pay'])->name('orders.pay');
-        Route::post('/orders/{order:invoice_number}/proof', [OrderController::class, 'uploadProof'])->name('orders.proof');
+        Route::post('/orders/{order:invoice_number}/proof', [OrderController::class, 'uploadProof'])
+            ->middleware('throttle:20,1,payment-proof')
+            ->name('orders.proof');
         Route::get('/orders/{order:invoice_number}/download', [OrderController::class, 'download'])
             ->middleware('signed')
             ->name('orders.download');

@@ -74,11 +74,11 @@ class ReportController extends Controller
                 fputcsv($out, [
                     $order->invoice_number,
                     $order->verified_at?->format('Y-m-d H:i'),
-                    $order->customer->name,
-                    $order->customer->email,
-                    $order->product->name,
-                    $order->referralLink?->affiliate->name ?? '-',
-                    $order->referralLink?->code ?? '-',
+                    $this->csvText($order->customer->name),
+                    $this->csvText($order->customer->email),
+                    $this->csvText($order->product->name),
+                    $order->referralLink ? $this->csvText($order->referralLink->affiliate->name) : '-',
+                    $order->referralLink ? $this->csvText($order->referralLink->code) : '-',
                     $order->payment_method->label(),
                     $order->amount,
                     $commission,
@@ -88,6 +88,17 @@ class ReportController extends Controller
 
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Teks dari pengguna (nama, email, kode) bisa diawali = + - @, yang oleh Excel dan Google Sheets
+     * dijalankan sebagai rumus. Beri tanda petik di depan supaya terbaca sebagai teks biasa.
+     */
+    private function csvText(?string $value): string
+    {
+        $value = (string) $value;
+
+        return preg_match('/^[=+\-@\t\r]/', $value) ? "'".$value : $value;
     }
 
     /**

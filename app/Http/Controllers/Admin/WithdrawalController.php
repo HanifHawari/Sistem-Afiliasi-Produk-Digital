@@ -6,11 +6,14 @@ use App\Enums\CommissionStatus;
 use App\Enums\WithdrawalStatus;
 use App\Http\Controllers\Admin\Concerns\ServesProofFiles;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\Withdrawal;
 use App\Services\Commission\CommissionService;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -84,20 +87,24 @@ class WithdrawalController extends Controller
 
     public function approve(Request $request, Withdrawal $withdrawal, CommissionService $commissions): RedirectResponse
     {
-        if ($withdrawal->status !== WithdrawalStatus::Pending) {
-            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
-        }
+        $error = $this->transition($withdrawal, [WithdrawalStatus::Pending], function (Withdrawal $withdrawal) use ($commissions, $request) {
+            // Saldo sudah dikurangi semua pengajuan yang tidak ditolak, termasuk yang ini
+            if ($commissions->balanceFor($withdrawal->affiliate) < 0) {
+                return 'Saldo komisi afiliator tidak mencukupi. Tolak pengajuan ini.';
+            }
 
-        // Saldo sudah dikurangi semua pengajuan yang tidak ditolak, termasuk yang ini
-        if ($commissions->balanceFor($withdrawal->affiliate) < 0) {
-            return back()->with('error', 'Saldo komisi afiliator tidak mencukupi. Tolak pengajuan ini.');
-        }
+            $withdrawal->update([
+                'status' => WithdrawalStatus::Approved,
+                'processed_by' => $request->user()->id,
+                'processed_at' => now(),
+            ]);
 
-        $withdrawal->update([
-            'status' => WithdrawalStatus::Approved,
-            'processed_by' => $request->user()->id,
-            'processed_at' => now(),
-        ]);
+            return null;
+        });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()
             ->with('status', 'Pencairan disetujui')
@@ -111,17 +118,22 @@ class WithdrawalController extends Controller
             'transfer_note' => ['nullable', 'string', 'max:500'],
         ], [], ['transfer_proof' => 'bukti transfer', 'transfer_note' => 'catatan']);
 
-        if ($withdrawal->status !== WithdrawalStatus::Approved) {
-            return back()->with('error', 'Hanya pengajuan yang sudah disetujui yang bisa ditandai lunas.');
-        }
+        $error = $this->transition($withdrawal, [WithdrawalStatus::Approved], function (Withdrawal $withdrawal) use ($data, $request) {
+            // Bukti baru disimpan setelah statusnya dipastikan, supaya klik dobel tidak meninggalkan file tak terpakai
+            $withdrawal->update([
+                'status' => WithdrawalStatus::Paid,
+                'transfer_proof' => $request->file('transfer_proof')->store('withdrawal-proofs', 'local'),
+                'note' => $data['transfer_note'] ?? $withdrawal->note,
+                'processed_by' => $request->user()->id,
+                'processed_at' => now(),
+            ]);
 
-        $withdrawal->update([
-            'status' => WithdrawalStatus::Paid,
-            'transfer_proof' => $request->file('transfer_proof')->store('withdrawal-proofs', 'local'),
-            'note' => $data['transfer_note'] ?? $withdrawal->note,
-            'processed_by' => $request->user()->id,
-            'processed_at' => now(),
-        ]);
+            return null;
+        }, 'Hanya pengajuan yang sudah disetujui yang bisa ditandai lunas.');
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()
             ->with('status', 'Pencairan selesai')
@@ -134,20 +146,53 @@ class WithdrawalController extends Controller
             'note' => ['required', 'string', 'max:500'],
         ], [], ['note' => 'alasan penolakan']);
 
-        if (! in_array($withdrawal->status, [WithdrawalStatus::Pending, WithdrawalStatus::Approved], true)) {
-            return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
-        }
+        $error = $this->transition($withdrawal, [WithdrawalStatus::Pending, WithdrawalStatus::Approved], function (Withdrawal $withdrawal) use ($data, $request) {
+            $withdrawal->update([
+                'status' => WithdrawalStatus::Rejected,
+                'note' => $data['note'],
+                'processed_by' => $request->user()->id,
+                'processed_at' => now(),
+            ]);
 
-        $withdrawal->update([
-            'status' => WithdrawalStatus::Rejected,
-            'note' => $data['note'],
-            'processed_by' => $request->user()->id,
-            'processed_at' => now(),
-        ]);
+            return null;
+        });
+
+        if ($error) {
+            return back()->with('error', $error);
+        }
 
         return back()
             ->with('status', 'Pencairan ditolak')
             ->with('status_detail', 'Saldo '.rupiah($withdrawal->amount).' kembali ke afiliator.');
+    }
+
+    /**
+     * Ubah status pengajuan hanya jika statusnya masih salah satu dari $from.
+     * Baris afiliator dan pengajuannya dikunci lalu dibaca ulang di dalam transaksi, supaya
+     * klik dobel atau dua keputusan bersamaan tidak sama-sama diproses, dan saldo tidak
+     * berubah di tengah jalan oleh pengajuan baru dari afiliator.
+     *
+     * @param  list<WithdrawalStatus>  $from
+     * @param  Closure(Withdrawal): ?string  $apply  mengembalikan pesan error, atau null jika berhasil
+     * @return string|null pesan error, atau null jika berhasil
+     */
+    private function transition(Withdrawal $withdrawal, array $from, Closure $apply, string $stale = 'Pengajuan ini sudah diproses sebelumnya.'): ?string
+    {
+        $error = DB::transaction(function () use ($withdrawal, $from, $apply, $stale) {
+            User::whereKey($withdrawal->affiliate_id)->lockForUpdate()->first();
+            $locked = Withdrawal::whereKey($withdrawal->id)->lockForUpdate()->first();
+
+            if (! $locked || ! in_array($locked->status, $from, true)) {
+                return $stale;
+            }
+
+            return $apply($locked);
+        });
+
+        // Pesan sukses di controller memakai nilai terbaru
+        $withdrawal->refresh();
+
+        return $error;
     }
 
     /**

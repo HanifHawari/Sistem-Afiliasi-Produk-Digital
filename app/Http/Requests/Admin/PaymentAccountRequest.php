@@ -27,7 +27,7 @@ class PaymentAccountRequest extends FormRequest
             'bank_name' => [Rule::requiredIf($isBank), 'nullable', 'string', 'max:50'],
             'account_number' => [Rule::requiredIf($isBank), 'nullable', 'regex:/^[0-9\-\s]{5,30}$/'],
             'account_holder' => ['required', 'string', 'max:100'],
-            'qris_image' => [Rule::requiredIf($needsImage), 'nullable', 'image', 'max:2048'],
+            'qris_image' => [Rule::requiredIf($needsImage), 'nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             'is_active' => ['boolean'],
         ];
     }
