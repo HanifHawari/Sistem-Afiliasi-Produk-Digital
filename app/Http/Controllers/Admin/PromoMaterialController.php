@@ -26,25 +26,21 @@ class PromoMaterialController extends Controller
 
     public function store(Request $request, Product $product): RedirectResponse
     {
+        $isText = $request->input('type') === PromoMaterialType::Text->value;
+
+        // File materi tersimpan di folder publik, jadi jenisnya selalu dibatasi ke gambar atau video.
+        // Materi teks tidak menyimpan file sama sekali: file yang ikut terkirim diabaikan.
         $data = $request->validate([
             'title' => ['required', 'string', 'max:150'],
             'type' => ['required', Rule::enum(PromoMaterialType::class)],
-            'file' => array_filter([
-                Rule::requiredIf(fn () => $request->input('type') !== PromoMaterialType::Text->value),
-                'nullable', 'file', 'max:51200',
-                match ($request->input('type')) {
-                    PromoMaterialType::Image->value => 'mimes:jpg,jpeg,png,webp,gif',
-                    PromoMaterialType::Video->value => 'mimes:mp4,mov,webm',
-                    default => null,
-                },
-            ]),
-            'caption' => [
-                Rule::requiredIf(fn () => $request->input('type') === PromoMaterialType::Text->value),
-                'nullable', 'string', 'max:2000',
+            'file' => $isText ? ['exclude'] : [
+                'required', 'file', 'max:51200',
+                $request->input('type') === PromoMaterialType::Video->value ? 'mimes:mp4,mov,webm' : 'mimes:jpg,jpeg,png,webp,gif',
             ],
+            'caption' => [Rule::requiredIf($isText), 'nullable', 'string', 'max:2000'],
         ], [], ['title' => 'judul', 'type' => 'jenis', 'file' => 'file', 'caption' => 'caption']);
 
-        if ($request->hasFile('file')) {
+        if (! $isText) {
             $data['file_path'] = $request->file('file')->store('promo-materials', 'public');
         }
         unset($data['file']);

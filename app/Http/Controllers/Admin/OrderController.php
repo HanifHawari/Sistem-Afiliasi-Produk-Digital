@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Commission;
 use App\Models\Order;
 use App\Services\Commission\CommissionService;
+use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,11 +72,9 @@ class OrderController extends Controller
 
     public function approve(Request $request, Order $order, CommissionService $commissions): RedirectResponse
     {
-        if (! $this->canBeVerified($order)) {
-            return back()->with('error', "Pesanan {$order->invoice_number} sudah diproses sebelumnya.");
-        }
+        $commission = null;
 
-        $commission = DB::transaction(function () use ($order, $commissions, $request) {
+        $approved = $this->verify($order, function (Order $order) use ($commissions, $request, &$commission) {
             $order->update([
                 'status' => OrderStatus::Paid,
                 'verified_by' => $request->user()->id,
@@ -83,8 +82,12 @@ class OrderController extends Controller
                 'rejection_note' => null,
             ]);
 
-            return $commissions->createForOrder($order);
+            $commission = $commissions->createForOrder($order);
         });
+
+        if (! $approved) {
+            return back()->with('error', "Pesanan {$order->invoice_number} sudah diproses sebelumnya.");
+        }
 
         $detail = 'Akses produk sudah terbuka untuk customer.';
         if ($commission) {
@@ -102,16 +105,16 @@ class OrderController extends Controller
             'rejection_note' => ['required', 'string', 'max:500'],
         ], [], ['rejection_note' => 'alasan penolakan']);
 
-        if (! $this->canBeVerified($order)) {
-            return back()->with('error', "Pesanan {$order->invoice_number} sudah diproses sebelumnya.");
-        }
-
-        $order->update([
+        $rejected = $this->verify($order, fn (Order $order) => $order->update([
             'status' => OrderStatus::Rejected,
             'verified_by' => $request->user()->id,
             'verified_at' => now(),
             'rejection_note' => $data['rejection_note'],
-        ]);
+        ]));
+
+        if (! $rejected) {
+            return back()->with('error', "Pesanan {$order->invoice_number} sudah diproses sebelumnya.");
+        }
 
         return back()
             ->with('status', "Pembayaran {$order->invoice_number} ditolak")
@@ -126,8 +129,25 @@ class OrderController extends Controller
         return $this->proofResponse($order->payment_proof);
     }
 
-    private function canBeVerified(Order $order): bool
+    /**
+     * Jalankan keputusan admin hanya jika pesanan masih menunggu keputusan.
+     * Barisnya dikunci dan statusnya dibaca ulang di dalam transaksi, supaya dua permintaan
+     * bersamaan (klik dobel, atau setujui dan tolak sekaligus) tidak sama-sama diproses.
+     *
+     * @param  Closure(Order): mixed  $decide
+     */
+    private function verify(Order $order, Closure $decide): bool
     {
-        return in_array($order->status, [OrderStatus::Pending, OrderStatus::WaitingVerification], true);
+        return DB::transaction(function () use ($order, $decide) {
+            $locked = Order::whereKey($order->id)->lockForUpdate()->first();
+
+            if (! $locked || ! in_array($locked->status, [OrderStatus::Pending, OrderStatus::WaitingVerification], true)) {
+                return false;
+            }
+
+            $decide($locked);
+
+            return true;
+        });
     }
 }
