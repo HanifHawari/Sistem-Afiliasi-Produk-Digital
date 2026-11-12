@@ -42,15 +42,16 @@
         {{-- ================================================================
              2. TOOLBAR FILTER & PENCARIAN
              ================================================================ --}}
-        <div class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
-            {{-- Filter Tipe Materi (Pills) --}}
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
+        <form method="GET" action="{{ route('affiliate.promo-materials.index') }}" class="toolbar">
+
+            {{-- Filter Tipe Materi (Pills / Tabs) --}}
+            <div class="tabs no-scrollbar">
                 @foreach ($typeOptions as $typeKey => $meta)
                     <a href="{{ route('affiliate.promo-materials.index', array_filter(['type' => $typeKey, 'product_id' => $selectedProduct, 'q' => $search])) }}"
                        @class([
-                           'inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold transition',
+                           'shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition',
                            'bg-blue-600 text-white shadow-sm shadow-blue-600/20' => (string) $selectedType === (string) $typeKey,
-                           'bg-slate-100 text-slate-600 hover:bg-slate-200' => (string) $selectedType !== (string) $typeKey,
+                           'text-slate-600 hover:bg-slate-100' => (string) $selectedType !== (string) $typeKey,
                        ])>
                         <span class="material-symbols-outlined text-[16px]">{{ $meta['icon'] }}</span>
                         <span>{{ $meta['label'] }}</span>
@@ -58,58 +59,48 @@
                 @endforeach
             </div>
 
-            {{-- Form Pencarian & Dropdown Produk --}}
-            <form method="GET" action="{{ route('affiliate.promo-materials.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                @if ($selectedType)
-                    <input type="hidden" name="type" value="{{ $selectedType }}">
-                @endif
+            {{-- Hidden input tipe untuk form submit --}}
+            @if ($selectedType)
+                <input type="hidden" name="type" value="{{ $selectedType }}">
+            @endif
 
-                <div class="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-                    {{-- Input Pencarian --}}
-                    <div class="relative min-w-0 flex-1">
-                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                            <span class="material-symbols-outlined text-[18px]">search</span>
-                        </span>
-                        <input
-                            type="search"
-                            name="q"
-                            value="{{ $search }}"
-                            placeholder="Cari judul materi, caption, atau nama produk..."
-                            class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        >
-                    </div>
+            {{-- Dropdown Filter Produk --}}
+            <select
+                name="product_id"
+                onchange="this.form.submit()"
+                class="input w-full sm:w-56"
+            >
+                <option value="">Semua Produk</option>
+                @foreach ($products as $productOption)
+                    <option value="{{ $productOption->id }}" @selected((string) $selectedProduct === (string) $productOption->id)>
+                        {{ $productOption->name }}
+                    </option>
+                @endforeach
+            </select>
 
-                    {{-- Filter Dropdown Produk --}}
-                    <div class="sm:w-64">
-                        <select
-                            name="product_id"
-                            onchange="this.form.submit()"
-                            class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        >
-                            <option value="">Semua Produk</option>
-                            @foreach ($products as $productOption)
-                                <option value="{{ $productOption->id }}" @selected((string) $selectedProduct === (string) $productOption->id)>
-                                    {{ $productOption->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+            {{-- Input Pencarian --}}
+            <div class="search lg:ml-auto">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ $search }}"
+                    placeholder="Cari judul materi, caption, atau nama produk..."
+                >
+            </div>
 
-                    <div class="flex items-center gap-2">
-                        <button type="submit" class="btn-primary btn-sm shrink-0">
-                            Cari
-                        </button>
+            <button type="submit" class="btn-primary btn-sm shrink-0">
+                Cari
+            </button>
 
-                        @if ($search !== '' || ! empty($selectedProduct) || ! empty($selectedType))
-                            <a href="{{ route('affiliate.promo-materials.index') }}" class="btn-outline btn-sm shrink-0 text-slate-500 hover:text-slate-700" title="Reset filter">
-                                <span class="material-symbols-outlined text-[18px]">restart_alt</span>
-                                <span class="hidden sm:inline">Reset</span>
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </form>
-        </div>
+            @if ($search !== '' || ! empty($selectedProduct) || ! empty($selectedType))
+                <a href="{{ route('affiliate.promo-materials.index') }}" class="btn-outline btn-sm shrink-0" title="Reset filter">
+                    <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                    <span class="hidden sm:inline">Reset</span>
+                </a>
+            @endif
+
+        </form>
 
         {{-- ================================================================
              3. GRID MATERI PROMOSI
@@ -193,7 +184,7 @@
                                 setTimeout(() => { if (this.failedType === type) this.failedType = null; }, 2500);
                             }
                         }"
-                        class="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition hover:shadow-md hover:ring-1 hover:ring-blue-200"
+                        class="card group flex flex-col justify-between overflow-hidden transition hover:shadow-md hover:ring-1 hover:ring-blue-200"
                     >
                         {{-- ATAS: Preview Media & Detail Materi --}}
                         <div>
@@ -266,7 +257,7 @@
                             @endif
 
                             {{-- Informasi Materi & Produk --}}
-                            <div class="p-5">
+                            <div class="card-body">
                                 {{-- Kategori & Nama Produk --}}
                                 <div class="flex items-center justify-between gap-2">
                                     <span class="inline-flex items-center gap-1 font-semibold text-xs text-blue-600 truncate">
@@ -423,7 +414,7 @@
                  4. PAGINASI
                  ================================================================ --}}
             @if ($materials->hasPages())
-                <div class="mt-2 rounded-2xl border border-slate-200/80 bg-white">
+                <div class="card">
                     <x-pager :paginator="$materials" noun="materi promosi" />
                 </div>
             @endif

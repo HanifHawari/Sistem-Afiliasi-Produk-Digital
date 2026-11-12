@@ -1,174 +1,66 @@
 <x-layouts.affiliate title="Ringkasan Afiliasi">
 
     {{-- ================================================================
-         HERO BANNER — sapaan + aksi navigasi cepat
+         PAGE HEADER — sapaan + aksi navigasi cepat
          ================================================================ --}}
-    <section class="relative mb-6 overflow-hidden rounded-2xl bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 p-6 shadow-lg shadow-blue-700/20 sm:p-8">
-        {{-- Orb dekoratif --}}
-        <div class="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-white/10 blur-3xl"></div>
-        <div class="pointer-events-none absolute -bottom-12 right-1/3 h-40 w-40 rounded-full bg-indigo-400/20 blur-2xl"></div>
-
-        <div class="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            {{-- Teks sapaan --}}
-            <div class="space-y-2">
-                <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 backdrop-blur-sm">
-                    <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
-                    <span class="text-xs font-semibold text-white/90">Dashboard Afiliasi Anda</span>
-                </div>
-                <h1 class="text-2xl font-bold leading-snug tracking-tight text-white sm:text-3xl">
-                    Halo, {{ auth()->user()->name }} 👋
-                </h1>
-                <p class="max-w-xl text-sm text-blue-100">
-                    Pantau performa link afiliasi, penjualan, dan komisi Anda secara langsung.
-                    Teruskan semangat berpromosi!
-                </p>
-            </div>
-
-            {{-- Aksi cepat — hanya ke route yang terdaftar --}}
-            <div class="flex flex-wrap gap-3">
-                <a href="{{ route('affiliate.withdrawals.index') }}"
-                   class="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-400 active:scale-95">
-                    <span class="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                    Tarik Komisi
-                </a>
-                <a href="{{ route('affiliate.links.index') }}"
-                   class="flex items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 active:scale-95">
-                    <span class="material-symbols-outlined text-[18px]">add_link</span>
-                    Link & Kampanye
-                </a>
-                <a href="{{ route('affiliate.promo-materials.index') }}"
-                   class="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20 active:scale-95">
-                    <span class="material-symbols-outlined text-[18px]">perm_media</span>
-                    Materi Promosi
-                </a>
-            </div>
-        </div>
-    </section>
+    <x-page-header
+        :title="'Halo, '.str(Auth::user()->name)->before(' ')"
+        description="Pantau performa link, penjualan, dan komisi Anda.">
+        <x-slot name="actions">
+            <a href="{{ route('affiliate.links.index') }}" class="btn-outline">
+                Link & Kampanye
+            </a>
+            <a href="{{ route('affiliate.withdrawals.index') }}" class="btn-primary">
+                Tarik Komisi
+            </a>
+        </x-slot>
+    </x-page-header>
 
     {{-- ================================================================
          KARTU STATISTIK — 4 KPI: Klik, Penjualan, Saldo, Total Komisi
-         Menggunakan markup Tailwind lokal karena x-stat-card bertema biru
-         polos dan tidak sesuai desain Stitch yang membutuhkan variasi warna.
          ================================================================ --}}
-    <section class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
+    <x-stat-grid>
         {{-- KPI 1: Total Klik Link --}}
-        <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Klik Link</p>
-                    <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                        {{ number_format($totalClicks, 0, ',', '.') }}
-                    </p>
-                </div>
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    <span class="material-symbols-outlined text-[22px]">ads_click</span>
-                </div>
-            </div>
-            <p class="mt-4 text-xs text-slate-400">Semua klik dari seluruh link referral Anda</p>
-        </div>
+        <x-stat-card
+            label="Total Klik Link"
+            :value="number_format($totalClicks, 0, ',', '.')"
+            caption="Dari semua link referral Anda." />
 
         {{-- KPI 2: Penjualan Berhasil --}}
-        <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Penjualan Berhasil</p>
-                    <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                        {{ number_format($totalSales, 0, ',', '.') }}
-                        <span class="text-base font-normal text-slate-400">order</span>
-                    </p>
-                </div>
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
-                </div>
-            </div>
-            <p class="mt-4 text-xs text-slate-400">Order dari referral yang sudah terverifikasi (Paid)</p>
-        </div>
+        <x-stat-card
+            label="Penjualan Berhasil"
+            :value="$totalSales.' order'"
+            caption="Order terverifikasi." />
 
         {{-- KPI 3: Saldo Siap Cair --}}
-        <div class="relative flex flex-col justify-between overflow-hidden rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-            <div class="pointer-events-none absolute -right-4 -top-4 h-20 w-20 rounded-full bg-emerald-100"></div>
-            <div class="flex items-start justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Saldo Siap Cair</p>
-                        <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">Siap Ditarik</span>
-                    </div>
-                    <p class="mt-2 text-3xl font-bold tracking-tight text-emerald-600">
-                        Rp {{ number_format($balance, 0, ',', '.') }}
-                    </p>
-                </div>
-                <div class="relative flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
-                    <span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1">account_balance_wallet</span>
-                </div>
-            </div>
-            <div class="mt-4 flex items-center justify-between">
-                <p class="text-xs text-slate-400">Komisi Approved dikurangi penarikan</p>
-                <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
-            </div>
-        </div>
+        <x-stat-card
+            label="Saldo Siap Cair"
+            :value="rupiah($balance)"
+            caption="Komisi dikurangi pencairan.">
+            <span>Bisa diajukan</span>
+            <a href="{{ route('affiliate.withdrawals.index') }}" class="font-bold text-white hover:underline">Tarik</a>
+        </x-stat-card>
 
-        {{-- KPI 4: Total Komisi Diterima --}}
-        <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-            <div class="flex items-start justify-between">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Komisi Diterima</p>
-                    <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                        Rp {{ number_format($totalCommission, 0, ',', '.') }}
-                    </p>
-                </div>
-                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
-                    <span class="material-symbols-outlined text-[22px]">paid</span>
-                </div>
-            </div>
-            <p class="mt-4 text-xs text-slate-400">Akumulasi komisi berstatus Approved</p>
-        </div>
-
-    </section>
-
-    {{-- ================================================================
-         QUICK ACTIONS — navigasi cepat ke fitur utama
-         ================================================================ --}}
-    <section class="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <a href="{{ route('affiliate.products.index') }}"
-           class="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-blue-200 active:scale-95">
-            <span class="material-symbols-outlined text-[28px] text-blue-600">storefront</span>
-            <span class="text-xs font-semibold text-slate-700">Katalog Produk</span>
-        </a>
-        <a href="{{ route('affiliate.links.index') }}"
-           class="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-blue-200 active:scale-95">
-            <span class="material-symbols-outlined text-[28px] text-indigo-600">link</span>
-            <span class="text-xs font-semibold text-slate-700">Link & Kampanye</span>
-        </a>
-        <a href="{{ route('affiliate.promo-materials.index') }}"
-           class="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-blue-200 active:scale-95">
-            <span class="material-symbols-outlined text-[28px] text-violet-600">perm_media</span>
-            <span class="text-xs font-semibold text-slate-700">Materi Promosi</span>
-        </a>
-        <a href="{{ route('affiliate.withdrawals.index') }}"
-           class="flex flex-col items-center gap-2 rounded-2xl bg-white p-4 text-center shadow-sm ring-1 ring-slate-100 transition hover:shadow-md hover:ring-emerald-200 active:scale-95">
-            <span class="material-symbols-outlined text-[28px] text-emerald-600">account_balance_wallet</span>
-            <span class="text-xs font-semibold text-slate-700">Penarikan Komisi</span>
-        </a>
-    </section>
+        {{-- KPI 4: Total Komisi --}}
+        <x-stat-card
+            label="Total Komisi"
+            :value="rupiah($totalCommission)"
+            caption="Komisi yang sudah disetujui." />
+    </x-stat-grid>
 
     {{-- ================================================================
          RIWAYAT PENJUALAN & KOMISI
          ================================================================ --}}
-    <section class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+    <section class="card overflow-hidden">
 
         {{-- Header tabel --}}
-        <div class="flex flex-col gap-2 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div class="card-header">
             <div>
-                <h2 class="flex items-center gap-2 text-base font-bold text-slate-900">
-                    <span class="material-symbols-outlined text-[22px] text-emerald-500">verified</span>
-                    Riwayat Penjualan & Komisi Masuk
-                </h2>
-                <p class="mt-0.5 text-sm text-slate-500">5 transaksi referral terbaru yang sudah berhasil.</p>
+                <h2 class="card-title">Riwayat Penjualan & Komisi Masuk</h2>
+                <p class="card-subtitle">5 transaksi referral terbaru yang sudah berhasil.</p>
             </div>
-            <a href="{{ route('affiliate.withdrawals.index') }}"
-               class="btn-outline shrink-0 text-sm">
-                Lihat Semua Penarikan
+            <a href="{{ route('affiliate.links.index') }}" class="card-link">
+                Lihat Link & Kampanye
             </a>
         </div>
 
@@ -201,34 +93,34 @@
             {{-- ============================================================
                  TABEL TRANSAKSI — responsive, overflow-x-auto
                  ============================================================ --}}
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse text-left">
+            <div class="relative overflow-x-auto">
+                <table class="data-table ledger">
                     <thead>
-                        <tr class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                            <th class="px-5 py-3">No. Invoice</th>
-                            <th class="px-5 py-3">Pembeli</th>
-                            <th class="px-5 py-3">Produk</th>
-                            <th class="px-5 py-3">Tanggal</th>
-                            <th class="px-5 py-3 text-right">Nominal Transaksi</th>
-                            <th class="px-5 py-3 text-right">Komisi</th>
-                            <th class="px-5 py-3 text-center">Status</th>
+                        <tr>
+                            <th>No. Invoice</th>
+                            <th>Pembeli</th>
+                            <th>Produk</th>
+                            <th>Tanggal</th>
+                            <th>Nominal Transaksi</th>
+                            <th>Komisi</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-50 text-sm text-slate-700">
+                    <tbody>
                         @foreach ($recentSales as $order)
-                            <tr class="transition hover:bg-slate-50/60">
+                            <tr>
                                 {{-- Nomor Invoice --}}
-                                <td class="whitespace-nowrap px-5 py-3.5 font-mono text-sm font-semibold text-blue-600">
+                                <td class="whitespace-nowrap font-mono font-semibold text-blue-600">
                                     #{{ $order->invoice_number ?? $order->id }}
                                 </td>
 
                                 {{-- Nama Pembeli --}}
-                                <td class="px-5 py-3.5 font-medium text-slate-800">
-                                    {{ $order->customer?->name ?? '—' }}
+                                <td>
+                                    <span class="block font-medium text-slate-800">{{ $order->customer?->name ?? '—' }}</span>
                                 </td>
 
                                 {{-- Nama Produk --}}
-                                <td class="px-5 py-3.5">
+                                <td>
                                     <div class="flex items-center gap-2">
                                         <span class="h-2 w-2 shrink-0 rounded-full bg-blue-500"></span>
                                         <span class="line-clamp-1 max-w-[200px]">{{ $order->product?->name ?? '—' }}</span>
@@ -236,17 +128,17 @@
                                 </td>
 
                                 {{-- Tanggal Transaksi --}}
-                                <td class="whitespace-nowrap px-5 py-3.5 text-slate-400">
+                                <td class="whitespace-nowrap text-slate-400">
                                     {{ $order->created_at->translatedFormat('d M Y, H:i') }} WIB
                                 </td>
 
                                 {{-- Nominal Transaksi --}}
-                                <td class="whitespace-nowrap px-5 py-3.5 text-right font-semibold text-slate-800">
+                                <td class="tabular whitespace-nowrap text-right font-semibold text-slate-800">
                                     Rp {{ number_format($order->amount, 0, ',', '.') }}
                                 </td>
 
                                 {{-- Nominal Komisi --}}
-                                <td class="whitespace-nowrap px-5 py-3.5 text-right font-bold text-emerald-600">
+                                <td class="tabular whitespace-nowrap text-right font-bold text-emerald-600">
                                     @if ($order->commission)
                                         +Rp {{ number_format($order->commission->amount, 0, ',', '.') }}
                                     @else
@@ -255,7 +147,7 @@
                                 </td>
 
                                 {{-- Status Transaksi --}}
-                                <td class="px-5 py-3.5 text-center">
+                                <td class="text-center">
                                     <x-badge :tone="$order->status->tone()">
                                         {{ $order->status->label() }}
                                     </x-badge>

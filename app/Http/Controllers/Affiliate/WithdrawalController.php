@@ -51,11 +51,11 @@ class WithdrawalController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['required', 'integer', 'min:50000'],
         ], [
             'amount.required' => 'Nominal penarikan wajib diisi.',
             'amount.integer' => 'Nominal penarikan harus berupa angka bulat positif.',
-            'amount.min' => 'Nominal penarikan minimal Rp 1.',
+            'amount.min' => 'Nominal penarikan minimal Rp 50.000.',
         ]);
 
         $amount = (int) $validated['amount'];
@@ -83,7 +83,7 @@ class WithdrawalController extends Controller
             // 5. Pastikan nominal tidak melebihi saldo terkini
             if ($amount > $currentBalance) {
                 throw ValidationException::withMessages([
-                    'amount' => 'Nominal penarikan melebihi saldo yang tersedia (' . rupiah($currentBalance) . ').',
+                    'amount' => 'Nominal penarikan melebihi saldo yang tersedia ('.rupiah($currentBalance).').',
                 ]);
             }
 
@@ -102,6 +102,6 @@ class WithdrawalController extends Controller
         return redirect()
             ->route('affiliate.withdrawals.index')
             ->with('status', 'Pengajuan penarikan berhasil')
-            ->with('status_detail', 'Pengajuan penarikan sebesar ' . rupiah($withdrawal->amount) . ' berhasil diajukan dan sedang menunggu verifikasi admin.');
+            ->with('status_detail', 'Pengajuan penarikan sebesar '.rupiah($withdrawal->amount).' berhasil diajukan dan sedang menunggu verifikasi admin.');
     }
 }

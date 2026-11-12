@@ -15,28 +15,25 @@
              Ditampilkan hanya jika data sudah pernah disimpan.
              ================================================================ --}}
         @if ($profile && $profile->bank_name)
-            <div class="mb-6 flex items-start gap-4 rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100">
+            <div class="card mb-6 flex items-start gap-4 p-5 sm:p-6">
                 <div class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                    <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1">account_balance</span>
+                    <span class="material-symbols-outlined text-[24px]">account_balance</span>
                 </div>
                 <div class="min-w-0 flex-1">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">Rekening Tersimpan</p>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Rekening Tersimpan</p>
                     <p class="mt-1 text-base font-bold text-slate-900">{{ $profile->bank_name }}</p>
-                    <p class="text-sm text-slate-600">
-                        <span class="font-mono font-semibold text-blue-700">{{ $profile->account_number }}</span>
-                        &nbsp;·&nbsp; a.n. <span class="font-semibold">{{ $profile->account_holder }}</span>
+                    <p class="mt-0.5 text-sm text-slate-600">
+                        <span class="tabular font-semibold text-blue-600">{{ $profile->account_number }}</span>
+                        &bull; a.n. <span class="font-semibold text-slate-800">{{ $profile->account_holder }}</span>
                     </p>
                 </div>
-                <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
-                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                    Aktif
-                </span>
+                <x-badge tone="success">Aktif</x-badge>
             </div>
         @else
-            <div class="mb-6 flex items-start gap-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50 p-5">
-                <span class="material-symbols-outlined shrink-0 text-[22px] text-amber-500">info</span>
+            <div class="mb-6 flex items-start gap-3.5 rounded-2xl border border-dashed border-amber-300 bg-amber-50/70 p-5">
+                <span class="material-symbols-outlined shrink-0 text-[22px] text-amber-600">info</span>
                 <div>
-                    <p class="text-sm font-semibold text-amber-800">Rekening belum ditambahkan</p>
+                    <p class="text-sm font-semibold text-amber-900">Rekening belum ditambahkan</p>
                     <p class="mt-0.5 text-sm text-amber-700">
                         Isi form di bawah agar komisi Anda dapat dicairkan ke rekening bank.
                     </p>
@@ -47,21 +44,23 @@
         {{-- ================================================================
              FORM REKENING BANK
              ================================================================ --}}
-        <div class="rounded-2xl bg-white shadow-sm ring-1 ring-slate-100">
+        <section class="card">
 
             {{-- Header kartu --}}
-            <div class="border-b border-slate-100 px-6 py-5">
-                <h2 class="flex items-center gap-2 text-base font-bold text-slate-900">
-                    <span class="material-symbols-outlined text-[20px] text-blue-600">edit</span>
-                    {{ $profile && $profile->bank_name ? 'Perbarui Rekening' : 'Tambah Rekening' }}
-                </h2>
-                <p class="mt-0.5 text-sm text-slate-500">
-                    Data ini digunakan admin untuk memproses pencairan komisi Anda.
-                </p>
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px] text-blue-600">edit</span>
+                        {{ $profile && $profile->bank_name ? 'Perbarui Rekening' : 'Tambah Rekening' }}
+                    </h2>
+                    <p class="card-subtitle">
+                        Data ini digunakan admin untuk memproses pencairan komisi Anda.
+                    </p>
+                </div>
             </div>
 
             {{-- Body form --}}
-            <form method="POST" action="{{ route('affiliate.bank-account.update') }}" class="px-6 py-6">
+            <form method="POST" action="{{ route('affiliate.bank-account.update') }}" class="card-body">
                 @csrf
                 @method('PUT')
 
@@ -81,7 +80,7 @@
                                 id="bank_name"
                                 name="bank_name"
                                 type="text"
-                                class="w-full pl-10 @error('bank_name') ring-red-400 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 {{ $errors->has('bank_name') ? 'ring-red-400 focus:ring-red-500' : '' }}"
                                 :value="old('bank_name', $profile?->bank_name)"
                                 placeholder="Contoh: BCA"
                                 autocomplete="off"
@@ -105,7 +104,7 @@
                                 name="account_number"
                                 type="text"
                                 inputmode="numeric"
-                                class="w-full pl-10 font-mono @error('account_number') ring-red-400 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 tabular font-mono {{ $errors->has('account_number') ? 'ring-red-400 focus:ring-red-500' : '' }}"
                                 :value="old('account_number', $profile?->account_number)"
                                 placeholder="Contoh: 1234567890"
                                 autocomplete="off"
@@ -131,7 +130,7 @@
                                 id="account_holder"
                                 name="account_holder"
                                 type="text"
-                                class="w-full pl-10 @error('account_holder') ring-red-400 focus:ring-red-500 @enderror"
+                                class="w-full pl-10 {{ $errors->has('account_holder') ? 'ring-red-400 focus:ring-red-500' : '' }}"
                                 :value="old('account_holder', $profile?->account_holder)"
                                 placeholder="Contoh: Budi Santoso"
                                 autocomplete="name"
@@ -145,24 +144,24 @@
                 {{-- Tombol Simpan --}}
                 <div class="mt-7 flex items-center justify-end gap-3">
                     <a href="{{ route('affiliate.dashboard') }}"
-                       class="btn-outline text-sm">
+                       class="btn-outline">
                         Batal
                     </a>
                     <button type="submit"
-                            class="btn-primary flex items-center gap-2 text-sm">
-                        <span class="material-symbols-outlined text-[18px]">save</span>
+                            class="btn-primary">
+                        <span class="material-symbols-outlined text-[20px]">save</span>
                         Simpan Rekening
                     </button>
                 </div>
             </form>
-        </div>
+        </section>
 
         {{-- ================================================================
              CATATAN KEAMANAN
              ================================================================ --}}
-        <div class="mt-5 flex items-start gap-3 rounded-xl bg-blue-50 px-5 py-4 ring-1 ring-blue-100">
-            <span class="material-symbols-outlined shrink-0 text-[20px] text-blue-500">lock</span>
-            <p class="text-sm text-blue-700">
+        <div class="mt-5 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 sm:p-5">
+            <span class="material-symbols-outlined shrink-0 text-[20px] text-blue-600">lock</span>
+            <p class="text-sm leading-relaxed text-blue-700">
                 Data rekening bank Anda tersimpan dengan aman dan hanya digunakan untuk proses
                 pencairan komisi yang sudah disetujui admin. Pastikan nama pemilik rekening sesuai
                 dengan identitas Anda.
