@@ -63,19 +63,36 @@
                         <tbody>
                             @forelse ($products as $product)
                                 <tr>
-                                    <td class="min-w-[220px]">
-                                        <div class="flex items-center gap-2">
-                                            <span @class(['font-medium', 'text-slate-800' => $product->is_active, 'text-slate-400' => ! $product->is_active])>{{ $product->name }}</span>
-                                            @unless ($product->is_active)
-                                                <span class="pill-gray">Nonaktif</span>
-                                            @endunless
+                                    <td class="min-w-[280px]">
+                                        <div class="flex items-center gap-3">
+                                            {{-- Gambar sampul: langsung terlihat produk mana yang belum punya --}}
+                                            @if ($product->thumbnail)
+                                                <img src="{{ asset('storage/'.$product->thumbnail) }}" alt="" loading="lazy"
+                                                     class="h-10 w-16 shrink-0 rounded-lg border border-slate-200 object-cover">
+                                            @else
+                                                <span class="flex h-10 w-16 shrink-0 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-slate-400"
+                                                      title="Belum ada gambar sampul">
+                                                    <span class="material-symbols-outlined text-[20px]">image</span>
+                                                </span>
+                                            @endif
+                                            <div class="min-w-0">
+                                                <div class="flex items-center gap-2">
+                                                    <span @class(['font-medium', 'text-slate-800' => $product->is_active, 'text-slate-400' => ! $product->is_active])>{{ $product->name }}</span>
+                                                    @unless ($product->is_active)
+                                                        <span class="pill-gray">Nonaktif</span>
+                                                    @endunless
+                                                </div>
+                                                <span class="mt-0.5 block text-[13px] text-slate-400">
+                                                    {{ $product->category ?? 'Tanpa kategori' }} &bull; {{ $product->sold_count }} terjual ({{ rupiah($product->revenue) }})
+                                                </span>
+                                                @if (! $product->file_path)
+                                                    <span class="mt-1 block text-[13px] text-red-500">Belum ada file produk</span>
+                                                @endif
+                                                @if (! $product->thumbnail)
+                                                    <span class="mt-1 block text-[13px] text-amber-600">Belum ada gambar sampul</span>
+                                                @endif
+                                            </div>
                                         </div>
-                                        <span class="mt-0.5 block text-[13px] text-slate-400">
-                                            {{ $product->category ?? 'Tanpa kategori' }} &bull; {{ $product->sold_count }} terjual ({{ rupiah($product->revenue) }})
-                                        </span>
-                                        @if (! $product->file_path)
-                                            <span class="mt-1 block text-[13px] text-red-500">Belum ada file produk</span>
-                                        @endif
                                     </td>
                                     <td class="tabular whitespace-nowrap font-bold text-slate-900">{{ rupiah($product->price) }}</td>
                                     <td class="whitespace-nowrap">
@@ -85,7 +102,7 @@
                                     <td class="text-right">
                                         <div class="ml-auto flex max-w-[12.5rem] flex-wrap items-center justify-end gap-2">
                                             <button type="button" class="btn-soft"
-                                                    @click="edit(@js($product->only(['id', 'name', 'category', 'price', 'description', 'is_active']) + ['commission_rate' => (float) $product->commission_rate, 'has_file' => (bool) $product->file_path]))">Edit</button>
+                                                    @click="edit(@js($product->only(['id', 'name', 'category', 'price', 'description', 'is_active']) + ['commission_rate' => (float) $product->commission_rate, 'has_file' => (bool) $product->file_path, 'thumbnail_url' => $product->thumbnail ? asset('storage/'.$product->thumbnail) : null]))">Edit</button>
                                             <a href="{{ route('admin.products.promo-materials.index', $product->id) }}" class="btn-outline btn-sm">Promosi{{ $product->promo_materials_count ? ' ('.$product->promo_materials_count.')' : '' }}</a>
                                             <form method="POST" action="{{ route('admin.products.toggle', $product->id) }}">
                                                 @csrf @method('PATCH')
@@ -217,6 +234,7 @@
                 <input type="hidden" name="_form" value="product">
                 <input type="hidden" name="_product_id" :value="form._product_id">
                 <input type="hidden" name="_has_file" :value="form.has_file ? 1 : 0">
+                <input type="hidden" name="_thumbnail_url" :value="form.thumbnail_url ?? ''">
                 <template x-if="mode === 'edit'"><input type="hidden" name="_method" value="PUT"></template>
 
                 <div class="flex items-center justify-between">
@@ -272,15 +290,23 @@
 
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <div>
-                            <label for="thumbnail" class="mb-1.5 block text-sm font-semibold text-slate-700">Thumbnail (maks. 2 MB)</label>
-                            <input id="thumbnail" name="thumbnail" type="file" accept="image/*"
+                            <label for="thumbnail" class="mb-1.5 block text-sm font-semibold text-slate-700">Gambar sampul (maks. 5 MB)</label>
+                            <input id="thumbnail" name="thumbnail" type="file" accept="image/jpeg,image/png,image/webp" @change="pickThumbnail($event)"
                                    class="w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-600">
+                            <p class="mt-1 text-[13px] text-slate-400">Tampil di katalog. Otomatis dipotong ke rasio 16:10, ideal 1600×1000 px.</p>
                             <x-input-error :messages="$errors->get('thumbnail')" class="mt-1" />
+                            {{-- Pratinjau: bagian yang terlihat di sini sama dengan hasil potongan di katalog --}}
+                            <template x-if="thumbPreview || form.thumbnail_url">
+                                <div class="mt-2 aspect-[16/10] w-full overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                                    <img :src="thumbPreview || form.thumbnail_url" alt="Pratinjau gambar sampul" class="h-full w-full object-cover">
+                                </div>
+                            </template>
                         </div>
                         <div>
                             <label for="file" class="mb-1.5 block text-sm font-semibold text-slate-700">File produk (maks. 50 MB)</label>
                             <input id="file" name="file" type="file"
                                    class="w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-blue-600">
+                            <p class="mt-1 text-[13px] text-slate-400">File yang diunduh pembeli setelah pembayaran lunas, bukan gambar sampul.</p>
                             <p class="mt-1 text-[13px] text-slate-400" x-show="mode === 'edit'"
                                x-text="form.has_file ? 'Sudah ada file. Kosongkan jika tidak diganti.' : 'Belum ada file produk.'"></p>
                             <x-input-error :messages="$errors->get('file')" class="mt-1" />
@@ -321,14 +347,15 @@
 
     <script>
         function productPage(config) {
-            const blank = { _product_id: '', name: '', category: '', price: '', commission_rate: 40, description: '', is_active: true, has_file: false };
+            const blank = { _product_id: '', name: '', category: '', price: '', commission_rate: 40, description: '', is_active: true, has_file: false, thumbnail_url: null };
             const old = config.old;
 
             return {
                 config,
                 mode: old && old._product_id ? 'edit' : 'create',
-                form: old ? { ...blank, ...old, is_active: old.is_active === '1', has_file: old._has_file === '1' } : { ...blank },
+                form: old ? { ...blank, ...old, is_active: old.is_active === '1', has_file: old._has_file === '1', thumbnail_url: old._thumbnail_url || null } : { ...blank },
                 sim: { price: 100000, rate: 40 },
+                thumbPreview: null,
 
                 get action() {
                     return this.mode === 'edit' ? config.updateUrl.replace('__ID__', this.form._product_id) : config.storeUrl;
@@ -336,12 +363,26 @@
                 create(prefill = {}) {
                     this.mode = 'create';
                     this.form = { ...blank, ...prefill };
+                    this.resetFiles();
                     this.$dispatch('open-modal', 'product-form');
                 },
                 edit(product) {
                     this.mode = 'edit';
                     this.form = { ...blank, ...product, _product_id: product.id, description: product.description ?? '', category: product.category ?? '' };
+                    this.resetFiles();
                     this.$dispatch('open-modal', 'product-form');
+                },
+                // Form dipakai bergantian untuk semua produk: file yang sempat dipilih jangan terbawa ke produk lain
+                resetFiles() {
+                    this.setPreview(null);
+                    ['thumbnail', 'file'].forEach((id) => { document.getElementById(id).value = ''; });
+                },
+                pickThumbnail(event) {
+                    this.setPreview(event.target.files[0] ?? null);
+                },
+                setPreview(file) {
+                    if (this.thumbPreview) URL.revokeObjectURL(this.thumbPreview);
+                    this.thumbPreview = file ? URL.createObjectURL(file) : null;
                 },
                 rupiah(value) {
                     return 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(value || 0));

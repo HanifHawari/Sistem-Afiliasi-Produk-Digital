@@ -112,7 +112,7 @@
 
                 {{-- Tombol CTA Beli Sekarang --}}
                 <a href="{{ route('shop.checkout', $product) }}"
-                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98]">
+                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-500 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98]">
                     <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
                     <span>Beli sekarang</span>
                 </a>

@@ -53,7 +53,7 @@ class ProductManagementTest extends TestCase
             'price' => 150000,
             'commission_rate' => 40,
             'is_active' => '1',
-            'thumbnail' => UploadedFile::fake()->image('thumb.jpg'),
+            'thumbnail' => UploadedFile::fake()->image('thumb.jpg', 1200, 800),
             'file' => UploadedFile::fake()->create('materi.zip', 100),
         ])->assertRedirect(route('admin.products.index'));
 
@@ -150,7 +150,7 @@ class ProductManagementTest extends TestCase
         Storage::fake('public');
         $this->seed();
 
-        $this->actingAs(User::firstWhere('email', 'hanif@afiliasi.test'))
+        $this->actingAs(User::firstWhere('email', 'atmind@afiliasi.test'))
             ->get(route('admin.dashboard'))
             ->assertOk()
             ->assertSee('Selamat Datang, Hanif')

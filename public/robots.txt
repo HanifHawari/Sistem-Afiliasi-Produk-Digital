@@ -1,2 +1,8 @@
 User-agent: *
-Disallow:
+Disallow: /admin
+Disallow: /affiliate
+Disallow: /checkout
+Disallow: /orders
+Disallow: /profile
+Disallow: /dashboard
+Disallow: /r/

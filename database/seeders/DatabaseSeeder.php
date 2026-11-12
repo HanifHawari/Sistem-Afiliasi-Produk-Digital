@@ -10,10 +10,13 @@ use App\Enums\WithdrawalStatus;
 use App\Models\Order;
 use App\Models\PaymentAccount;
 use App\Models\Product;
+use App\Models\ReferralLink;
 use App\Models\User;
 use App\Services\Commission\CommissionService;
+use App\Services\Media\ProductThumbnail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Http\File;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -22,7 +25,7 @@ use Illuminate\Support\Str;
 /**
  * Data contoh untuk development. Semua akun memakai password: password
  *
- *   hanif@afiliasi.test   -> Admin
+ *   atmind@afiliasi.test  -> Admin
  *   gibran@afiliasi.test  -> Afiliator utama
  *   fadhil@afiliasi.test  -> Afiliator kedua
  *   bagus@afiliasi.test   -> Customer
@@ -30,6 +33,36 @@ use Illuminate\Support\Str;
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
+
+    /**
+     * Produk contoh: nama, kategori, harga, komisi (%), deskripsi.
+     * Empat pertama diambil dari desain Stitch dan dipakai order contoh di bawah; jangan ubah urutannya.
+     *
+     * @var list<array{0: string, 1: string, 2: int, 3: int, 4: string}>
+     */
+    private const PRODUCTS = [
+        ['Mastering TikTok Organic & Affiliate 2025', 'E-Course', 150000, 40,
+            'Kelas video langkah demi langkah membangun akun TikTok dari nol sampai menghasilkan komisi afiliasi, tanpa iklan berbayar.'],
+        ['Template Notion All-in-One Freelancer OS', 'Template Notion', 99000, 50,
+            'Satu ruang kerja Notion untuk mengatur klien, proyek, invoice, dan keuangan freelancer. Tinggal duplikat dan pakai.'],
+        ['Formula 100 Juta Pertama Bisnis Digital', 'Ebook', 75000, 40,
+            'Ebook 120 halaman berisi peta jalan memilih produk, membangun audiens, dan mencapai omzet 100 juta pertama.'],
+        ['Preset Lightroom & CapCut Cinematic Pack', 'Creative Assets', 120000, 35,
+            'Kumpulan 60 preset Lightroom dan 25 template CapCut bernuansa sinematik untuk konten foto dan video pendek.'],
+        ['Kelas Copywriting Jualan Online dari Nol', 'E-Course', 135000, 40,
+            'Belajar menulis caption, headline, dan halaman penjualan yang membuat calon pembeli langsung checkout. Berisi 24 video dan lembar latihan.'],
+        ['Template Canva 150+ Konten Instagram UMKM', 'Template Canva', 69000, 45,
+            'Lebih dari 150 desain feed, story, dan carousel siap edit di Canva untuk promosi, testimoni, dan katalog produk UMKM.'],
+        ['Panduan Shopee Affiliate untuk Pemula', 'Ebook', 59000, 45,
+            'Panduan praktis memilih produk laris, membuat konten yang menarik pembeli, dan menaikkan komisi Shopee Affiliate dari bulan pertama.'],
+        ['Lisensi Plugin Auto Caption Video Pendek', 'Software / License Key', 199000, 30,
+            'Lisensi seumur hidup plugin pembuat subtitle otomatis berbahasa Indonesia untuk Reels, Shorts, dan TikTok.'],
+        ['Bundle 500+ Sound Effect & Musik Bebas Royalti', 'Creative Assets', 89000, 35,
+            'Lebih dari 500 efek suara dan musik latar bebas royalti, aman dipakai untuk konten YouTube, podcast, dan iklan.'],
+    ];
+
+    /** Format gambar sampul contoh yang dicari di database/seeders/sampul, berurutan. */
+    public const THUMBNAIL_EXTENSIONS = ['webp', 'jpg', 'jpeg', 'png'];
 
     /**
      * Seed the application's database.
@@ -40,7 +73,7 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::factory()->admin()->create([
             'name' => 'Hanif',
-            'email' => 'hanif@afiliasi.test',
+            'email' => 'atmind@afiliasi.test',
             'phone' => '085264019832',
         ]);
 
@@ -61,19 +94,15 @@ class DatabaseSeeder extends Seeder
             'phone' => '082169785312',
         ]);
 
-        // Produk contoh, diambil dari desain Stitch
-        $products = collect([
-            ['Mastering TikTok Organic & Affiliate 2025', 'E-Course', 150000, 40],
-            ['Template Notion All-in-One Freelancer OS', 'Template Notion', 99000, 50],
-            ['Formula 100 Juta Pertama Bisnis Digital', 'Ebook', 75000, 40],
-            ['Preset Lightroom & CapCut Cinematic Pack', 'Creative Assets', 120000, 35],
-        ])->map(fn ($p) => Product::create([
+        $products = collect(self::PRODUCTS)->map(fn ($p) => Product::create([
             'name' => $p[0],
             'slug' => Str::slug($p[0]),
             'category' => $p[1],
-            'description' => 'Deskripsi contoh untuk '.$p[0].'.',
+            'description' => $p[4],
             'price' => $p[2],
             'commission_rate' => $p[3],
+            // Gambar sampul dari database/seeders/sampul/{slug}.webp|jpg|png (kosong jika filenya belum ada)
+            'thumbnail' => $this->sampleThumbnail(Str::slug($p[0])),
             // File PDF contoh supaya alur beli -> unduh bisa langsung dicoba
             'file_path' => $this->fakeProductFile(Str::slug($p[0]), $p[0]),
         ]));
@@ -104,16 +133,10 @@ class DatabaseSeeder extends Seeder
             ]),
         ]);
 
-        // Klik contoh di link Gibran (supaya angka konversi terlihat)
-        $channels = ['tiktok', 'instagram', 'wa', 'facebook', null];
+        // Klik contoh di link Gibran. Jumlahnya selalu di atas jumlah penjualan link itu,
+        // supaya rasio konversi yang tampil masuk akal (tidak lebih dari 100%).
         foreach ($links->values() as $i => $link) {
-            foreach (range(1, [40, 25, 12, 8][$i] ?? 5) as $n) {
-                $link->clicks()->create([
-                    'ip_address' => '10.0.0.'.$n,
-                    'channel' => $channels[$n % count($channels)],
-                    'clicked_at' => now()->subHours($n * 3),
-                ]);
-            }
+            $this->seedClicks($link, [40, 25, 12, 8, 22, 18, 14, 16, 11][$i] ?? 10);
         }
 
         // Afiliator kedua: satu link produk
@@ -123,8 +146,7 @@ class DatabaseSeeder extends Seeder
             'phone' => '085261337840',
         ]);
         $fadhil->affiliateProfile()->create(['bank_name' => 'MANDIRI', 'account_number' => '1370045812', 'account_holder' => 'Fadhil']);
-        $fadhil->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'FADHIL2'])
-            ->clicks()->create(['channel' => 'instagram', 'clicked_at' => now()->subDay()]);
+        $this->seedClicks($fadhil->referralLinks()->create(['product_id' => $products[1]->id, 'code' => 'FADHIL2']), 30);
 
         // Order contoh dengan berbagai status, supaya halaman admin bisa langsung diuji
         $orders = [
@@ -167,11 +189,11 @@ class DatabaseSeeder extends Seeder
         // Riwayat penjualan 45 hari terakhir, supaya laporan & grafik punya data
         $this->seedSalesHistory($products, [$links, $fadhil->referralLinks()->get()->keyBy('product_id')], $customer, $qris, $bca);
 
-        // Pengajuan pencairan contoh (total 45.000, masih di bawah komisi Gibran)
+        // Pengajuan pencairan contoh: tiap pengajuan minimal Rp 50.000, total 185.000 (masih di bawah komisi Gibran)
         $bank = $affiliate->affiliateProfile->only(['bank_name', 'account_number', 'account_holder']);
 
         $paid = $affiliate->withdrawals()->create($bank + [
-            'amount' => 15000,
+            'amount' => 60000,
             'status' => WithdrawalStatus::Paid,
             'processed_by' => $admin->id,
             'processed_at' => now(),
@@ -180,21 +202,37 @@ class DatabaseSeeder extends Seeder
         $paid->update(['transfer_proof' => $this->fakeReceipt("withdrawal-proofs/WD-{$paid->id}.png", [
             'Ke      : BCA 7712045318',
             'a.n     : Gibran',
-            'Nominal : Rp 15.000',
+            'Nominal : Rp 60.000',
             'Berita  : Pencairan komisi',
         ])]);
 
         $affiliate->withdrawals()->create($bank + [
-            'amount' => 10000,
+            'amount' => 50000,
             'status' => WithdrawalStatus::Approved,
             'processed_by' => $admin->id,
             'processed_at' => now(),
         ]);
 
         $affiliate->withdrawals()->create($bank + [
-            'amount' => 20000,
+            'amount' => 75000,
             'status' => WithdrawalStatus::Pending,
         ]);
+    }
+
+    /**
+     * Klik contoh pada satu link referral, tersebar di beberapa channel dan jam.
+     */
+    private function seedClicks(ReferralLink $link, int $count): void
+    {
+        $channels = ['tiktok', 'instagram', 'wa', 'facebook', null];
+
+        foreach (range(1, $count) as $n) {
+            $link->clicks()->create([
+                'ip_address' => '10.0.0.'.$n,
+                'channel' => $channels[$n % count($channels)],
+                'clicked_at' => now()->subHours($n * 3),
+            ]);
+        }
     }
 
     /**
@@ -261,6 +299,24 @@ class DatabaseSeeder extends Seeder
                 }
             }
         }
+    }
+
+    /**
+     * Gambar sampul contoh. Taruh gambarnya di folder database/seeders/sampul dengan nama = slug produk,
+     * misalnya mastering-tiktok-organic-affiliate-2025.webp. Gambar diproses seperti unggahan admin
+     * (dipotong 16:10, lebar maksimal 1600 px). Produk tanpa file di folder itu tidak diberi gambar.
+     */
+    private function sampleThumbnail(string $slug): ?string
+    {
+        foreach (self::THUMBNAIL_EXTENSIONS as $extension) {
+            $path = database_path("seeders/sampul/{$slug}.{$extension}");
+
+            if (is_file($path)) {
+                return app(ProductThumbnail::class)->store(new File($path));
+            }
+        }
+
+        return null;
     }
 
     /**

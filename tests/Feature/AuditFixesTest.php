@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Enums\PaymentMethod;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ReferralLink;
 use App\Models\User;
+use App\Models\Withdrawal;
+use App\Services\Commission\CommissionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -102,7 +105,7 @@ class AuditFixesTest extends TestCase
         $this->seed();
 
         $this->assertSame(
-            ['bagus@afiliasi.test', 'fadhil@afiliasi.test', 'gibran@afiliasi.test', 'hanif@afiliasi.test'],
+            ['atmind@afiliasi.test', 'bagus@afiliasi.test', 'fadhil@afiliasi.test', 'gibran@afiliasi.test'],
             User::orderBy('email')->pluck('email')->all(),
         );
         Storage::disk('local')->assertMissing('payment-proofs/INV-LAMA-0001.png');
@@ -112,8 +115,40 @@ class AuditFixesTest extends TestCase
             Storage::disk('local')->assertExists($proof);
         }
 
-        // Setiap produk contoh punya file yang bisa diunduh pembeli setelah lunas
+        // Sembilan produk contoh (katalog 3 kolom terisi penuh), semuanya dipromosikan Gibran
+        $this->assertSame(9, Product::count());
+        $this->assertSame(9, User::firstWhere('email', 'gibran@afiliasi.test')->referralLinks()->count());
+
+        // Gambar sampul dipasang dari database/seeders/sampul/{slug}.*; produk tanpa file di sana tetap tanpa gambar
         foreach (Product::all() as $product) {
+            $sample = glob(database_path("seeders/sampul/{$product->slug}.*"));
+
+            if ($sample === []) {
+                $this->assertNull($product->thumbnail, $product->name.' seharusnya belum punya gambar sampul');
+
+                continue;
+            }
+
+            Storage::disk('public')->assertExists($product->thumbnail);
+            [$width, $height] = getimagesizefromstring(Storage::disk('public')->get($product->thumbnail));
+            $this->assertEqualsWithDelta(1.6, $width / $height, 0.01, $product->name.' tidak berasio 16:10');
+            $this->assertLessThanOrEqual(1600, $width);
+        }
+        $this->assertNotNull(Product::firstWhere('slug', 'mastering-tiktok-organic-affiliate-2025')->thumbnail);
+
+        // Data contoh harus masuk akal: penjualan tiap link tidak melebihi kliknya (konversi maksimal 100%),
+        // setiap pencairan contoh memenuhi minimal Rp 50.000, dan tidak ada saldo afiliator yang negatif
+        foreach (ReferralLink::withCount('clicks')->withCount(['orders as paid_count' => fn ($q) => $q->where('status', 'paid')])->get() as $link) {
+            $this->assertLessThanOrEqual($link->clicks_count, $link->paid_count, "Link {$link->code}: penjualan melebihi klik");
+        }
+        $this->assertGreaterThanOrEqual(50000, Withdrawal::min('amount'));
+        foreach (User::where('role', 'affiliate')->get() as $affiliate) {
+            $this->assertGreaterThanOrEqual(0, app(CommissionService::class)->balanceFor($affiliate), "Saldo {$affiliate->email} negatif");
+        }
+
+        // Setiap produk contoh punya deskripsi dan file yang bisa diunduh pembeli setelah lunas
+        foreach (Product::all() as $product) {
+            $this->assertNotEmpty($product->description, $product->name.' tidak punya deskripsi');
             $this->assertNotNull($product->file_path, $product->name.' tidak punya file');
             Storage::disk('local')->assertExists($product->file_path);
             $this->assertStringStartsWith('%PDF-', Storage::disk('local')->get($product->file_path));
