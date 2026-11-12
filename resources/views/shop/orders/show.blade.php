@@ -88,7 +88,7 @@
                             </p>
                             <div class="mt-space-md">
                                 <a href="{{ route('shop.orders.pay', $order) }}"
-                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
+                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
                                     <span class="material-symbols-outlined text-[20px]">payments</span>
                                     <span>Bayar</span>
                                 </a>
@@ -125,7 +125,7 @@
                             @endif
                             <div class="mt-space-md">
                                 <a href="{{ route('shop.orders.pay', $order) }}"
-                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
+                                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] sm:w-auto">
                                     <span class="material-symbols-outlined text-[20px]">upload_file</span>
                                     <span>Upload ulang bukti</span>
                                 </a>
