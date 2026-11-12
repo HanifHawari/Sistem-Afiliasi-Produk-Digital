@@ -397,4 +397,88 @@ class WithdrawalTest extends TestCase
         $this->assertSame(40000, $this->commissionService->balanceFor($affiliate));
         $this->assertGreaterThanOrEqual(0, $this->commissionService->balanceFor($affiliate));
     }
+
+    public function test_withdrawal_buttons_are_disabled_when_balance_is_below_minimum(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate);
+        $this->addCommission($affiliate, 40000);
+
+        $html = $this->actingAs($affiliate)
+            ->get(route('affiliate.withdrawals.index'))
+            ->assertOk()
+            ->getContent();
+
+        // Variabel PHP tidak boleh bocor ke atribut Alpine (di sana dibaca sebagai JavaScript)
+        $this->assertStringNotContainsString('$isBankComplete', $html);
+        $this->assertStringNotContainsString('$balance', $html);
+
+        // Tombol "Tarik Semua Saldo" nonaktif sejak dirender, tombol kirim nonaktif lewat Alpine
+        $this->assertMatchesRegularExpression('/<button[^>]*\sdisabled(?=[\s>])[^>]*>\s*Tarik Semua Saldo/', $html);
+        $this->assertStringContainsString(':disabled="submitting || true"', $html);
+    }
+
+    public function test_withdrawal_buttons_are_enabled_when_balance_and_bank_account_are_valid(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate);
+        $this->addCommission($affiliate, 75000);
+
+        $html = $this->actingAs($affiliate)
+            ->get(route('affiliate.withdrawals.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertDoesNotMatchRegularExpression('/<button[^>]*\sdisabled(?=[\s>])[^>]*>\s*Tarik Semua Saldo/', $html);
+        $this->assertStringContainsString(':disabled="submitting || false"', $html);
+    }
+
+    public function test_array_amount_does_not_crash_the_withdrawal_page(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate);
+        $this->addCommission($affiliate, 75000);
+
+        $this->actingAs($affiliate)
+            ->from(route('affiliate.withdrawals.index'))
+            ->followingRedirects()
+            ->post(route('affiliate.withdrawals.store'), ['amount' => ['x', 'y']])
+            ->assertOk()
+            ->assertSee('ring-red-400');
+
+        $this->assertCount(0, $affiliate->withdrawals);
+    }
+
+    public function test_amount_input_is_only_marked_red_when_there_is_an_error(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate);
+        $this->addCommission($affiliate, 75000);
+
+        $this->actingAs($affiliate)
+            ->get(route('affiliate.withdrawals.index'))
+            ->assertOk()
+            ->assertDontSee('ring-red-400')
+            ->assertDontSee('@error', false);
+    }
+
+    public function test_old_amount_cannot_inject_script_into_the_withdrawal_form(): void
+    {
+        $affiliate = User::factory()->affiliate()->create();
+        $this->setBankProfile($affiliate);
+        $this->addCommission($affiliate, 75000);
+
+        $payload = "'-alert('XSS')-'";
+
+        $html = $this->actingAs($affiliate)
+            ->from(route('affiliate.withdrawals.index'))
+            ->followingRedirects()
+            ->post(route('affiliate.withdrawals.store'), ['amount' => $payload])
+            ->assertOk()
+            ->getContent();
+
+        // Nilai lama dikirim ke Alpine sebagai string JavaScript yang sudah di-escape, bukan disisipkan mentah
+        $this->assertStringNotContainsString("amount: ''-alert(", html_entity_decode($html, ENT_QUOTES));
+        $this->assertStringContainsString("amount: '".str_replace("'", '\\u0027', $payload)."'", $html);
+    }
 }

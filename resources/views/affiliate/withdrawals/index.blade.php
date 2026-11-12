@@ -123,7 +123,7 @@
                     action="{{ route('affiliate.withdrawals.store') }}"
                     class="max-w-xl"
                     x-data="{
-                        amount: '{{ old('amount', '') }}',
+                        amount: @js(old('amount', '')),
                         submitting: false,
                         maxAmount: {{ max(0, $balance) }},
                         setAll() {
@@ -152,7 +152,7 @@
                                 max="{{ max(0, $balance) }}"
                                 step="1"
                                 x-model="amount"
-                                class="w-full pl-11 pr-32 font-mono @error('amount') ring-red-400 focus:ring-red-500 @enderror"
+                                class="w-full pl-11 pr-32 font-mono {{ $errors->has('amount') ? 'ring-red-400 focus:ring-red-500' : '' }}"
                                 placeholder="0"
                                 :disabled="!$isBankComplete || $balance < 50000"
                                 required
@@ -161,7 +161,7 @@
                                 <button
                                     type="button"
                                     @click="setAll()"
-                                    :disabled="!$isBankComplete || $balance < 50000"
+                                    @disabled(! $isBankComplete || $balance < 50000)
                                     class="btn-outline btn-sm py-1 px-2.5 text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
                                 >
                                     Tarik Semua Saldo
@@ -190,7 +190,7 @@
                         <div class="mt-5">
                             <button
                                 type="submit"
-                                :disabled="submitting || !$isBankComplete || $balance < 50000"
+                                :disabled="submitting || {{ (! $isBankComplete || $balance < 50000) ? 'true' : 'false' }}"
                                 class="btn-primary inline-flex items-center justify-center gap-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <span class="material-symbols-outlined text-[18px]" x-show="!submitting">payments</span>

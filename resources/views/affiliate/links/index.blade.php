@@ -212,13 +212,10 @@
                         <thead>
                             <tr>
                                 <th>Produk</th>
-                                <th>Kode Referral</th>
-                                <th>URL Referral</th>
-                                <th class="text-center">Jumlah Klik</th>
-                                <th class="text-center">Penjualan Berhasil</th>
-                                <th class="text-center">Conversion Rate</th>
-                                <th>Tanggal Dibuat</th>
-                                <th class="text-right">Aksi</th>
+                                <th>Link Referral</th>
+                                <th class="text-center">Klik</th>
+                                <th class="text-center">Penjualan</th>
+                                <th class="text-center">Konversi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -244,7 +241,7 @@
                                         setTimeout(() => this.copied = false, 2000);
                                     }
                                 }">
-                                    {{-- Kolom 1: Produk (thumbnail, nama, harga) --}}
+                                    {{-- Kolom 1: Produk (thumbnail, nama, kode referral, harga) --}}
                                     <td>
                                         <div class="flex items-center gap-3">
                                             @if ($link->product?->thumbnail)
@@ -259,34 +256,44 @@
                                                     <span class="material-symbols-outlined text-[20px]">inventory_2</span>
                                                 </div>
                                             @endif
-                                            <div class="min-w-0 max-w-[220px]">
+                                            <div class="min-w-0 max-w-[200px] min-[1400px]:max-w-[220px]">
                                                 <p class="truncate font-semibold text-slate-900" title="{{ $link->product?->name }}">
                                                     {{ $link->product?->name ?? 'Produk Dihapus' }}
                                                 </p>
-                                                <p class="mt-0.5 text-xs text-slate-500">
-                                                    Rp {{ number_format($link->product?->price ?? 0, 0, ',', '.') }}
-                                                </p>
+                                                <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap text-xs text-slate-500">
+                                                    <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/70">
+                                                        {{ $link->code }}
+                                                    </span>
+                                                    <span>Rp {{ number_format($link->product?->price ?? 0, 0, ',', '.') }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
 
-                                    {{-- Kolom 2: Kode Referral --}}
-                                    <td class="whitespace-nowrap">
-                                        <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800 ring-1 ring-slate-200/70">
-                                            {{ $link->code }}
-                                        </span>
-                                    </td>
-
-                                    {{-- Kolom 3: URL Referral --}}
+                                    {{-- Kolom 2: Link Referral (URL, tombol salin, tanggal dibuat) --}}
                                     <td>
-                                        <div class="flex max-w-[200px] items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1">
-                                            <span class="truncate font-mono text-xs text-slate-600 select-all" title="{{ $link->url() }}">
-                                                {{ $link->url() }}
-                                            </span>
+                                        <div class="flex max-w-[240px] items-center gap-2 min-[1400px]:max-w-[340px] 2xl:max-w-[400px]">
+                                            <div class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+                                                <p class="truncate font-mono text-xs text-slate-600 select-all" title="{{ $link->url() }}">
+                                                    {{ $link->url() }}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                @click="copy()"
+                                                :class="copied ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'"
+                                                class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition active:scale-95"
+                                            >
+                                                <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'">content_copy</span>
+                                                <span x-text="copied ? 'Tersalin!' : 'Salin'">Salin</span>
+                                            </button>
                                         </div>
+                                        <p class="mt-1 text-[11px] text-slate-400">
+                                            Dibuat {{ $link->created_at?->translatedFormat('d M Y') ?? '—' }}
+                                        </p>
                                     </td>
 
-                                    {{-- Kolom 4: Jumlah Klik --}}
+                                    {{-- Kolom 3: Jumlah Klik --}}
                                     <td class="whitespace-nowrap text-center">
                                         <div class="inline-flex items-center gap-1 font-semibold text-slate-900">
                                             <span class="material-symbols-outlined text-[16px] text-slate-400">ads_click</span>
@@ -294,7 +301,7 @@
                                         </div>
                                     </td>
 
-                                    {{-- Kolom 5: Penjualan Berhasil --}}
+                                    {{-- Kolom 4: Penjualan Berhasil --}}
                                     <td class="whitespace-nowrap text-center">
                                         <div class="inline-flex items-center gap-1 font-semibold text-slate-900">
                                             <span class="material-symbols-outlined text-[16px] text-slate-400">shopping_bag</span>
@@ -302,29 +309,11 @@
                                         </div>
                                     </td>
 
-                                    {{-- Kolom 6: Conversion Rate --}}
+                                    {{-- Kolom 5: Conversion Rate --}}
                                     <td class="whitespace-nowrap text-center">
                                         <x-badge :tone="$link->conversion_rate > 0 ? 'success' : 'neutral'" class="font-mono">
                                             {{ number_format($link->conversion_rate, 2, ',', '.') }}%
                                         </x-badge>
-                                    </td>
-
-                                    {{-- Kolom 7: Tanggal Dibuat --}}
-                                    <td class="whitespace-nowrap text-xs text-slate-500">
-                                        {{ $link->created_at?->translatedFormat('d M Y') ?? '—' }}
-                                    </td>
-
-                                    {{-- Kolom 8: Aksi Salin Link --}}
-                                    <td class="whitespace-nowrap text-right">
-                                        <button
-                                            type="button"
-                                            @click="copy()"
-                                            :class="copied ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'"
-                                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold shadow-sm transition active:scale-95"
-                                        >
-                                            <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'">content_copy</span>
-                                            <span x-text="copied ? 'Tersalin!' : 'Salin'">Salin</span>
-                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
