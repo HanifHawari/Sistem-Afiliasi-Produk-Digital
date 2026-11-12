@@ -161,6 +161,31 @@ class AuditFixesTest extends TestCase
             ->assertDownload();
     }
 
+    public function test_buy_button_is_only_offered_to_guests_and_customers(): void
+    {
+        $product = Product::create(['name' => 'Produk Uji', 'slug' => 'produk-uji', 'price' => 10000, 'commission_rate' => 10]);
+        $page = route('shop.products.show', $product);
+        $checkout = route('shop.checkout', $product);
+
+        // Tamu dan pembeli melihat tombol beli
+        $this->get($page)->assertOk()->assertSee('Beli sekarang')->assertSee($checkout);
+        $this->actingAs(User::factory()->customer()->create())
+            ->get($page)->assertOk()->assertSee('Beli sekarang')->assertSee($checkout)
+            ->assertDontSee('Pembelian hanya untuk akun pembeli');
+
+        // Afiliator dan admin tidak bisa checkout (403), jadi tombolnya diganti keterangan
+        foreach ([User::factory()->affiliate()->create(), User::factory()->admin()->create()] as $user) {
+            $this->actingAs($user)
+                ->get($page)->assertOk()
+                ->assertDontSee('Beli sekarang')->assertDontSee($checkout)
+                ->assertSee('Pembelian hanya untuk akun pembeli')
+                ->assertSee($user->role->label())
+                ->assertSee(route('dashboard'));
+
+            $this->actingAs($user)->get($checkout)->assertForbidden();
+        }
+    }
+
     public function test_password_fields_have_show_password_button(): void
     {
         $this->get('/login')->assertOk()->assertSee('Tampilkan password');
