@@ -199,7 +199,7 @@
                             </p>
                             <div class="mt-space-md flex flex-wrap items-center gap-space-sm">
                                 <a href="{{ route('shop.orders.show', $order) }}"
-                                   class="inline-flex items-center gap-1.5 rounded-lg bg-primary-container px-4 py-2 font-label-sm text-label-sm text-on-primary shadow-sm transition hover:bg-blue-700">
+                                   class="inline-flex items-center gap-1.5 rounded-lg bg-primary-container px-4 py-2 font-label-sm text-label-sm text-on-primary shadow-sm transition hover:bg-blue-500 active:bg-blue-600">
                                     <span class="material-symbols-outlined text-[16px]">receipt_long</span>
                                     <span>Lihat Detail Pesanan</span>
                                 </a>
@@ -258,7 +258,7 @@
 
                         <button type="submit"
                                 :disabled="submitting"
-                                class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
+                                class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-500 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">
                             <span class="material-symbols-outlined text-[20px]" x-text="submitting ? 'progress_activity' : 'check_circle'">check_circle</span>
                             <span x-text="submitting ? 'Mengunggah Bukti...' : '{{ $isRejected ? 'Kirim Ulang Bukti Pembayaran' : 'Konfirmasi & Kirim Bukti Pembayaran' }}'">
                                 {{ $isRejected ? 'Kirim Ulang Bukti Pembayaran' : 'Konfirmasi & Kirim Bukti Pembayaran' }}

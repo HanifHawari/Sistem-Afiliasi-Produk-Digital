@@ -4,7 +4,6 @@ namespace Tests\Feature\Affiliate;
 
 use App\Enums\PromoMaterialType;
 use App\Models\Product;
-use App\Models\PromoMaterial;
 use App\Models\ReferralLink;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

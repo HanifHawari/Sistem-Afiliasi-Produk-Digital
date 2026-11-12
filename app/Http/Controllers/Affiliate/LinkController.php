@@ -88,4 +88,3 @@ class LinkController extends Controller
         ));
     }
 }
-

@@ -102,4 +102,3 @@ class PromoMaterialController extends Controller
         return Storage::disk('public')->download($promoMaterial->file_path, $safeFilename);
     }
 }
-

@@ -77,13 +77,13 @@
                     <div class="mt-space-xs flex flex-col gap-2 border-t border-slate-100 pt-space-sm">
                         @if ($order->status === OrderStatus::Pending)
                             <a href="{{ route('shop.orders.pay', $order) }}"
-                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98]">
+                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600 active:scale-[0.98]">
                                 <span class="material-symbols-outlined text-[16px]">payments</span>
                                 <span>Bayar</span>
                             </a>
                         @elseif ($order->status === OrderStatus::Rejected)
                             <a href="{{ route('shop.orders.pay', $order) }}"
-                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98]">
+                               class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600 active:scale-[0.98]">
                                 <span class="material-symbols-outlined text-[16px]">upload_file</span>
                                 <span>Upload ulang bukti</span>
                             </a>
@@ -157,13 +157,13 @@
                                     <div class="inline-flex items-center justify-end gap-2">
                                         @if ($order->status === OrderStatus::Pending)
                                             <a href="{{ route('shop.orders.pay', $order) }}"
-                                               class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700">
+                                               class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600">
                                                 <span class="material-symbols-outlined text-[15px]">payments</span>
                                                 <span>Bayar</span>
                                             </a>
                                         @elseif ($order->status === OrderStatus::Rejected)
                                             <a href="{{ route('shop.orders.pay', $order) }}"
-                                               class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-700">
+                                               class="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-3 py-1.5 font-label-sm text-label-sm text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600">
                                                 <span class="material-symbols-outlined text-[15px]">upload_file</span>
                                                 <span>Upload ulang bukti</span>
                                             </a>
@@ -234,7 +234,7 @@
                 Kamu belum memiliki riwayat transaksi produk digital. Yuk jelajahi katalog produk pilihan kami.
             </p>
             <a href="{{ route('shop.products.index') }}"
-               class="mt-space-md inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-700">
+               class="mt-space-md inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2.5 font-label-md text-label-md text-white shadow-sm transition hover:bg-blue-500 active:bg-blue-600">
                 <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
                 <span>Lihat Katalog Produk</span>
             </a>

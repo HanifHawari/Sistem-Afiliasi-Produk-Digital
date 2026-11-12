@@ -1,11 +1,11 @@
-<x-layouts.affiliate title="Link &amp; Kampanye">
+<x-layouts.affiliate title="Link & Kampanye">
 
     {{-- ================================================================
          1. PAGE HEADER
          ================================================================ --}}
     <x-page-header
         eyebrow="Ruang Afiliator"
-        title="Link &amp; Kampanye"
+        title="Link & Kampanye"
         description="Kelola link referral dan pantau performa setiap kampanye produk digital Anda."
     >
         <x-slot:actions>
@@ -29,90 +29,67 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <x-stat-grid>
                 {{-- KPI 1: Total Link --}}
-                <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Link</p>
-                            <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                                {{ number_format($summary['total_links'], 0, ',', '.') }}
-                            </p>
-                        </div>
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                            <span class="material-symbols-outlined text-[22px]">link</span>
-                        </div>
-                    </div>
-                    <p class="mt-4 text-xs text-slate-400">Referral link aktif yang Anda miliki</p>
-                </div>
+                <x-stat-card
+                    label="Total Link"
+                    :value="number_format($summary['total_links'], 0, ',', '.')"
+                    caption="Referral link aktif yang Anda miliki"
+                >
+                    <span class="material-symbols-outlined text-[18px]">link</span>
+                    <span>Semua kampanye</span>
+                </x-stat-card>
 
                 {{-- KPI 2: Total Klik --}}
-                <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total Klik</p>
-                            <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                                {{ number_format($summary['clicks'], 0, ',', '.') }}
-                            </p>
-                        </div>
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                            <span class="material-symbols-outlined text-[22px]">ads_click</span>
-                        </div>
-                    </div>
-                    <p class="mt-4 text-xs text-slate-400">Semua klik dari seluruh link referral Anda</p>
-                </div>
+                <x-stat-card
+                    label="Total Klik"
+                    :value="number_format($summary['clicks'], 0, ',', '.')"
+                    caption="Semua klik dari seluruh link referral Anda"
+                >
+                    <span class="material-symbols-outlined text-[18px]">ads_click</span>
+                    <span>Klik masuk</span>
+                </x-stat-card>
 
                 {{-- KPI 3: Penjualan Berhasil --}}
-                <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Penjualan Berhasil</p>
-                            <p class="mt-2 text-3xl font-bold tracking-tight text-slate-900">
-                                {{ number_format($summary['paid_orders'], 0, ',', '.') }}
-                                <span class="text-base font-normal text-slate-400">order</span>
-                            </p>
-                        </div>
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                            <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
-                        </div>
-                    </div>
-                    <p class="mt-4 text-xs text-slate-400">Order referral terverifikasi (Paid)</p>
-                </div>
+                <x-stat-card
+                    label="Penjualan Berhasil"
+                    :value="number_format($summary['paid_orders'], 0, ',', '.') . ' order'"
+                    caption="Order referral terverifikasi (Paid)"
+                >
+                    <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                    <span>Order Paid</span>
+                </x-stat-card>
 
                 {{-- KPI 4: Conversion Rate --}}
-                <div class="flex flex-col justify-between rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md">
-                    <div class="flex items-start justify-between">
-                        <div>
-                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Conversion Rate</p>
-                            <p class="mt-2 text-3xl font-bold tracking-tight text-emerald-600">
-                                {{ number_format($summary['conversion_rate'], 2, ',', '.') }}%
-                            </p>
-                        </div>
-                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                            <span class="material-symbols-outlined text-[22px]">trending_up</span>
-                        </div>
-                    </div>
-                    <p class="mt-4 text-xs text-slate-400">Rasio penjualan per klik (Paid / Klik)</p>
-                </div>
-            </div>
+                <x-stat-card
+                    label="Conversion Rate"
+                    :value="number_format($summary['conversion_rate'], 2, ',', '.') . '%'"
+                    caption="Rasio penjualan per klik (Paid / Klik)"
+                >
+                    <span class="material-symbols-outlined text-[18px]">trending_up</span>
+                    <span>Konversi keseluruhan</span>
+                </x-stat-card>
+            </x-stat-grid>
         </section>
 
         {{-- ================================================================
              3. QUICK LINK GENERATOR
              ================================================================ --}}
-        <section class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
-            <div class="flex flex-col gap-4">
-                <div class="flex flex-col gap-1">
+        <section class="card">
+            <div class="card-header">
+                <div>
                     <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-600">
                         <span class="material-symbols-outlined text-[16px]">bolt</span>
                         Quick Link Generator
                     </div>
-                    <h3 class="text-base font-bold text-slate-900">Buat Link Referral Cepat</h3>
-                    <p class="text-xs text-slate-500">
+                    <h3 class="card-title mt-1">Buat Link Referral Cepat</h3>
+                    <p class="card-subtitle">
                         Pilih produk digital aktif yang belum Anda promosikan untuk langsung menghasilkan link referral unik Anda.
                     </p>
                 </div>
+            </div>
 
+            <div class="card-body">
                 @if ($productsWithoutLink->isNotEmpty())
                     <form
                         method="POST"
@@ -138,7 +115,7 @@
                             <select
                                 name="product_slug"
                                 x-model="selectedSlug"
-                                class="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-3.5 pr-10 text-sm font-medium text-slate-800 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                class="input"
                                 required
                             >
                                 @foreach ($productsWithoutLink as $product)
@@ -152,7 +129,7 @@
                         <button
                             type="submit"
                             :disabled="loading || !selectedSlug"
-                            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                            class="btn-primary btn-sm shrink-0"
                         >
                             <span class="material-symbols-outlined text-[18px]" x-show="!loading">add_link</span>
                             <span class="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" x-show="loading" x-cloak></span>
@@ -182,80 +159,68 @@
         {{-- ================================================================
              4. TOOLBAR: PENCARIAN & FILTER PRODUK
              ================================================================ --}}
-        <section class="flex flex-col gap-4 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
-            <form method="GET" action="{{ route('affiliate.links.index') }}" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div class="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
-                    {{-- Input Pencarian: Nama Produk atau Kode Referral --}}
-                    <div class="relative min-w-0 flex-1">
-                        <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-                            <span class="material-symbols-outlined text-[18px]">search</span>
-                        </span>
-                        <input
-                            type="search"
-                            name="q"
-                            value="{{ $search }}"
-                            placeholder="Cari nama produk atau kode referral..."
-                            class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        >
-                    </div>
+        <form method="GET" action="{{ route('affiliate.links.index') }}" class="toolbar">
+            {{-- Input Pencarian: Nama Produk atau Kode Referral --}}
+            <div class="search">
+                <span class="material-symbols-outlined">search</span>
+                <input
+                    type="search"
+                    name="q"
+                    value="{{ $search }}"
+                    placeholder="Cari nama produk atau kode referral..."
+                >
+            </div>
 
-                    {{-- Filter Dropdown Berdasarkan Produk --}}
-                    <div class="sm:w-64">
-                        <select
-                            name="product_id"
-                            onchange="this.form.submit()"
-                            class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-3 pr-8 text-sm text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                        >
-                            <option value="">Semua Produk</option>
-                            @foreach ($userProducts as $productOption)
-                                <option value="{{ $productOption->id }}" @selected((string) $selectedProduct === (string) $productOption->id)>
-                                    {{ $productOption->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+            {{-- Filter Dropdown Berdasarkan Produk --}}
+            <select
+                name="product_id"
+                onchange="this.form.submit()"
+                class="input w-full sm:w-56"
+            >
+                <option value="">Semua Produk</option>
+                @foreach ($userProducts as $productOption)
+                    <option value="{{ $productOption->id }}" @selected((string) $selectedProduct === (string) $productOption->id)>
+                        {{ $productOption->name }}
+                    </option>
+                @endforeach
+            </select>
 
-                    <div class="flex items-center gap-2">
-                        {{-- Tombol Cari --}}
-                        <button type="submit" class="btn-primary btn-sm shrink-0">
-                            Cari
-                        </button>
+            <div class="flex items-center gap-2">
+                {{-- Tombol Cari --}}
+                <button type="submit" class="btn-primary btn-sm shrink-0">
+                    Cari
+                </button>
 
-                        {{-- Tombol Reset Filter --}}
-                        @if ($search !== '' || ! empty($selectedProduct))
-                            <a href="{{ route('affiliate.links.index') }}" class="btn-outline btn-sm shrink-0 text-slate-500 hover:text-slate-700" title="Reset pencarian & filter">
-                                <span class="material-symbols-outlined text-[18px]">restart_alt</span>
-                                <span class="hidden sm:inline">Reset</span>
-                            </a>
-                        @endif
-                    </div>
-                </div>
-            </form>
-        </section>
+                {{-- Tombol Reset Filter --}}
+                @if ($search !== '' || ! empty($selectedProduct))
+                    <a href="{{ route('affiliate.links.index') }}" class="btn-outline btn-sm shrink-0 text-slate-500 hover:text-slate-700" title="Reset pencarian & filter">
+                        <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+                        <span class="hidden sm:inline">Reset</span>
+                    </a>
+                @endif
+            </div>
+        </form>
 
         {{-- ================================================================
              5. DAFTAR LINK & KAMPANYE (DESKTOP & MOBILE)
              ================================================================ --}}
         @if ($links->isNotEmpty())
             {{-- A. TAMPILAN DESKTOP (TABLE) --}}
-            <section class="hidden overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm lg:block">
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-left">
+            <section class="card hidden overflow-hidden lg:block">
+                <div class="relative overflow-x-auto">
+                    <table class="data-table ledger">
                         <thead>
-                            <tr class="bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                                <th class="px-5 py-3.5">Produk</th>
-                                <th class="px-5 py-3.5">Kode Referral</th>
-                                <th class="px-5 py-3.5">URL Referral</th>
-                                <th class="px-5 py-3.5 text-center">Jumlah Klik</th>
-                                <th class="px-5 py-3.5 text-center">Penjualan Berhasil</th>
-                                <th class="px-5 py-3.5 text-center">Conversion Rate</th>
-                                <th class="px-5 py-3.5">Tanggal Dibuat</th>
-                                <th class="px-5 py-3.5 text-right">Aksi</th>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Link Referral</th>
+                                <th class="text-center">Klik</th>
+                                <th class="text-center">Penjualan</th>
+                                <th class="text-center">Konversi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100 text-sm text-slate-700">
+                        <tbody>
                             @foreach ($links as $link)
-                                <tr class="transition hover:bg-slate-50/60" x-data="{
+                                <tr x-data="{
                                     copied: false,
                                     copy() {
                                         const text = '{{ $link->url() }}';
@@ -276,8 +241,8 @@
                                         setTimeout(() => this.copied = false, 2000);
                                     }
                                 }">
-                                    {{-- Kolom 1: Produk (thumbnail, nama, harga) --}}
-                                    <td class="px-5 py-4">
+                                    {{-- Kolom 1: Produk (thumbnail, nama, kode referral, harga) --}}
+                                    <td>
                                         <div class="flex items-center gap-3">
                                             @if ($link->product?->thumbnail)
                                                 <img
@@ -291,72 +256,64 @@
                                                     <span class="material-symbols-outlined text-[20px]">inventory_2</span>
                                                 </div>
                                             @endif
-                                            <div class="min-w-0 max-w-[220px]">
+                                            <div class="min-w-0 max-w-[200px] min-[1400px]:max-w-[220px]">
                                                 <p class="truncate font-semibold text-slate-900" title="{{ $link->product?->name }}">
                                                     {{ $link->product?->name ?? 'Produk Dihapus' }}
                                                 </p>
-                                                <p class="mt-0.5 text-xs text-slate-500">
-                                                    Rp {{ number_format($link->product?->price ?? 0, 0, ',', '.') }}
-                                                </p>
+                                                <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 whitespace-nowrap text-xs text-slate-500">
+                                                    <span class="inline-flex items-center rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[11px] font-semibold text-slate-700 ring-1 ring-slate-200/70">
+                                                        {{ $link->code }}
+                                                    </span>
+                                                    <span>Rp {{ number_format($link->product?->price ?? 0, 0, ',', '.') }}</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
 
-                                    {{-- Kolom 2: Kode Referral --}}
-                                    <td class="whitespace-nowrap px-5 py-4">
-                                        <span class="inline-flex items-center rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-semibold text-slate-800 ring-1 ring-slate-200/70">
-                                            {{ $link->code }}
-                                        </span>
-                                    </td>
-
-                                    {{-- Kolom 3: URL Referral --}}
-                                    <td class="px-5 py-4">
-                                        <div class="flex max-w-[200px] items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1">
-                                            <span class="truncate font-mono text-xs text-slate-600 select-all" title="{{ $link->url() }}">
-                                                {{ $link->url() }}
-                                            </span>
+                                    {{-- Kolom 2: Link Referral (URL, tombol salin, tanggal dibuat) --}}
+                                    <td>
+                                        <div class="flex max-w-[240px] items-center gap-2 min-[1400px]:max-w-[340px] 2xl:max-w-[400px]">
+                                            <div class="min-w-0 flex-1 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+                                                <p class="truncate font-mono text-xs text-slate-600 select-all" title="{{ $link->url() }}">
+                                                    {{ $link->url() }}
+                                                </p>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                @click="copy()"
+                                                :class="copied ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'"
+                                                class="inline-flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm transition active:scale-95"
+                                            >
+                                                <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'">content_copy</span>
+                                                <span x-text="copied ? 'Tersalin!' : 'Salin'">Salin</span>
+                                            </button>
                                         </div>
+                                        <p class="mt-1 text-[11px] text-slate-400">
+                                            Dibuat {{ $link->created_at?->translatedFormat('d M Y') ?? '—' }}
+                                        </p>
                                     </td>
 
-                                    {{-- Kolom 4: Jumlah Klik --}}
-                                    <td class="whitespace-nowrap px-5 py-4 text-center">
+                                    {{-- Kolom 3: Jumlah Klik --}}
+                                    <td class="whitespace-nowrap text-center">
                                         <div class="inline-flex items-center gap-1 font-semibold text-slate-900">
                                             <span class="material-symbols-outlined text-[16px] text-slate-400">ads_click</span>
                                             <span>{{ number_format($link->clicks_count, 0, ',', '.') }}</span>
                                         </div>
                                     </td>
 
-                                    {{-- Kolom 5: Penjualan Berhasil --}}
-                                    <td class="whitespace-nowrap px-5 py-4 text-center">
+                                    {{-- Kolom 4: Penjualan Berhasil --}}
+                                    <td class="whitespace-nowrap text-center">
                                         <div class="inline-flex items-center gap-1 font-semibold text-slate-900">
                                             <span class="material-symbols-outlined text-[16px] text-slate-400">shopping_bag</span>
                                             <span>{{ number_format($link->paid_orders_count, 0, ',', '.') }}</span>
                                         </div>
                                     </td>
 
-                                    {{-- Kolom 6: Conversion Rate --}}
-                                    <td class="whitespace-nowrap px-5 py-4 text-center">
+                                    {{-- Kolom 5: Conversion Rate --}}
+                                    <td class="whitespace-nowrap text-center">
                                         <x-badge :tone="$link->conversion_rate > 0 ? 'success' : 'neutral'" class="font-mono">
                                             {{ number_format($link->conversion_rate, 2, ',', '.') }}%
                                         </x-badge>
-                                    </td>
-
-                                    {{-- Kolom 7: Tanggal Dibuat --}}
-                                    <td class="whitespace-nowrap px-5 py-4 text-xs text-slate-500">
-                                        {{ $link->created_at?->translatedFormat('d M Y') ?? '—' }}
-                                    </td>
-
-                                    {{-- Kolom 8: Aksi Salin Link --}}
-                                    <td class="whitespace-nowrap px-5 py-4 text-right">
-                                        <button
-                                            type="button"
-                                            @click="copy()"
-                                            :class="copied ? 'bg-emerald-600 text-white' : 'bg-blue-600 text-white hover:bg-blue-700'"
-                                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-semibold shadow-sm transition active:scale-95"
-                                        >
-                                            <span class="material-symbols-outlined text-[16px]" x-text="copied ? 'check' : 'content_copy'">content_copy</span>
-                                            <span x-text="copied ? 'Tersalin!' : 'Salin'">Salin</span>
-                                        </button>
                                     </td>
                                 </tr>
                             @endforeach
@@ -373,7 +330,7 @@
             {{-- B. TAMPILAN MOBILE (KARTU RESPONSIVE) --}}
             <section class="flex flex-col gap-4 lg:hidden">
                 @foreach ($links as $link)
-                    <div class="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm" x-data="{
+                    <div class="card p-4" x-data="{
                         copied: false,
                         copy() {
                             const text = '{{ $link->url() }}';
@@ -472,7 +429,7 @@
 
                 {{-- Pager mobile --}}
                 @if ($links->hasPages())
-                    <div class="rounded-2xl border border-slate-200/80 bg-white">
+                    <div class="card">
                         <x-pager :paginator="$links" noun="link kampanye" />
                     </div>
                 @endif
@@ -524,8 +481,5 @@
         @endif
 
     </div>
-
-    {{-- Notifikasi Toast --}}
-    <x-toast />
 
 </x-layouts.affiliate>
