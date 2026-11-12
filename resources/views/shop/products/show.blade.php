@@ -110,18 +110,35 @@
                     </li>
                 </ul>
 
-                {{-- Tombol CTA Beli Sekarang --}}
-                <a href="{{ route('shop.checkout', $product) }}"
-                   class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-500 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98]">
-                    <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
-                    <span>Beli sekarang</span>
-                </a>
+                {{-- Tombol CTA Beli Sekarang: checkout hanya untuk akun pembeli (route role:customer) --}}
+                @if (auth()->guest() || auth()->user()->isCustomer())
+                    <a href="{{ route('shop.checkout', $product) }}"
+                       class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary-container px-5 py-3 font-label-md text-label-md text-on-primary shadow-sm transition hover:bg-blue-500 active:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 active:scale-[0.98]">
+                        <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+                        <span>Beli sekarang</span>
+                    </a>
 
-                @guest
-                    <p class="mt-space-sm text-center font-caption text-caption text-on-surface-variant">
-                        Belum masuk akun? Anda akan diarahkan ke halaman <strong>Masuk</strong> terlebih dahulu lalu kembali ke checkout.
-                    </p>
-                @endguest
+                    @guest
+                        <p class="mt-space-sm text-center font-caption text-caption text-on-surface-variant">
+                            Belum masuk akun? Anda akan diarahkan ke halaman <strong>Masuk</strong> terlebih dahulu lalu kembali ke checkout.
+                        </p>
+                    @endguest
+                @else
+                    <div class="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-center">
+                        <p class="flex items-center justify-center gap-2 font-label-md text-label-md text-on-surface">
+                            <span class="material-symbols-outlined text-[20px] text-slate-400">lock</span>
+                            <span>Pembelian hanya untuk akun pembeli</span>
+                        </p>
+                        <p class="mt-1.5 font-caption text-caption text-on-surface-variant">
+                            Anda sedang masuk sebagai <strong>{{ auth()->user()->role->label() }}</strong>. Untuk membeli produk ini, keluar lalu masuk dengan akun pembeli.
+                        </p>
+                    </div>
+                    <a href="{{ route('dashboard') }}"
+                       class="mt-space-sm inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 px-5 py-3 font-label-md text-label-md text-on-surface transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2">
+                        <span class="material-symbols-outlined text-[20px]">dashboard</span>
+                        <span>Kembali ke Dashboard</span>
+                    </a>
+                @endif
             </div>
         </aside>
     </div>
